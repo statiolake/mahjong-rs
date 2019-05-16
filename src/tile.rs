@@ -191,15 +191,15 @@ impl Tile {
         }
     }
 
-    /// Checks it is 中張牌 (*chuchan pai*).
-    pub fn is_chuchan(&self) -> bool {
+    /// Checks it is 中張牌 (*chunchan pai*).
+    pub fn is_chunchan(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
-            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_chuchan(),
+            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_chunchan(),
         }
     }
 
-    /// Checks if it is 么九牌 (*yaochu pai*).  This is same as `!self.is_chuchan()`.
+    /// Checks if it is 么九牌 (*yaochu pai*).  This is same as `!self.is_chunchan()`.
     pub fn is_yaochu(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -207,8 +207,8 @@ impl Tile {
         }
     }
 
-    /// Checks if it is 風牌 (*fon pai*).  風牌 is the diretion tiles (東南西北).
-    pub fn is_fon(&self) -> bool {
+    /// Checks if it is 風牌 (*fan pai*).  風牌 is the diretion tiles (東南西北).
+    pub fn is_fan(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::East) => true,
             Tile::Jihai(Jihai::South) => true,
@@ -228,7 +228,7 @@ impl Tile {
         }
     }
 
-    /// Checks if it can consist of 緑一色 (*Ryuiso*).
+    /// Checks if it can consist of 緑一色 (*ryuiso*).
     pub fn is_green(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::Hatu) => true,
@@ -290,13 +290,13 @@ impl Order {
     }
 
     /// Checks if it is 中張牌 (*chunchan pai*).
-    pub fn is_chuchan(&self) -> bool {
+    pub fn is_chunchan(&self) -> bool {
         self.order != 1 && self.order != 9
     }
 
     /// Checks if it is 么九牌 (*yaochu hai*).
     pub fn is_yaochu(&self) -> bool {
-        !self.is_chuchan()
+        !self.is_chunchan()
     }
 
     /// Checks if it has the order which can be green 牌.  The suit is not considered and simply
