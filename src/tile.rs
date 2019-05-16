@@ -37,6 +37,8 @@ pub enum Jihai {
     Chun,
 }
 
+use crate::config::Direction;
+
 impl Tile {
     pub fn parse(from: &str) -> Result<Tile> {
         // jihai
@@ -170,6 +172,31 @@ impl Tile {
             _ => false,
         }
     }
+
+    /// check the num of *yakuhai*.  the tile is *yakuhai* if its direction is same with current
+    /// play's place or player's direction, or if it is *sangen pai*.
+    pub fn num_yakuhai(&self, place: Direction, player: Direction) -> u32 {
+        match self {
+            Tile::Jihai(jihai) => {
+                let mut res = 0;
+
+                if *jihai == place {
+                    res += 1;
+                }
+
+                if *jihai == player {
+                    res += 1;
+                }
+
+                if self.is_sangen() {
+                    res += 1;
+                }
+
+                res
+            }
+            _ => 0,
+        }
+    }
 }
 
 impl Order {
@@ -259,6 +286,18 @@ impl PartialEq for Order {
         // ignore is_red flag since red dora 5 is no difference than non-red version in everywhere
         // except dora calculation.
         self.order == other.order
+    }
+}
+
+impl PartialEq<Direction> for Jihai {
+    fn eq(&self, other: &Direction) -> bool {
+        match (self, other) {
+            (Jihai::East, Direction::East) => true,
+            (Jihai::South, Direction::South) => true,
+            (Jihai::West, Direction::West) => true,
+            (Jihai::North, Direction::North) => true,
+            _ => false,
+        }
     }
 }
 
@@ -396,5 +435,17 @@ mod tests {
         assert_eq!(haku.prev(false), Ok(chun));
         assert_eq!(hatu.prev(false), Ok(haku));
         assert_eq!(chun.prev(false), Ok(hatu));
+    }
+
+    #[test]
+    fn yakuhai() {
+        let east = Tile::Jihai(Jihai::East);
+        let haku = Tile::Jihai(Jihai::Haku);
+
+        assert_eq!(east.num_yakuhai(Direction::East, Direction::East), 2);
+        assert_eq!(east.num_yakuhai(Direction::East, Direction::West), 1);
+        assert_eq!(east.num_yakuhai(Direction::North, Direction::West), 0);
+
+        assert_eq!(haku.num_yakuhai(Direction::East, Direction::East), 1);
     }
 }
