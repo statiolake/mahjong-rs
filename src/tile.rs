@@ -1,23 +1,38 @@
 pub type Result<T> = std::result::Result<T, TileError>;
 
+/// Error while creating / parsing tile.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TileError {
+    /// (parse) The length of string is invalid.
     InvalidStringLen,
+
+    /// (parse) An unexpected char is found.
     InvalidChar,
+
+    /// The specified order is invalid (out-of-range when creating)
     InvalidOrder,
+
+    /// 赤ドラ (Red *dora*) is specified but its not allowed (red *dora* is only applicable for 5.)
     InvalidRed,
-    InvalidNext,
-    InvalidPrev,
 }
 
+/// 牌 (tile). the basic of all.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Tile {
+    /// 索子.
     Souzu(Order),
+
+    /// 萬子.
     Manzu(Order),
+
+    /// 筒子.
     Pinzu(Order),
+
+    /// 字牌.
     Jihai(Jihai),
 }
 
+/// Number of 索子, 萬子 or 筒子.  It also has whether the tile is red ドラ or not.
 // PartialEq is manually implemented because `is_red` should be ignored in equality comparizon.
 // Ord and PartialOrd is also manually implemented for the same reason.
 #[derive(Debug, Copy, Clone, Eq)]
@@ -26,20 +41,39 @@ pub struct Order {
     is_red: bool,
 }
 
+/// 字牌 (*jihai*).
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Jihai {
+    /// 東.
     East,
+
+    /// 南.
     South,
+
+    /// 西.
     West,
+
+    /// 北.
     North,
+
+    /// 白.
     Haku,
+
+    /// 發.
     Hatu,
+
+    /// 中.
     Chun,
 }
 
 use crate::config::Direction;
 
 impl Tile {
+    /// Parses specified string to create Tile.
+    ///
+    /// # Errors
+    ///
+    /// Returns an `Err` if original string has invalid format.
     pub fn parse(from: &str) -> Result<Tile> {
         // jihai
         //------------------------------
@@ -61,6 +95,7 @@ impl Tile {
         }
 
         let mut chars = from.chars();
+        // the length is already checked, so it can safely unwrapped.
         let order = chars.next().expect("length checked but no char");
         let suit = chars.next().expect("length checked but no char");
         assert!(chars.next().is_none());
@@ -82,46 +117,73 @@ impl Tile {
         Ok(tile_constructor(order))
     }
 
-    pub fn next(&self, red_if_5: bool) -> Result<Tile> {
+    /// Returns the next tile of the current one.  If `red_if_5` is true, the tile will be 赤ドラ
+    /// (red *dora*) when the new tile is one of 5s, 5m, 5p.  (In other words, the returned tile is
+    /// one of 5S, 5M, 5P.)
+    pub fn next(&self, red_if_5: bool) -> Tile {
+        // checks if the next tile should be 赤ドラ or not
         let should_be_red = |o: &Order| {
             // the next will be 5 so now 4
             red_if_5 && o.order == 4
         };
 
         match self {
-            Tile::Jihai(Jihai::East) => Ok(Tile::Jihai(Jihai::South)),
-            Tile::Jihai(Jihai::South) => Ok(Tile::Jihai(Jihai::West)),
-            Tile::Jihai(Jihai::West) => Ok(Tile::Jihai(Jihai::North)),
-            Tile::Jihai(Jihai::North) => Ok(Tile::Jihai(Jihai::East)),
-            Tile::Jihai(Jihai::Haku) => Ok(Tile::Jihai(Jihai::Hatu)),
-            Tile::Jihai(Jihai::Hatu) => Ok(Tile::Jihai(Jihai::Chun)),
-            Tile::Jihai(Jihai::Chun) => Ok(Tile::Jihai(Jihai::Haku)),
-            Tile::Souzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Souzu),
-            Tile::Manzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Manzu),
-            Tile::Pinzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Pinzu),
+            Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::South),
+            Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::West),
+            Tile::Jihai(Jihai::West) => Tile::Jihai(Jihai::North),
+            Tile::Jihai(Jihai::North) => Tile::Jihai(Jihai::East),
+            Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Hatu),
+            Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Chun),
+            Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Haku),
+            Tile::Souzu(o) if o.order == 9 => {
+                Tile::Souzu(Order::new(1, should_be_red(&o)).unwrap())
+            }
+            Tile::Manzu(o) if o.order == 9 => {
+                Tile::Manzu(Order::new(1, should_be_red(&o)).unwrap())
+            }
+            Tile::Pinzu(o) if o.order == 9 => {
+                Tile::Pinzu(Order::new(1, should_be_red(&o)).unwrap())
+            }
+            Tile::Souzu(o) => Tile::Souzu(Order::new(o.order + 1, should_be_red(&o)).unwrap()),
+            Tile::Manzu(o) => Tile::Manzu(Order::new(o.order + 1, should_be_red(&o)).unwrap()),
+            Tile::Pinzu(o) => Tile::Pinzu(Order::new(o.order + 1, should_be_red(&o)).unwrap()),
         }
     }
 
-    pub fn prev(&self, red_if_5: bool) -> Result<Tile> {
+    /// Returns the previous tile of the current one.  If `red_if_5` is true, the tile will be
+    /// 赤ドラ (red *dora*) when the new tile is one of 5s, 5m, 5p.  (In other words, the returned
+    /// tile is one of 5S, 5M, 5P.)
+    pub fn prev(&self, red_if_5: bool) -> Tile {
+        // checks if the next tile should be 赤ドラ or not
         let should_be_red = |o: &Order| {
             // the previous will be 5 so now 6
             red_if_5 && o.order == 6
         };
 
         match self {
-            Tile::Jihai(Jihai::East) => Ok(Tile::Jihai(Jihai::North)),
-            Tile::Jihai(Jihai::South) => Ok(Tile::Jihai(Jihai::East)),
-            Tile::Jihai(Jihai::West) => Ok(Tile::Jihai(Jihai::South)),
-            Tile::Jihai(Jihai::North) => Ok(Tile::Jihai(Jihai::West)),
-            Tile::Jihai(Jihai::Haku) => Ok(Tile::Jihai(Jihai::Chun)),
-            Tile::Jihai(Jihai::Hatu) => Ok(Tile::Jihai(Jihai::Haku)),
-            Tile::Jihai(Jihai::Chun) => Ok(Tile::Jihai(Jihai::Hatu)),
-            Tile::Souzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Souzu),
-            Tile::Manzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Manzu),
-            Tile::Pinzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Pinzu),
+            Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::North),
+            Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::East),
+            Tile::Jihai(Jihai::West) => Tile::Jihai(Jihai::South),
+            Tile::Jihai(Jihai::North) => Tile::Jihai(Jihai::West),
+            Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Chun),
+            Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Haku),
+            Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Hatu),
+            Tile::Souzu(o) if o.order == 1 => {
+                Tile::Souzu(Order::new(9, should_be_red(&o)).unwrap())
+            }
+            Tile::Manzu(o) if o.order == 1 => {
+                Tile::Manzu(Order::new(9, should_be_red(&o)).unwrap())
+            }
+            Tile::Pinzu(o) if o.order == 1 => {
+                Tile::Pinzu(Order::new(9, should_be_red(&o)).unwrap())
+            }
+            Tile::Souzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
+            Tile::Manzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
+            Tile::Pinzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
         }
     }
 
+    /// Checks if it is 赤ドラ (*red dora*).
     pub fn is_red(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -129,6 +191,7 @@ impl Tile {
         }
     }
 
+    /// Checks it is 中張牌 (*chuchan pai*).
     pub fn is_chuchan(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -136,6 +199,7 @@ impl Tile {
         }
     }
 
+    /// Checks if it is 么九牌 (*yaochu pai*).  This is same as `!self.is_chuchan()`.
     pub fn is_yaochu(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -143,7 +207,7 @@ impl Tile {
         }
     }
 
-    /// 風牌: 東南西北
+    /// Checks if it is 風牌 (*fon pai*).  風牌 is the diretion tiles (東南西北).
     pub fn is_fon(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::East) => true,
@@ -154,7 +218,7 @@ impl Tile {
         }
     }
 
-    /// 三元牌: 白發中
+    /// Check if it is 三元牌 (*sangen pai*).  三元牌 is the special tiles (白發中).
     pub fn is_sangen(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::Haku) => true,
@@ -164,7 +228,7 @@ impl Tile {
         }
     }
 
-    /// check if the tile can consist of 緑一色.
+    /// Checks if it can consist of 緑一色 (*Ryuiso*).
     pub fn is_green(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::Hatu) => true,
@@ -173,8 +237,10 @@ impl Tile {
         }
     }
 
-    /// check the num of *yakuhai*.  the tile is *yakuhai* if its direction is same with current
-    /// play's place or player's direction, or if it is *sangen pai*.
+    /// Checks the num of 役牌 (*yakuhai*).  The tile is 役牌 if its direction is same with current
+    /// play's place or player's direction, or if it is 三元牌.  The reason it is not bool is that
+    /// for example the play is on 東場 (east place) and player's direction is 東家 (east), then 東
+    /// will be counted as 役牌 twice.
     pub fn num_yakuhai(&self, place: Direction, player: Direction) -> u32 {
         match self {
             Tile::Jihai(jihai) => {
@@ -200,6 +266,12 @@ impl Tile {
 }
 
 impl Order {
+    /// Creates new instance of Order.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err` if specified `order` is out-of-range or `is_red` is true even if `order` is
+    /// not 5.
     pub fn new(order: u8, is_red: bool) -> Result<Order> {
         if order < 1 || 9 < order {
             return Err(TileError::InvalidOrder);
@@ -212,18 +284,24 @@ impl Order {
         Ok(Order { order, is_red })
     }
 
+    /// Checks if it is 赤ドラ (red *dora*).
     pub fn is_red(&self) -> bool {
         self.is_red
     }
 
+    /// Checks if it is 中張牌 (*chunchan pai*).
     pub fn is_chuchan(&self) -> bool {
         self.order != 1 && self.order != 9
     }
 
+    /// Checks if it is 么九牌 (*yaochu hai*).
     pub fn is_yaochu(&self) -> bool {
         !self.is_chuchan()
     }
 
+    /// Checks if it has the order which can be green 牌.  The suit is not considered and simply
+    /// returns true when `self.order` is one of 2, 3, 4, 6, 8.  It is meant to be used with
+    /// `Tile::is_green()`.
     pub fn is_green_order(&self) -> bool {
         match self.order {
             2 | 3 | 4 | 6 | 8 => true,
@@ -413,28 +491,28 @@ mod tests {
         let hatu = Tile::Jihai(Jihai::Hatu);
         let chun = Tile::Jihai(Jihai::Chun);
 
-        assert_eq!(s4.next(false), Ok(s5));
-        assert_eq!(s5.prev(false), Ok(s4));
-        assert_eq!(m4.next(true), Ok(rm5));
-        assert_eq!(rm5.prev(false), Ok(m4));
-        assert_eq!(p4.next(true), Ok(rp5));
-        assert_eq!(rp5.prev(true), Ok(p4));
+        assert_eq!(s4.next(false), s5);
+        assert_eq!(s5.prev(false), s4);
+        assert_eq!(m4.next(true), rm5);
+        assert_eq!(rm5.prev(false), m4);
+        assert_eq!(p4.next(true), rp5);
+        assert_eq!(rp5.prev(true), p4);
 
-        assert_eq!(east.next(false), Ok(south));
-        assert_eq!(south.next(false), Ok(west));
-        assert_eq!(west.next(false), Ok(north));
-        assert_eq!(north.next(false), Ok(east));
-        assert_eq!(haku.next(false), Ok(hatu));
-        assert_eq!(hatu.next(false), Ok(chun));
-        assert_eq!(chun.next(false), Ok(haku));
+        assert_eq!(east.next(false), south);
+        assert_eq!(south.next(false), west);
+        assert_eq!(west.next(false), north);
+        assert_eq!(north.next(false), east);
+        assert_eq!(haku.next(false), hatu);
+        assert_eq!(hatu.next(false), chun);
+        assert_eq!(chun.next(false), haku);
 
-        assert_eq!(east.prev(false), Ok(north));
-        assert_eq!(south.prev(false), Ok(east));
-        assert_eq!(west.prev(false), Ok(south));
-        assert_eq!(north.prev(false), Ok(west));
-        assert_eq!(haku.prev(false), Ok(chun));
-        assert_eq!(hatu.prev(false), Ok(haku));
-        assert_eq!(chun.prev(false), Ok(hatu));
+        assert_eq!(east.prev(false), north);
+        assert_eq!(south.prev(false), east);
+        assert_eq!(west.prev(false), south);
+        assert_eq!(north.prev(false), west);
+        assert_eq!(haku.prev(false), chun);
+        assert_eq!(hatu.prev(false), haku);
+        assert_eq!(chun.prev(false), hatu);
     }
 
     #[test]
