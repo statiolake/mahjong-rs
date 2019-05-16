@@ -30,8 +30,8 @@ pub struct Order {
 pub enum Jihai {
     East,
     South,
-    North,
     West,
+    North,
     Haku,
     Hatu,
     Chun,
@@ -87,7 +87,13 @@ impl Tile {
         };
 
         match self {
-            Tile::Jihai(_) => Err(TileError::InvalidNext),
+            Tile::Jihai(Jihai::East) => Ok(Tile::Jihai(Jihai::South)),
+            Tile::Jihai(Jihai::South) => Ok(Tile::Jihai(Jihai::West)),
+            Tile::Jihai(Jihai::West) => Ok(Tile::Jihai(Jihai::North)),
+            Tile::Jihai(Jihai::North) => Ok(Tile::Jihai(Jihai::East)),
+            Tile::Jihai(Jihai::Haku) => Ok(Tile::Jihai(Jihai::Hatu)),
+            Tile::Jihai(Jihai::Hatu) => Ok(Tile::Jihai(Jihai::Chun)),
+            Tile::Jihai(Jihai::Chun) => Ok(Tile::Jihai(Jihai::Haku)),
             Tile::Souzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Souzu),
             Tile::Manzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Manzu),
             Tile::Pinzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Pinzu),
@@ -101,7 +107,13 @@ impl Tile {
         };
 
         match self {
-            Tile::Jihai(_) => Err(TileError::InvalidPrev),
+            Tile::Jihai(Jihai::East) => Ok(Tile::Jihai(Jihai::North)),
+            Tile::Jihai(Jihai::South) => Ok(Tile::Jihai(Jihai::East)),
+            Tile::Jihai(Jihai::West) => Ok(Tile::Jihai(Jihai::South)),
+            Tile::Jihai(Jihai::North) => Ok(Tile::Jihai(Jihai::West)),
+            Tile::Jihai(Jihai::Haku) => Ok(Tile::Jihai(Jihai::Chun)),
+            Tile::Jihai(Jihai::Hatu) => Ok(Tile::Jihai(Jihai::Haku)),
+            Tile::Jihai(Jihai::Chun) => Ok(Tile::Jihai(Jihai::Hatu)),
             Tile::Souzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Souzu),
             Tile::Manzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Manzu),
             Tile::Pinzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Pinzu),
@@ -263,6 +275,8 @@ mod tests {
         let rs5 = Tile::Souzu(Order::new(5, true).unwrap());
         let rm5 = Tile::Manzu(Order::new(5, true).unwrap());
         let rp5 = Tile::Pinzu(Order::new(5, true).unwrap());
+        let east = Tile::Jihai(Jihai::East);
+        let west = Tile::Jihai(Jihai::West);
 
         assert!(s4 < m5);
         assert!(m5 > s4);
@@ -270,6 +284,8 @@ mod tests {
         assert_eq!(m5, rm5);
         assert!(rp5 < p6);
         assert!(rs5 < rm5);
+        assert!(east < west);
+        assert!(west > east);
     }
 
     #[test]
@@ -281,7 +297,12 @@ mod tests {
         let p4 = Tile::Pinzu(Order::new(4, false).unwrap());
         let rp5 = Tile::Pinzu(Order::new(5, true).unwrap());
         let east = Tile::Jihai(Jihai::East);
-        let west = Tile::Jihai(Jihai::East);
+        let south = Tile::Jihai(Jihai::South);
+        let west = Tile::Jihai(Jihai::West);
+        let north = Tile::Jihai(Jihai::North);
+        let haku = Tile::Jihai(Jihai::Haku);
+        let hatu = Tile::Jihai(Jihai::Hatu);
+        let chun = Tile::Jihai(Jihai::Chun);
 
         assert_eq!(s4.next(false), Ok(s5));
         assert_eq!(s5.prev(false), Ok(s4));
@@ -290,7 +311,20 @@ mod tests {
         assert_eq!(p4.next(true), Ok(rp5));
         assert_eq!(rp5.prev(true), Ok(p4));
 
-        assert!(east.next(false).is_err());
-        assert!(west.prev(false).is_err());
+        assert_eq!(east.next(false), Ok(south));
+        assert_eq!(south.next(false), Ok(west));
+        assert_eq!(west.next(false), Ok(north));
+        assert_eq!(north.next(false), Ok(east));
+        assert_eq!(haku.next(false), Ok(hatu));
+        assert_eq!(hatu.next(false), Ok(chun));
+        assert_eq!(chun.next(false), Ok(haku));
+
+        assert_eq!(east.prev(false), Ok(north));
+        assert_eq!(south.prev(false), Ok(east));
+        assert_eq!(west.prev(false), Ok(south));
+        assert_eq!(north.prev(false), Ok(west));
+        assert_eq!(haku.prev(false), Ok(chun));
+        assert_eq!(hatu.prev(false), Ok(haku));
+        assert_eq!(chun.prev(false), Ok(hatu));
     }
 }
