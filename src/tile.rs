@@ -6,7 +6,7 @@ pub enum TileError {
     InvalidRed,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Tile {
     Souzu(Order),
     Manzu(Order),
@@ -15,13 +15,14 @@ pub enum Tile {
 }
 
 // PartialEq is manually implemented because `is_red` should be ignored in equality comparizon.
+// Ord and PartialOrd is also manually implemented for the same reason.
 #[derive(Debug, Copy, Clone, Eq)]
 pub struct Order {
     order: u8,
     is_red: bool,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Jihai {
     East,
     South,
@@ -147,6 +148,20 @@ impl PartialEq for Order {
     }
 }
 
+use std::cmp::Ordering;
+
+impl PartialOrd for Order {
+    fn partial_cmp(&self, other: &Order) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Order {
+    fn cmp(&self, other: &Order) -> Ordering {
+        self.order.cmp(&other.order)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -206,5 +221,22 @@ mod tests {
         assert_eq!(Tile::parse("中").unwrap(), Tile::Jihai(Jihai::Chun));
         assert!(Tile::parse("あ").is_err());
         assert!(Tile::parse("あい").is_err());
+    }
+
+    #[test]
+    fn ordering() {
+        let s4 = Tile::Souzu(Order::new(4, false).unwrap());
+        let m5 = Tile::Manzu(Order::new(5, false).unwrap());
+        let p6 = Tile::Pinzu(Order::new(6, false).unwrap());
+        let rs5 = Tile::Souzu(Order::new(5, true).unwrap());
+        let rm5 = Tile::Manzu(Order::new(5, true).unwrap());
+        let rp5 = Tile::Pinzu(Order::new(5, true).unwrap());
+
+        assert!(s4 < m5);
+        assert!(m5 > s4);
+        assert!(s4 < rs5);
+        assert_eq!(m5, rm5);
+        assert!(rp5 < p6);
+        assert!(rs5 < rm5);
     }
 }
