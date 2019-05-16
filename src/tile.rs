@@ -126,6 +126,50 @@ impl Tile {
             Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_red(),
         }
     }
+
+    pub fn is_chuchan(&self) -> bool {
+        match self {
+            Tile::Jihai(_) => false,
+            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_chuchan(),
+        }
+    }
+
+    pub fn is_yaochu(&self) -> bool {
+        match self {
+            Tile::Jihai(_) => false,
+            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_yaochu(),
+        }
+    }
+
+    /// 風牌: 東南西北
+    pub fn is_fon(&self) -> bool {
+        match self {
+            Tile::Jihai(Jihai::East) => true,
+            Tile::Jihai(Jihai::South) => true,
+            Tile::Jihai(Jihai::West) => true,
+            Tile::Jihai(Jihai::North) => true,
+            _ => false,
+        }
+    }
+
+    /// 三元牌: 白發中
+    pub fn is_sangen(&self) -> bool {
+        match self {
+            Tile::Jihai(Jihai::Haku) => true,
+            Tile::Jihai(Jihai::Hatu) => true,
+            Tile::Jihai(Jihai::Chun) => true,
+            _ => false,
+        }
+    }
+
+    /// check if the tile can consist of 緑一色.
+    pub fn is_green(&self) -> bool {
+        match self {
+            Tile::Jihai(Jihai::Hatu) => true,
+            Tile::Souzu(o) => o.is_green_order(),
+            _ => false,
+        }
+    }
 }
 
 impl Order {
@@ -143,6 +187,21 @@ impl Order {
 
     pub fn is_red(&self) -> bool {
         self.is_red
+    }
+
+    pub fn is_chuchan(&self) -> bool {
+        self.order != 1 && self.order != 9
+    }
+
+    pub fn is_yaochu(&self) -> bool {
+        !self.is_chuchan()
+    }
+
+    pub fn is_green_order(&self) -> bool {
+        match self.order {
+            2 | 3 | 4 | 6 | 8 => true,
+            _ => false,
+        }
     }
 }
 
