@@ -119,6 +119,13 @@ impl Tile {
             Tile::Pinzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Pinzu),
         }
     }
+
+    pub fn is_red(&self) -> bool {
+        match self {
+            Tile::Jihai(_) => false,
+            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_red(),
+        }
+    }
 }
 
 impl Order {
@@ -132,6 +139,10 @@ impl Order {
         }
 
         Ok(Order { order, is_red })
+    }
+
+    pub fn is_red(&self) -> bool {
+        self.is_red
     }
 }
 
