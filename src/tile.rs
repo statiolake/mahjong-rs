@@ -1,9 +1,13 @@
+pub type Result<T> = std::result::Result<T, TileError>;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TileError {
     InvalidStringLen,
     InvalidChar,
     InvalidOrder,
     InvalidRed,
+    InvalidNext,
+    InvalidPrev,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -34,7 +38,7 @@ pub enum Jihai {
 }
 
 impl Tile {
-    pub fn parse(from: &str) -> Result<Tile, TileError> {
+    pub fn parse(from: &str) -> Result<Tile> {
         // jihai
         //------------------------------
         match from {
@@ -75,10 +79,38 @@ impl Tile {
 
         Ok(tile_constructor(order))
     }
+
+    pub fn next(&self, red_if_5: bool) -> Result<Tile> {
+        let should_be_red = |o: &Order| {
+            // the next will be 5 so now 4
+            red_if_5 && o.order == 4
+        };
+
+        match self {
+            Tile::Jihai(_) => Err(TileError::InvalidNext),
+            Tile::Souzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Souzu),
+            Tile::Manzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Manzu),
+            Tile::Pinzu(o) => Order::new(o.order + 1, should_be_red(&o)).map(Tile::Pinzu),
+        }
+    }
+
+    pub fn prev(&self, red_if_5: bool) -> Result<Tile> {
+        let should_be_red = |o: &Order| {
+            // the previous will be 5 so now 6
+            red_if_5 && o.order == 6
+        };
+
+        match self {
+            Tile::Jihai(_) => Err(TileError::InvalidPrev),
+            Tile::Souzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Souzu),
+            Tile::Manzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Manzu),
+            Tile::Pinzu(o) => Order::new(o.order - 1, should_be_red(&o)).map(Tile::Pinzu),
+        }
+    }
 }
 
 impl Order {
-    pub fn new(order: u8, is_red: bool) -> Result<Order, TileError> {
+    pub fn new(order: u8, is_red: bool) -> Result<Order> {
         if order < 1 || 9 < order {
             return Err(TileError::InvalidOrder);
         }
@@ -95,7 +127,7 @@ use std::convert::TryFrom;
 
 impl TryFrom<&str> for Tile {
     type Error = TileError;
-    fn try_from(from: &str) -> Result<Tile, TileError> {
+    fn try_from(from: &str) -> Result<Tile> {
         Tile::parse(from)
     }
 }
@@ -238,5 +270,27 @@ mod tests {
         assert_eq!(m5, rm5);
         assert!(rp5 < p6);
         assert!(rs5 < rm5);
+    }
+
+    #[test]
+    fn next_prev() {
+        let s4 = Tile::Souzu(Order::new(4, false).unwrap());
+        let s5 = Tile::Souzu(Order::new(5, false).unwrap());
+        let m4 = Tile::Manzu(Order::new(4, false).unwrap());
+        let rm5 = Tile::Manzu(Order::new(5, true).unwrap());
+        let p4 = Tile::Pinzu(Order::new(4, false).unwrap());
+        let rp5 = Tile::Pinzu(Order::new(5, true).unwrap());
+        let east = Tile::Jihai(Jihai::East);
+        let west = Tile::Jihai(Jihai::East);
+
+        assert_eq!(s4.next(false), Ok(s5));
+        assert_eq!(s5.prev(false), Ok(s4));
+        assert_eq!(m4.next(true), Ok(rm5));
+        assert_eq!(rm5.prev(false), Ok(m4));
+        assert_eq!(p4.next(true), Ok(rp5));
+        assert_eq!(rp5.prev(true), Ok(p4));
+
+        assert!(east.next(false).is_err());
+        assert!(west.prev(false).is_err());
     }
 }
