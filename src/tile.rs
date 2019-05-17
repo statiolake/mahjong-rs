@@ -16,8 +16,23 @@ pub enum TileError {
     InvalidRed,
 }
 
+/// kind of 牌 (tile).
+pub enum TileKind {
+    /// 索子.
+    Souzu,
+
+    /// 萬子.
+    Manzu,
+
+    /// 筒子.
+    Pinzu,
+
+    /// 字牌.
+    Jihai,
+}
+
 /// 牌 (tile). the basic of all.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Tile {
     /// 索子.
     Souzu(Order),
@@ -35,14 +50,14 @@ pub enum Tile {
 /// Number of 索子, 萬子 or 筒子.  It also has whether the tile is red ドラ or not.
 // PartialEq is manually implemented because `is_red` should be ignored in equality comparizon.
 // Ord and PartialOrd is also manually implemented for the same reason.
-#[derive(Debug, Copy, Clone, Eq)]
+#[derive(Debug, Copy, Clone, Eq, Hash)]
 pub struct Order {
     order: u8,
     is_red: bool,
 }
 
 /// 字牌 (*jihai*).
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Jihai {
     /// 東.
     East,
@@ -320,6 +335,17 @@ impl TryFrom<&str> for Tile {
 }
 
 use std::fmt;
+
+impl fmt::Display for TileKind {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TileKind::Souzu => write!(b, "索子"),
+            TileKind::Manzu => write!(b, "萬子"),
+            TileKind::Pinzu => write!(b, "筒子"),
+            TileKind::Jihai => write!(b, "字牌"),
+        }
+    }
+}
 
 impl fmt::Display for Tile {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
