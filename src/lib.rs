@@ -1,5 +1,6 @@
 pub mod config;
 pub mod tile;
+pub mod tileset;
 
 #[cfg(test)]
 mod tests {
