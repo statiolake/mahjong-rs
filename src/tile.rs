@@ -1,96 +1,100 @@
+//! 牌などを定義する。
+
 pub type Result<T> = std::result::Result<T, TileError>;
 
-/// Error while creating / parsing tile.
+/// 牌を作るときまたはパース中に生じたエラー。
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TileError {
-    /// (parse) The length of string is invalid.
+    /// (パース) 文字列の長さが変。
     InvalidStringLen,
 
-    /// (parse) An unexpected char is found.
+    /// (パース) 予期しない文字が出現した。
     InvalidChar,
 
-    /// The specified order is invalid (out-of-range when creating)
+    /// 番号がおかしい。 (例: 10m など)
     InvalidOrder,
 
-    /// 赤ドラ (Red *dora*) is specified but its not allowed (red *dora* is only applicable for 5.)
+    /// 5 以外の牌で赤ドラが指定された。
     InvalidRed,
 }
 
-/// kind of 牌 (tile).
+/// 牌の種類。
 pub enum TileKind {
-    /// 索子.
+    /// 索子。
     Souzu,
 
-    /// 萬子.
+    /// 萬子。
     Manzu,
 
-    /// 筒子.
+    /// 筒子。
     Pinzu,
 
-    /// 字牌.
+    /// 字牌。
     Jihai,
 }
 
-/// 牌 (tile). the basic of all.
+/// 牌。
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Tile {
-    /// 索子.
+    /// 索子。
     Souzu(Order),
 
-    /// 萬子.
+    /// 萬子。
     Manzu(Order),
 
-    /// 筒子.
+    /// 筒子。
     Pinzu(Order),
 
-    /// 字牌.
+    /// 字牌。
     Jihai(Jihai),
 }
 
-/// Number of 索子, 萬子 or 筒子.  It also has whether the tile is red ドラ or not.
-// PartialEq is manually implemented because `is_red` should be ignored in equality comparizon.
-// Ord and PartialOrd is also manually implemented for the same reason.
+/// 索子、萬子、筒子の番号。
+///
+/// 赤ドラかどうかも持つ。
+// 比較で赤ドラかどうかは無視したいので PartialEq は手動で実装する。それに伴って Hash も手動で実装す
+// る。
 #[derive(Debug, Copy, Clone, Eq, Hash)]
 pub struct Order {
     order: u8,
     is_red: bool,
 }
 
-/// 字牌 (*jihai*).
+/// 字牌。
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Jihai {
-    /// 東.
+    /// 東。
     East,
 
-    /// 南.
+    /// 南。
     South,
 
-    /// 西.
+    /// 西。
     West,
 
-    /// 北.
+    /// 北。
     North,
 
-    /// 白.
+    /// 白。
     Haku,
 
-    /// 發.
+    /// 發。
     Hatu,
 
-    /// 中.
+    /// 中。
     Chun,
 }
 
 use crate::config::Direction;
 
 impl Tile {
-    /// Parses specified string to create Tile.
+    /// 与えられた文字列をパースして牌を作る。
     ///
-    /// # Errors
+    /// # エラー
     ///
-    /// Returns an `Err` if original string has invalid format.
+    /// もしフォーマットがおかしければエラーを返す。
     pub fn parse(from: &str) -> Result<Tile> {
-        // jihai
+        // 字牌
         //------------------------------
         match from {
             "東" => return Ok(Tile::Jihai(Jihai::East)),
@@ -103,14 +107,10 @@ impl Tile {
             _ => (),
         };
 
-        // other tiles
+        // 他の牌
         //------------------------------
-        if from.chars().count() != 2 {
-            return Err(TileError::InvalidStringLen);
-        }
-
         let mut chars = from.chars();
-        // the length is already checked, so it can safely unwrapped.
+        // 長さは既にチェックしたので unwrap() してよい。
         let order = chars.next().expect("length checked but no char");
         let suit = chars.next().expect("length checked but no char");
         assert!(chars.next().is_none());
@@ -132,13 +132,11 @@ impl Tile {
         Ok(tile_constructor(order))
     }
 
-    /// Returns the next tile of the current one.  If `red_if_5` is true, the tile will be 赤ドラ
-    /// (red *dora*) when the new tile is one of 5s, 5m, 5p.  (In other words, the returned tile is
-    /// one of 5S, 5M, 5P.)
+    /// 今の牌の次の牌を返す。 red_if_5 が true なら、次の牌が 5 だったときには赤ドラになる。
     pub fn next(&self, red_if_5: bool) -> Tile {
-        // checks if the next tile should be 赤ドラ or not
+        // 赤ドラになるかどうかをチェック
         let should_be_red = |o: &Order| {
-            // the next will be 5 so now 4
+            // 赤ドラにするよう指定されていて今が 4 なら、次の牌は赤ドラにするべき
             red_if_5 && o.order == 4
         };
 
@@ -165,13 +163,11 @@ impl Tile {
         }
     }
 
-    /// Returns the previous tile of the current one.  If `red_if_5` is true, the tile will be
-    /// 赤ドラ (red *dora*) when the new tile is one of 5s, 5m, 5p.  (In other words, the returned
-    /// tile is one of 5S, 5M, 5P.)
+    /// 今の牌の前の牌を返す。 red_if_5 が true なら、次の牌が 5 だったときには赤ドラになる。
     pub fn prev(&self, red_if_5: bool) -> Tile {
-        // checks if the next tile should be 赤ドラ or not
+        // 赤ドラになるかどうかをチェック
         let should_be_red = |o: &Order| {
-            // the previous will be 5 so now 6
+            // 赤ドラにするよう指定されていて今が 4 なら、次の牌は赤ドラにするべき
             red_if_5 && o.order == 6
         };
 
@@ -198,7 +194,7 @@ impl Tile {
         }
     }
 
-    /// Checks if it is 赤ドラ (*red dora*).
+    /// 赤ドラかどうか調べる。
     pub fn is_red(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -206,7 +202,7 @@ impl Tile {
         }
     }
 
-    /// Checks it is 中張牌 (*chunchan pai*).
+    /// 中張牌かどうか調べる
     pub fn is_chunchan(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -214,7 +210,7 @@ impl Tile {
         }
     }
 
-    /// Checks if it is 么九牌 (*yaochu pai*).  This is same as `!self.is_chunchan()`.
+    /// 么九牌かどうか調べる。 `!self.is_chunchan()` と同じ。
     pub fn is_yaochu(&self) -> bool {
         match self {
             Tile::Jihai(_) => false,
@@ -222,7 +218,7 @@ impl Tile {
         }
     }
 
-    /// Checks if it is 風牌 (*fan pai*).  風牌 is the diretion tiles (東南西北).
+    /// 風牌かどうか調べる。風牌は「東南西北」のどれか。
     pub fn is_fan(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::East) => true,
@@ -233,7 +229,7 @@ impl Tile {
         }
     }
 
-    /// Check if it is 三元牌 (*sangen pai*).  三元牌 is the special tiles (白發中).
+    /// 三元牌かどうか調べる。三元牌は「白發中」のどれか。
     pub fn is_sangen(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::Haku) => true,
@@ -243,7 +239,7 @@ impl Tile {
         }
     }
 
-    /// Checks if it can consist of 緑一色 (*ryuiso*).
+    /// 緑一色を構成できる牌かどうか調べる。
     pub fn is_green(&self) -> bool {
         match self {
             Tile::Jihai(Jihai::Hatu) => true,
@@ -252,10 +248,18 @@ impl Tile {
         }
     }
 
-    /// Checks the num of 役牌 (*yakuhai*).  The tile is 役牌 if its direction is same with current
-    /// play's place or player's direction, or if it is 三元牌.  The reason it is not bool is that
-    /// for example the play is on 東場 (east place) and player's direction is 東家 (east), then 東
-    /// will be counted as 役牌 twice.
+    /// この牌の役牌の数を返す。
+    ///
+    /// 役牌とは
+    ///
+    /// - 場風が自風と一致している
+    /// - 三元牌のいずれかである
+    ///
+    /// である。返す値は
+    ///
+    /// - 役牌ではない : 0
+    /// - ダブってはないが役牌である : 1
+    /// - 東場の東家のようにダブ東である : 2
     pub fn num_yakuhai(&self, place: Direction, player: Direction) -> u32 {
         match self {
             Tile::Jihai(jihai) => {
@@ -281,12 +285,12 @@ impl Tile {
 }
 
 impl Order {
-    /// Creates new instance of Order.
+    /// 牌の順序を作る。
     ///
-    /// # Errors
+    /// # エラー
     ///
-    /// Returns `Err` if specified `order` is out-of-range or `is_red` is true even if `order` is
-    /// not 5.
+    /// もし `order` が範囲外になっているか、 5 でもないのに `is_red` で赤ドラ指定されていれば `Err`
+    /// を返す。
     pub fn new(order: u8, is_red: bool) -> Result<Order> {
         if order < 1 || 9 < order {
             return Err(TileError::InvalidOrder);
@@ -299,24 +303,25 @@ impl Order {
         Ok(Order { order, is_red })
     }
 
-    /// Checks if it is 赤ドラ (red *dora*).
+    /// 赤ドラかどうか調べる。
     pub fn is_red(&self) -> bool {
         self.is_red
     }
 
-    /// Checks if it is 中張牌 (*chunchan pai*).
+    /// 中張牌かどうか調べる。
     pub fn is_chunchan(&self) -> bool {
         self.order != 1 && self.order != 9
     }
 
-    /// Checks if it is 么九牌 (*yaochu hai*).
+    /// 么九牌かどうか調べる。
     pub fn is_yaochu(&self) -> bool {
         !self.is_chunchan()
     }
 
-    /// Checks if it has the order which can be green 牌.  The suit is not considered and simply
-    /// returns true when `self.order` is one of 2, 3, 4, 6, 8.  It is meant to be used with
-    /// `Tile::is_green()`.
+    /// **順序として** 緑一色を構成できる牌かどうかを調べる。
+    ///
+    /// そもそも索子でなければありえないが、こういった牌の種類はこちらからは知りようもないし無視す
+    /// る。それらを考慮するのは牌側の仕事である。順序が 2, 3, 4, 6, 8 になっていることを確かめる。
     pub fn is_green_order(&self) -> bool {
         match self.order {
             2 | 3 | 4 | 6 | 8 => true,
@@ -387,8 +392,7 @@ impl fmt::Display for Jihai {
 
 impl PartialEq for Order {
     fn eq(&self, other: &Order) -> bool {
-        // ignore is_red flag since red dora 5 is no difference than non-red version in everywhere
-        // except dora calculation.
+        // 赤ドラかどうかは全く影響しないので無視する。
         self.order == other.order
     }
 }
