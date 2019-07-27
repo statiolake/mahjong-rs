@@ -137,7 +137,7 @@ impl Tile {
     }
 
     /// 今の牌の次の牌を返す。 red_if_5 が true なら、次の牌が 5 だったときには赤ドラになる。
-    pub fn next(&self, red_if_5: bool) -> Tile {
+    pub fn next(self, red_if_5: bool) -> Tile {
         // 赤ドラになるかどうかをチェック
         let should_be_red = |o: &Order| {
             // 赤ドラにするよう指定されていて今が 4 なら、次の牌は赤ドラにするべき
@@ -168,7 +168,7 @@ impl Tile {
     }
 
     /// 今の牌の前の牌を返す。 red_if_5 が true なら、次の牌が 5 だったときには赤ドラになる。
-    pub fn prev(&self, red_if_5: bool) -> Tile {
+    pub fn prev(self, red_if_5: bool) -> Tile {
         // 赤ドラになるかどうかをチェック
         let should_be_red = |o: &Order| {
             // 赤ドラにするよう指定されていて今が 4 なら、次の牌は赤ドラにするべき
@@ -199,7 +199,7 @@ impl Tile {
     }
 
     /// 赤ドラかどうか調べる。
-    pub fn is_red(&self) -> bool {
+    pub fn is_red(self) -> bool {
         match self {
             Tile::Jihai(_) => false,
             Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_red(),
@@ -207,7 +207,7 @@ impl Tile {
     }
 
     /// 中張牌かどうか調べる
-    pub fn is_chunchan(&self) -> bool {
+    pub fn is_chunchan(self) -> bool {
         match self {
             Tile::Jihai(_) => false,
             Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_chunchan(),
@@ -215,7 +215,7 @@ impl Tile {
     }
 
     /// 么九牌かどうか調べる。 `!self.is_chunchan()` と同じ。
-    pub fn is_yaochu(&self) -> bool {
+    pub fn is_yaochu(self) -> bool {
         match self {
             Tile::Jihai(_) => false,
             Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_yaochu(),
@@ -223,7 +223,7 @@ impl Tile {
     }
 
     /// 風牌かどうか調べる。風牌は「東南西北」のどれか。
-    pub fn is_fan(&self) -> bool {
+    pub fn is_fan(self) -> bool {
         match self {
             Tile::Jihai(Jihai::East) => true,
             Tile::Jihai(Jihai::South) => true,
@@ -234,7 +234,7 @@ impl Tile {
     }
 
     /// 三元牌かどうか調べる。三元牌は「白發中」のどれか。
-    pub fn is_sangen(&self) -> bool {
+    pub fn is_sangen(self) -> bool {
         match self {
             Tile::Jihai(Jihai::Haku) => true,
             Tile::Jihai(Jihai::Hatu) => true,
@@ -244,7 +244,7 @@ impl Tile {
     }
 
     /// 緑一色を構成できる牌かどうか調べる。
-    pub fn is_green(&self) -> bool {
+    pub fn is_green(self) -> bool {
         match self {
             Tile::Jihai(Jihai::Hatu) => true,
             Tile::Souzu(o) => o.is_green_order(),
@@ -264,16 +264,16 @@ impl Tile {
     /// - 役牌ではない : 0
     /// - ダブってはないが役牌である : 1
     /// - 東場の東家のようにダブ東である : 2
-    pub fn num_yakuhai(&self, place: Direction, player: Direction) -> u32 {
+    pub fn num_yakuhai(self, place: Direction, player: Direction) -> u32 {
         match self {
             Tile::Jihai(jihai) => {
                 let mut res = 0;
 
-                if *jihai == place {
+                if jihai == place {
                     res += 1;
                 }
 
-                if *jihai == player {
+                if jihai == player {
                     res += 1;
                 }
 
@@ -308,17 +308,17 @@ impl Order {
     }
 
     /// 赤ドラかどうか調べる。
-    pub fn is_red(&self) -> bool {
+    pub fn is_red(self) -> bool {
         self.is_red
     }
 
     /// 中張牌かどうか調べる。
-    pub fn is_chunchan(&self) -> bool {
+    pub fn is_chunchan(self) -> bool {
         self.order != 1 && self.order != 9
     }
 
     /// 么九牌かどうか調べる。
-    pub fn is_yaochu(&self) -> bool {
+    pub fn is_yaochu(self) -> bool {
         !self.is_chunchan()
     }
 
@@ -326,7 +326,7 @@ impl Order {
     ///
     /// そもそも索子でなければありえないが、こういった牌の種類はこちらからは知りようもないし無視す
     /// る。それらを考慮するのは牌側の仕事である。順序が 2, 3, 4, 6, 8 になっていることを確かめる。
-    pub fn is_green_order(&self) -> bool {
+    pub fn is_green_order(self) -> bool {
         match self.order {
             2 | 3 | 4 | 6 | 8 => true,
             _ => false,
