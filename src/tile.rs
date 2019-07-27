@@ -114,10 +114,10 @@ impl Tile {
         // 他の牌
         //------------------------------
         let mut chars = from.chars();
-        // 長さは既にチェックしたので unwrap() してよい。
-        let order = chars.next().expect("length checked but no char");
-        let suit = chars.next().expect("length checked but no char");
-        assert!(chars.next().is_none());
+        let (order, suit) = match (chars.next(), chars.next(), chars.next()) {
+            (Some(order), Some(suit), None) => (order, suit),
+            _ => return Err(TileError::InvalidStringLen),
+        };
 
         let (tile_constructor, is_red): (fn(Order) -> Tile, bool) = match suit {
             's' => (Tile::Souzu, false),
