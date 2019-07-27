@@ -131,17 +131,19 @@ impl Tile {
             _ => return Err(TileError::InvalidChar),
         };
 
-        let order = Order::new(order as u8 - b'0', is_red)?;
+        let order = Order::new(order as u8 - b'0')?.with_red(is_red)?;
 
         Ok(tile_constructor(order))
     }
 
-    /// 今の牌の次の牌を返す。 red_if_5 が true なら、次の牌が 5 だったときには赤ドラになる。
-    pub fn next(self, red_if_5: bool) -> Tile {
-        // 赤ドラになるかどうかをチェック
-        let should_be_red = |o: &Order| {
-            // 赤ドラにするよう指定されていて今が 4 なら、次の牌は赤ドラにするべき
-            red_if_5 && o.order == 4
+    /// 今の牌の次の牌を返す。常に赤ドラではない牌を返す。
+    pub fn next(self) -> Tile {
+        // 次の番号
+        let next_order = |curr: u8| -> u8 {
+            assert!(1 <= curr && curr <= 9);
+            let zcurr = curr - 1;
+            let znext = (zcurr + 1) % 9;
+            znext + 1
         };
 
         match self {
@@ -152,27 +154,20 @@ impl Tile {
             Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Hatu),
             Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Chun),
             Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Haku),
-            Tile::Souzu(o) if o.order == 9 => {
-                Tile::Souzu(Order::new(1, should_be_red(&o)).unwrap())
-            }
-            Tile::Manzu(o) if o.order == 9 => {
-                Tile::Manzu(Order::new(1, should_be_red(&o)).unwrap())
-            }
-            Tile::Pinzu(o) if o.order == 9 => {
-                Tile::Pinzu(Order::new(1, should_be_red(&o)).unwrap())
-            }
-            Tile::Souzu(o) => Tile::Souzu(Order::new(o.order + 1, should_be_red(&o)).unwrap()),
-            Tile::Manzu(o) => Tile::Manzu(Order::new(o.order + 1, should_be_red(&o)).unwrap()),
-            Tile::Pinzu(o) => Tile::Pinzu(Order::new(o.order + 1, should_be_red(&o)).unwrap()),
+            Tile::Souzu(o) => Tile::Souzu(Order::new(next_order(o.order)).unwrap()),
+            Tile::Manzu(o) => Tile::Manzu(Order::new(next_order(o.order)).unwrap()),
+            Tile::Pinzu(o) => Tile::Pinzu(Order::new(next_order(o.order)).unwrap()),
         }
     }
 
-    /// 今の牌の前の牌を返す。 red_if_5 が true なら、次の牌が 5 だったときには赤ドラになる。
-    pub fn prev(self, red_if_5: bool) -> Tile {
-        // 赤ドラになるかどうかをチェック
-        let should_be_red = |o: &Order| {
-            // 赤ドラにするよう指定されていて今が 4 なら、次の牌は赤ドラにするべき
-            red_if_5 && o.order == 6
+    /// 今の牌の前の牌を返す。常に赤ドラではない牌を返す。
+    pub fn prev(self) -> Tile {
+        // 次の番号
+        let prev_order = |curr: u8| -> u8 {
+            assert!(1 <= curr && curr <= 9);
+            let zcurr = curr - 1;
+            let znext = (zcurr + 8) % 9;
+            znext + 1
         };
 
         match self {
@@ -183,18 +178,18 @@ impl Tile {
             Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Chun),
             Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Haku),
             Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Hatu),
-            Tile::Souzu(o) if o.order == 1 => {
-                Tile::Souzu(Order::new(9, should_be_red(&o)).unwrap())
-            }
-            Tile::Manzu(o) if o.order == 1 => {
-                Tile::Manzu(Order::new(9, should_be_red(&o)).unwrap())
-            }
-            Tile::Pinzu(o) if o.order == 1 => {
-                Tile::Pinzu(Order::new(9, should_be_red(&o)).unwrap())
-            }
-            Tile::Souzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
-            Tile::Manzu(o) => Tile::Manzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
-            Tile::Pinzu(o) => Tile::Pinzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
+            Tile::Souzu(o) => Tile::Souzu(Order::new(prev_order(o.order)).unwrap()),
+            Tile::Manzu(o) => Tile::Manzu(Order::new(prev_order(o.order)).unwrap()),
+            Tile::Pinzu(o) => Tile::Pinzu(Order::new(prev_order(o.order)).unwrap()),
+        }
+    }
+
+    pub fn with_red(self, is_red: bool) -> Result<Tile> {
+        match self {
+            Tile::Jihai(_) => Err(TileError::InvalidRed),
+            Tile::Souzu(o) => Ok(Tile::Souzu(o.with_red(is_red)?)),
+            Tile::Manzu(o) => Ok(Tile::Manzu(o.with_red(is_red)?)),
+            Tile::Pinzu(o) => Ok(Tile::Pinzu(o.with_red(is_red)?)),
         }
     }
 
@@ -293,18 +288,25 @@ impl Order {
     ///
     /// # エラー
     ///
-    /// もし `order` が範囲外になっているか、 5 でもないのに `is_red` で赤ドラ指定されていれば `Err`
-    /// を返す。
-    pub fn new(order: u8, is_red: bool) -> Result<Order> {
+    /// もし `order` が範囲外になっていればエラーを返す。
+    pub fn new(order: u8) -> Result<Order> {
         if order < 1 || 9 < order {
             return Err(TileError::InvalidOrder);
         }
 
-        if is_red && order != 5 {
+        Ok(Order {
+            order,
+            is_red: false,
+        })
+    }
+
+    /// 赤ドラにした同じ番号のものを作る
+    pub fn with_red(self, is_red: bool) -> Result<Order> {
+        if is_red && self.order != 5 {
             return Err(TileError::InvalidRed);
         }
 
-        Ok(Order { order, is_red })
+        Ok(Order { is_red, ..self })
     }
 
     /// 赤ドラかどうか調べる。
@@ -432,14 +434,21 @@ impl Ord for Order {
 mod tests {
     use super::*;
 
+    fn order_of(order: u8, is_red: bool) -> Order {
+        Order::new(order)
+            .expect("不正な順番です。")
+            .with_red(is_red)
+            .expect("不正な赤ドラです。")
+    }
+
     #[test]
     fn smp() {
-        assert_eq!("4s", Tile::Souzu(Order::new(4, false).unwrap()).to_string());
-        assert_eq!("5m", Tile::Manzu(Order::new(5, false).unwrap()).to_string());
-        assert_eq!("6p", Tile::Pinzu(Order::new(6, false).unwrap()).to_string());
-        assert_eq!("5S", Tile::Souzu(Order::new(5, true).unwrap()).to_string());
-        assert_eq!("5M", Tile::Manzu(Order::new(5, true).unwrap()).to_string());
-        assert_eq!("5P", Tile::Pinzu(Order::new(5, true).unwrap()).to_string());
+        assert_eq!("4s", Tile::Souzu(order_of(4, false)).to_string());
+        assert_eq!("5m", Tile::Manzu(order_of(5, false)).to_string());
+        assert_eq!("6p", Tile::Pinzu(order_of(6, false)).to_string());
+        assert_eq!("5S", Tile::Souzu(order_of(5, true)).to_string());
+        assert_eq!("5M", Tile::Manzu(order_of(5, true)).to_string());
+        assert_eq!("5P", Tile::Pinzu(order_of(5, true)).to_string());
         assert_eq!("東", Tile::Jihai(Jihai::East).to_string());
         assert_eq!("南", Tile::Jihai(Jihai::South).to_string());
         assert_eq!("西", Tile::Jihai(Jihai::West).to_string());
@@ -447,37 +456,24 @@ mod tests {
         assert_eq!("白", Tile::Jihai(Jihai::Haku).to_string());
         assert_eq!("發", Tile::Jihai(Jihai::Hatu).to_string());
         assert_eq!("中", Tile::Jihai(Jihai::Chun).to_string());
-        assert!(Order::new(0, false).is_err());
-        assert!(Order::new(10, false).is_err());
-        assert!(Order::new(4, true).is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    fn smp_invalid() {
+        order_of(0, false);
+        order_of(10, false);
+        order_of(4, true);
     }
 
     #[test]
     fn parse() {
-        assert_eq!(
-            Tile::parse("4s").unwrap(),
-            Tile::Souzu(Order::new(4, false).unwrap())
-        );
-        assert_eq!(
-            Tile::parse("5m").unwrap(),
-            Tile::Manzu(Order::new(5, false).unwrap())
-        );
-        assert_eq!(
-            Tile::parse("6p").unwrap(),
-            Tile::Pinzu(Order::new(6, false).unwrap())
-        );
-        assert_eq!(
-            Tile::parse("5S").unwrap(),
-            Tile::Souzu(Order::new(5, true).unwrap())
-        );
-        assert_eq!(
-            Tile::parse("5M").unwrap(),
-            Tile::Manzu(Order::new(5, true).unwrap())
-        );
-        assert_eq!(
-            Tile::parse("5P").unwrap(),
-            Tile::Pinzu(Order::new(5, true).unwrap())
-        );
+        assert_eq!(Tile::parse("4s").unwrap(), Tile::Souzu(order_of(4, false)));
+        assert_eq!(Tile::parse("5m").unwrap(), Tile::Manzu(order_of(5, false)));
+        assert_eq!(Tile::parse("6p").unwrap(), Tile::Pinzu(order_of(6, false)));
+        assert_eq!(Tile::parse("5S").unwrap(), Tile::Souzu(order_of(5, true)));
+        assert_eq!(Tile::parse("5M").unwrap(), Tile::Manzu(order_of(5, true)));
+        assert_eq!(Tile::parse("5P").unwrap(), Tile::Pinzu(order_of(5, true)));
         assert_eq!(Tile::parse("東").unwrap(), Tile::Jihai(Jihai::East));
         assert_eq!(Tile::parse("南").unwrap(), Tile::Jihai(Jihai::South));
         assert_eq!(Tile::parse("西").unwrap(), Tile::Jihai(Jihai::West));
@@ -491,12 +487,12 @@ mod tests {
 
     #[test]
     fn ordering() {
-        let s4 = Tile::Souzu(Order::new(4, false).unwrap());
-        let m5 = Tile::Manzu(Order::new(5, false).unwrap());
-        let p6 = Tile::Pinzu(Order::new(6, false).unwrap());
-        let rs5 = Tile::Souzu(Order::new(5, true).unwrap());
-        let rm5 = Tile::Manzu(Order::new(5, true).unwrap());
-        let rp5 = Tile::Pinzu(Order::new(5, true).unwrap());
+        let s4 = Tile::Souzu(order_of(4, false));
+        let m5 = Tile::Manzu(order_of(5, false));
+        let p6 = Tile::Pinzu(order_of(6, false));
+        let rs5 = Tile::Souzu(order_of(5, true));
+        let rm5 = Tile::Manzu(order_of(5, true));
+        let rp5 = Tile::Pinzu(order_of(5, true));
         let east = Tile::Jihai(Jihai::East);
         let west = Tile::Jihai(Jihai::West);
 
@@ -512,12 +508,10 @@ mod tests {
 
     #[test]
     fn next_prev() {
-        let s4 = Tile::Souzu(Order::new(4, false).unwrap());
-        let s5 = Tile::Souzu(Order::new(5, false).unwrap());
-        let m4 = Tile::Manzu(Order::new(4, false).unwrap());
-        let rm5 = Tile::Manzu(Order::new(5, true).unwrap());
-        let p4 = Tile::Pinzu(Order::new(4, false).unwrap());
-        let rp5 = Tile::Pinzu(Order::new(5, true).unwrap());
+        let s4 = Tile::Souzu(order_of(4, false));
+        let s5 = Tile::Souzu(order_of(5, false));
+        let m4 = Tile::Manzu(order_of(4, false));
+        let rm5 = Tile::Manzu(order_of(5, true));
         let east = Tile::Jihai(Jihai::East);
         let south = Tile::Jihai(Jihai::South);
         let west = Tile::Jihai(Jihai::West);
@@ -526,28 +520,25 @@ mod tests {
         let hatu = Tile::Jihai(Jihai::Hatu);
         let chun = Tile::Jihai(Jihai::Chun);
 
-        assert_eq!(s4.next(false), s5);
-        assert_eq!(s5.prev(false), s4);
-        assert_eq!(m4.next(true), rm5);
-        assert_eq!(rm5.prev(false), m4);
-        assert_eq!(p4.next(true), rp5);
-        assert_eq!(rp5.prev(true), p4);
+        assert_eq!(s4.next(), s5);
+        assert_eq!(s5.prev(), s4);
+        assert_eq!(rm5.prev(), m4);
 
-        assert_eq!(east.next(false), south);
-        assert_eq!(south.next(false), west);
-        assert_eq!(west.next(false), north);
-        assert_eq!(north.next(false), east);
-        assert_eq!(haku.next(false), hatu);
-        assert_eq!(hatu.next(false), chun);
-        assert_eq!(chun.next(false), haku);
+        assert_eq!(east.next(), south);
+        assert_eq!(south.next(), west);
+        assert_eq!(west.next(), north);
+        assert_eq!(north.next(), east);
+        assert_eq!(haku.next(), hatu);
+        assert_eq!(hatu.next(), chun);
+        assert_eq!(chun.next(), haku);
 
-        assert_eq!(east.prev(false), north);
-        assert_eq!(south.prev(false), east);
-        assert_eq!(west.prev(false), south);
-        assert_eq!(north.prev(false), west);
-        assert_eq!(haku.prev(false), chun);
-        assert_eq!(hatu.prev(false), haku);
-        assert_eq!(chun.prev(false), hatu);
+        assert_eq!(east.prev(), north);
+        assert_eq!(south.prev(), east);
+        assert_eq!(west.prev(), south);
+        assert_eq!(north.prev(), west);
+        assert_eq!(haku.prev(), chun);
+        assert_eq!(hatu.prev(), haku);
+        assert_eq!(chun.prev(), hatu);
     }
 
     #[test]

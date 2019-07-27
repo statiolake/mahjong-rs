@@ -113,7 +113,7 @@ impl Tiles {
             if *tile != expect {
                 return Err(TilesetError::InvalidQi(self));
             }
-            expect = expect.next(false);
+            expect = expect.next();
         }
 
         Ok(self)
