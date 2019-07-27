@@ -1,5 +1,10 @@
 //! 牌などを定義する。
 
+use crate::config::Direction;
+use std::cmp::Ordering;
+use std::convert::TryFrom;
+use std::fmt;
+
 pub type Result<T> = std::result::Result<T, TileError>;
 
 /// 牌を作るときまたはパース中に生じたエラー。
@@ -84,8 +89,6 @@ pub enum Jihai {
     /// 中。
     Chun,
 }
-
-use crate::config::Direction;
 
 impl Tile {
     /// 与えられた文字列をパースして牌を作る。
@@ -330,16 +333,12 @@ impl Order {
     }
 }
 
-use std::convert::TryFrom;
-
 impl TryFrom<&str> for Tile {
     type Error = TileError;
     fn try_from(from: &str) -> Result<Tile> {
         Tile::parse(from)
     }
 }
-
-use std::fmt;
 
 impl fmt::Display for TileKind {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
@@ -408,8 +407,6 @@ impl PartialEq<Direction> for Jihai {
         }
     }
 }
-
-use std::cmp::Ordering;
 
 impl PartialOrd for Order {
     fn partial_cmp(&self, other: &Order) -> Option<Ordering> {
