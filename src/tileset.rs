@@ -188,7 +188,7 @@ impl Tileset {
             return Err(TilesetError::InvalidPon(tiles));
         }
 
-        let mut expect = tiles[0].clone();
+        let mut expect = tiles[0];
         for tile in tiles.inner() {
             if *tile != expect {
                 return Err(TilesetError::InvalidQi(tiles));
@@ -437,7 +437,7 @@ impl Tilesets {
 
         match nums.into_iter().find(|&(_, num)| num > 4) {
             None => Ok(()),
-            Some((tile, _)) => Err(TilesetError::InvalidNumSameTiles(tile.clone())),
+            Some((tile, _)) => Err(TilesetError::InvalidNumSameTiles(*tile)),
         }
     }
 
