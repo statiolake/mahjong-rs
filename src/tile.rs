@@ -193,8 +193,8 @@ impl Tile {
                 Tile::Pinzu(Order::new(9, should_be_red(&o)).unwrap())
             }
             Tile::Souzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
-            Tile::Manzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
-            Tile::Pinzu(o) => Tile::Souzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
+            Tile::Manzu(o) => Tile::Manzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
+            Tile::Pinzu(o) => Tile::Pinzu(Order::new(o.order - 1, should_be_red(&o)).unwrap()),
         }
     }
 
