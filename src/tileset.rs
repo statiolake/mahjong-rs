@@ -401,7 +401,8 @@ impl Tilesets {
 
     /// ドラを含めた全ての牌をまわすイテレータを得る。
     fn tiles_all<'a>(&'a self) -> impl Iterator<Item = Tile> + 'a {
-        self.tiles_without_doras().chain(self.doras.iter().copied())
+        self.tiles_without_doras()
+            .chain(self.doras.iter().map(|tile| tile.prev()))
     }
 
     /// 赤ドラの枚数を確認。各色に赤ドラは 1 枚ずつしかないはず。
