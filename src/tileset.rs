@@ -476,3 +476,33 @@ impl Tilesets {
         Ok(())
     }
 }
+
+impl fmt::Display for Tilesets {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        write!(b, "{}", self.hand)?;
+
+        for pon in &self.pons {
+            write!(b, " ポン{}", pon)?;
+        }
+
+        for qi in &self.qis {
+            write!(b, " チー{}", qi)?;
+        }
+
+        for minkan in &self.minkans {
+            write!(b, " 明槓{}", minkan)?;
+        }
+
+        for ankan in &self.ankans {
+            write!(b, " 暗槓{}", ankan)?;
+        }
+
+        if self.is_tumo {
+            write!(b, " ツモ{}", self.last)?;
+        } else {
+            write!(b, " ロン{}", self.last)?;
+        }
+
+        Ok(())
+    }
+}
