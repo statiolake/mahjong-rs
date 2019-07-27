@@ -61,8 +61,6 @@ pub enum TilesetError {
 pub type Result<T> = std::result::Result<T, TilesetError>;
 
 /// 牌のかたまり。
-///
-/// `Vec<Tile>` へのラッパー。 `Vec<Tile>` に `Display` を実装するために存在する。
 pub struct Tiles(Vec<Tile>);
 
 impl Tiles {
@@ -76,6 +74,73 @@ impl Tiles {
 
     pub fn inner_mut(&mut self) -> &mut Vec<Tile> {
         &mut self.0
+    }
+
+    /// アガリ牌を確認する。
+    ///
+    /// - 枚数が 1 枚かどうか
+    fn check_last_tile(self) -> Result<Tiles> {
+        if self.len() != 1 {
+            return Err(TilesetError::InvalidLastTile(self));
+        }
+
+        Ok(self)
+    }
+
+    /// ポンを確認する。
+    ///
+    /// - 枚数が 3 枚かどうか
+    /// - 刻子になっているかどうか
+    fn check_pon(self) -> Result<Tiles> {
+        if self.len() != 3 {
+            return Err(TilesetError::InvalidPon(self));
+        }
+
+        self.check_kotu()
+    }
+
+    /// チーを確認する。
+    ///
+    /// - 枚数が 3 枚かどうか
+    /// - 順子になっているかどうか
+    fn check_qi(self) -> Result<Tiles> {
+        if self.len() != 3 {
+            return Err(TilesetError::InvalidPon(self));
+        }
+
+        let mut expect = self[0];
+        for tile in self.inner() {
+            if *tile != expect {
+                return Err(TilesetError::InvalidQi(self));
+            }
+            expect = expect.next(false);
+        }
+
+        Ok(self)
+    }
+
+    /// カンを確認する
+    ///
+    /// - 枚数が 4 枚かどうか
+    /// - 刻子になっているかどうか
+    fn check_kan(self) -> Result<Tiles> {
+        if self.len() != 4 {
+            return Err(TilesetError::InvalidPon(self));
+        }
+
+        self.check_kotu()
+    }
+
+    /// 刻子かどうか確認する
+    fn check_kotu(self) -> Result<Tiles> {
+        let expect = &self[0];
+        for tile in &self[1..] {
+            if tile != expect {
+                return Err(TilesetError::InvalidPon(self));
+            }
+        }
+
+        Ok(self)
     }
 }
 
@@ -146,81 +211,14 @@ impl Tileset {
 
         // まず牌の集合としておかしいものをチェックしつつ除く。
         let tiles = match tag {
-            Tag::Tumo | Tag::Ron => Tileset::check_last_tile(tiles)?,
-            Tag::Pon => Tileset::check_pon(tiles)?,
-            Tag::Qi => Tileset::check_qi(tiles)?,
-            Tag::Minkan | Tag::Ankan => Tileset::check_kan(tiles)?,
+            Tag::Tumo | Tag::Ron => tiles.check_last_tile()?,
+            Tag::Pon => tiles.check_pon()?,
+            Tag::Qi => tiles.check_qi()?,
+            Tag::Minkan | Tag::Ankan => tiles.check_kan()?,
             _ => tiles,
         };
 
         Ok(Tileset { tag, tiles })
-    }
-
-    /// アガリ牌を確認する。
-    ///
-    /// - 枚数が 1 枚かどうか
-    fn check_last_tile(tiles: Tiles) -> Result<Tiles> {
-        if tiles.len() != 1 {
-            return Err(TilesetError::InvalidLastTile(tiles));
-        }
-
-        Ok(tiles)
-    }
-
-    /// ポンを確認する。
-    ///
-    /// - 枚数が 3 枚かどうか
-    /// - 刻子になっているかどうか
-    fn check_pon(tiles: Tiles) -> Result<Tiles> {
-        if tiles.len() != 3 {
-            return Err(TilesetError::InvalidPon(tiles));
-        }
-
-        Tileset::check_kotu(tiles)
-    }
-
-    /// チーを確認する。
-    ///
-    /// - 枚数が 3 枚かどうか
-    /// - 順子になっているかどうか
-    fn check_qi(tiles: Tiles) -> Result<Tiles> {
-        if tiles.len() != 3 {
-            return Err(TilesetError::InvalidPon(tiles));
-        }
-
-        let mut expect = tiles[0];
-        for tile in tiles.inner() {
-            if *tile != expect {
-                return Err(TilesetError::InvalidQi(tiles));
-            }
-            expect = expect.next(false);
-        }
-
-        Ok(tiles)
-    }
-
-    /// カンを確認する
-    ///
-    /// - 枚数が 4 枚かどうか
-    /// - 刻子になっているかどうか
-    fn check_kan(tiles: Tiles) -> Result<Tiles> {
-        if tiles.len() != 4 {
-            return Err(TilesetError::InvalidPon(tiles));
-        }
-
-        Tileset::check_kotu(tiles)
-    }
-
-    /// 刻子かどうか確認する
-    fn check_kotu(tiles: Tiles) -> Result<Tiles> {
-        let expect = &tiles[0];
-        for tile in &tiles[1..] {
-            if tile != expect {
-                return Err(TilesetError::InvalidPon(tiles));
-            }
-        }
-
-        Ok(tiles)
     }
 }
 
