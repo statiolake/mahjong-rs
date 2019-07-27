@@ -4,6 +4,7 @@ use crate::config::Direction;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
+use std::hash;
 
 pub type Result<T> = std::result::Result<T, TileError>;
 
@@ -59,7 +60,7 @@ pub enum Tile {
 /// 赤ドラかどうかも持つ。
 // 比較で赤ドラかどうかは無視したいので PartialEq は手動で実装する。それに伴って Hash も手動で実装す
 // る。
-#[derive(Debug, Copy, Clone, Eq, Hash)]
+#[derive(Debug, Copy, Clone, Eq)]
 pub struct Order {
     order: u8,
     is_red: bool,
@@ -393,6 +394,13 @@ impl PartialEq for Order {
     fn eq(&self, other: &Order) -> bool {
         // 赤ドラかどうかは全く影響しないので無視する。
         self.order == other.order
+    }
+}
+
+impl hash::Hash for Order {
+    fn hash<H: hash::Hasher>(&self, hasher: &mut H) {
+        // 赤ドラかどうかは影響しないのでむし っ
+        hasher.write_u8(self.order);
     }
 }
 
