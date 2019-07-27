@@ -1,6 +1,7 @@
 //! 牌などを定義する。
 
 use crate::config::Direction;
+use failure::Fail;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
@@ -9,22 +10,27 @@ use std::hash;
 pub type Result<T> = std::result::Result<T, TileError>;
 
 /// 牌を作るときまたはパース中に生じたエラー。
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Fail, Copy, Clone, PartialEq, Eq)]
 pub enum TileError {
     /// (パース) 文字列の長さが変。
+    #[fail(display = "文字列の長さが変です。")]
     InvalidStringLen,
 
     /// (パース) 予期しない文字が出現した。
-    InvalidChar,
+    #[fail(display = "予期しない文字です: {}。", 0)]
+    InvalidChar(char),
 
     /// 番号がおかしい。 (例: 10m など)
+    #[fail(display = "索子・萬子・筒子の番号が範囲外です。")]
     InvalidOrder,
 
     /// 5 以外の牌で赤ドラが指定された。
+    #[fail(display = "5 以外は赤ドラになれません。")]
     InvalidRed,
 }
 
 /// 牌の種類。
+#[derive(Debug, Clone, Copy)]
 pub enum TileKind {
     /// 索子。
     Souzu,
@@ -128,7 +134,7 @@ impl Tile {
             'M' => (Tile::Manzu, true),
             'P' => (Tile::Pinzu, true),
 
-            _ => return Err(TileError::InvalidChar),
+            ch => return Err(TileError::InvalidChar(ch)),
         };
 
         let order = Order::new(order as u8 - b'0')?.with_red(is_red)?;

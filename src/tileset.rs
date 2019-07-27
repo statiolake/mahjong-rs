@@ -9,58 +9,74 @@
 use crate::config::Context;
 use crate::config::Riichi;
 use crate::tile::{Tile, TileKind};
-
+use failure::Fail;
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 /// 牌集合に関するエラー。
+#[derive(Debug, Fail)]
 pub enum TilesetError {
     /// アガリ牌が複数回指定されている。
+    #[fail(display = "アガリ牌が複数枚指定されています: {}", 0)]
     InvalidLastTile(Tiles),
 
     /// ポンの長さが変、または全ての牌が同じではない。
+    #[fail(display = "変なポンです: {}", 0)]
     InvalidPon(Tiles),
 
     /// チーの長さが変、または牌の番号が連続していない。例 : 2s4s5s
+    #[fail(display = "変なチーです: {}", 0)]
     InvalidQi(Tiles),
 
     /// カンの長さが変、または全ての牌が同じではない。
+    #[fail(display = "変なカンです: {}", 0)]
     InvalidKan(Tiles),
 
     /// 手牌が指定されていない。
+    #[fail(display = "手牌が指定されていません。")]
     HandNotFound,
 
     /// 手牌が 2 回以上指定された。
+    #[fail(display = "手牌が二回以上指定されています。")]
     HandSpecifiedMoreThanOnce,
 
     /// アガリ牌が指定されなかった。
+    #[fail(display = "アガリ牌が指定されていません。")]
     LastTileNotFound,
 
     /// アガリ牌が 2 回以上指定された。
+    #[fail(display = "アガリ牌が二回以上指定されています。")]
     LastTileSpecifiedMoreThanOnce,
 
     /// ドラが指定されなかった。
+    #[fail(display = "ドラが指定されていません。")]
     DorasNotFound,
 
     /// ドラが 2 回以上指定された。
+    #[fail(display = "ドラが二回以上指定されています。")]
     DorasSpecifiedMoreThanOnce,
 
     /// 立直と副露が同時に行われている。
+    #[fail(display = "立直と副露が同時に行われています。")]
     BothRiichiFuro,
 
     /// 赤ドラが多すぎる。
+    #[fail(display = "{} に対する赤ドラが {} 枚もあります。", 0, 1)]
     InvalidNumRed(TileKind, u32),
 
     /// 手牌に同じ牌が多すぎる。
+    #[fail(display = "{} の数が多すぎます。", 0)]
     InvalidNumSameTiles(Tile),
 
     /// 手牌の枚数が多すぎるか少なすぎる (多牌か少牌) 。
+    #[fail(display = "手牌の数が変です: {} 枚あります。", 0)]
     InvalidNumTiles(u32),
 }
 
 pub type Result<T> = std::result::Result<T, TilesetError>;
 
 /// 牌のかたまり。
+#[derive(Debug)]
 pub struct Tiles(Vec<Tile>);
 
 impl Tiles {
