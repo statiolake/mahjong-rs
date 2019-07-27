@@ -306,7 +306,7 @@ impl Tilesets {
                 *storage = Some(value);
                 Ok(())
             } else {
-                return Err(error);
+                Err(error)
             }
         }
 
