@@ -389,19 +389,19 @@ impl Tilesets {
     }
 
     /// ドラ以外の全ての牌をまわすイテレータを得る。
-    fn tiles_without_doras(&self) -> impl Iterator<Item = &Tile> {
-        Some(&self.last)
-            .into_iter()
-            .chain(self.hand.iter())
-            .chain(self.pons.iter().flat_map(|i| i.iter()))
-            .chain(self.qis.iter().flat_map(|i| i.iter()))
-            .chain(self.minkans.iter().flat_map(|i| i.iter()))
-            .chain(self.ankans.iter().flat_map(|i| i.iter()))
+    fn tiles_without_doras<'a>(&'a self) -> impl Iterator<Item = Tile> + 'a {
+        use std::iter::once;
+        once(self.last)
+            .chain(self.hand.iter().copied())
+            .chain(self.pons.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.qis.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.minkans.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.ankans.iter().flat_map(|i| i.iter().copied()))
     }
 
     /// ドラを含めた全ての牌をまわすイテレータを得る。
-    fn tiles_all(&self) -> impl Iterator<Item = &Tile> {
-        self.tiles_without_doras().chain(self.doras.iter())
+    fn tiles_all<'a>(&'a self) -> impl Iterator<Item = Tile> + 'a {
+        self.tiles_without_doras().chain(self.doras.iter().copied())
     }
 
     /// 赤ドラの枚数を確認。各色に赤ドラは 1 枚ずつしかないはず。
@@ -435,7 +435,7 @@ impl Tilesets {
 
         match nums.into_iter().find(|&(_, num)| num > 4) {
             None => Ok(()),
-            Some((tile, _)) => Err(TilesetError::InvalidNumSameTiles(*tile)),
+            Some((tile, _)) => Err(TilesetError::InvalidNumSameTiles(tile)),
         }
     }
 
