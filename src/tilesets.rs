@@ -54,33 +54,33 @@ pub enum TilesetsError {
 /// 牌集合の集合。これをもとに判定を行う。
 pub struct Tilesets {
     /// コンテキスト (場風・自風やリーチの状態など) 。
-    context: Context,
+    pub context: Context,
 
     /// ツモかどうか。
-    is_tumo: bool,
+    pub is_tumo: bool,
 
     /// アガリ牌。
-    last: Tile,
+    pub last: Tile,
 
     /// 手牌。
-    hand: Tiles,
+    pub hand: Tiles,
 
     /// ポン。
-    pons: Vec<Tiles>,
+    pub pons: Vec<Tiles>,
 
     /// チー。
-    qis: Vec<Tiles>,
+    pub qis: Vec<Tiles>,
 
     /// 明槓。
-    minkans: Vec<Tiles>,
+    pub minkans: Vec<Tiles>,
 
     /// 暗槓。
-    ankans: Vec<Tiles>,
+    pub ankans: Vec<Tiles>,
 
     /// ドラ。
     ///
     /// ドラ表示牌ではなくてその次の本来のドラの牌で表されている。
-    doras: Tiles,
+    pub doras: Tiles,
 }
 
 impl Tilesets {

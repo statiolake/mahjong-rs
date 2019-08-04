@@ -3,6 +3,7 @@
 use crate::tile::Order;
 use crate::tile::Tile;
 use crate::tileset::Tiles;
+use crate::tilesets::Tilesets;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -211,6 +212,155 @@ impl<'a> MachiEnumerator<'a> {
 
         Some(MachiKind::Tanki)
     }
+}
+
+/// ロンによる明刻・明順を保持する。
+enum RonMin {
+    Minko(Tiles),
+    Minjun(Tiles),
+    None,
+}
+
+impl RonMin {
+    fn minko(&self) -> Option<&Tiles> {
+        match self {
+            RonMin::Minko(tiles) => Some(tiles),
+            RonMin::Minjun(_) => None,
+            RonMin::None => None,
+        }
+    }
+
+    fn minjun(&self) -> Option<&Tiles> {
+        match self {
+            RonMin::Minko(_) => None,
+            RonMin::Minjun(tiles) => Some(tiles),
+            RonMin::None => None,
+        }
+    }
+
+    fn iter_minko(&self) -> impl Iterator<Item = &Tiles> {
+        self.minko().into_iter()
+    }
+
+    fn iter_minjun(&self) -> impl Iterator<Item = &Tiles> {
+        self.minjun().into_iter()
+    }
+}
+
+/// アガリ形に整理された牌集合たち。
+pub struct AgariTilesets {
+    tilesets: Tilesets,
+    machi: MachiKind,
+    ronmin: RonMin,
+    janto: Tiles,
+    kotus_in_hand: Vec<Tiles>,
+    juntus_in_hand: Vec<Tiles>,
+}
+
+impl AgariTilesets {
+    fn new(
+        mut tilesets: Tilesets,
+        machi: MachiKind,
+        janto: Tiles,
+        mut kotus_in_hand: Vec<Tiles>,
+        mut juntus_in_hand: Vec<Tiles>,
+    ) -> AgariTilesets {
+        let ronmin = fix_ron_an_mins(
+            &mut tilesets,
+            &janto,
+            &mut kotus_in_hand,
+            &mut juntus_in_hand,
+        );
+
+        AgariTilesets {
+            tilesets,
+            machi,
+            ronmin,
+            janto,
+            kotus_in_hand,
+            juntus_in_hand,
+        }
+    }
+
+    /// 明刻。ポンと明槓、ロンによる明刻を合わせたもの。
+    fn minkos(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets
+            .pons
+            .iter()
+            .chain(self.tilesets.minkans.iter())
+            .chain(self.ronmin.iter_minko())
+    }
+
+    /// 暗刻。手札の刻子と暗槓を合わせたもの。
+    fn ankos(&self) -> impl Iterator<Item = &Tiles> {
+        self.kotus_in_hand.iter().chain(self.tilesets.ankans.iter())
+    }
+
+    /// 明順。チーとロンによる順子を合わせたもの。
+    fn minjuns(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets.qis.iter().chain(self.ronmin.iter_minjun())
+    }
+
+    /// 暗順。手札の順子のみ。
+    fn anjuns(&self) -> impl Iterator<Item = &Tiles> {
+        self.juntus_in_hand.iter()
+    }
+
+    /// 刻子。明刻、暗刻を合わせたもの。
+    fn kotus(&self) -> impl Iterator<Item = &Tiles> {
+        self.minkos().chain(self.ankos())
+    }
+
+    /// 順子。明順、暗順を合わせたもの。
+    fn juntus(&self) -> impl Iterator<Item = &Tiles> {
+        self.minjuns().chain(self.anjuns())
+    }
+
+    /// 面子。刻子と順子を合わせたもの。
+    fn mentus(&self) -> impl Iterator<Item = &Tiles> {
+        self.kotus().chain(self.juntus())
+    }
+}
+
+/// ロンによる暗刻と明刻を調整する。ロンによってできた刻子は明刻として扱うルールがあるため、最初は
+/// 手牌の暗刻として扱われているものを一つ明刻へ移さなければならない。
+fn fix_ron_an_mins(
+    tilesets: &mut Tilesets,
+    janto: &Tiles,
+    kotus_in_hand: &mut Vec<Tiles>,
+    juntus_in_hand: &mut Vec<Tiles>,
+) -> RonMin {
+    // ツモなら関係がない。
+    if tilesets.is_tumo {
+        return RonMin::None;
+    }
+
+    let last = tilesets.last;
+
+    // まず、暗順に `last` を含む順子があるなら、ロンした牌は常にその順子を作ったと考える。刻子では
+    // 暗刻か明刻かが重要になるのに対し、順子に関しては鳴いたかどうかは問題でも暗順か明順かの区別は
+    // 一切無関係である。よって、どのような場合も常に順子を優先的に明順にする方がよい。
+    for anjuns in &mut [juntus_in_hand] {
+        if let Some(pos) = anjuns.iter().position(|jun| jun.contains(&last)) {
+            return RonMin::Minjun(anjuns.remove(pos));
+        }
+    }
+
+    // そうでないなら仕方ないので刻子を確認する。
+    for ankos in &mut [kotus_in_hand, &mut tilesets.ankans] {
+        if let Some(pos) = ankos.iter().position(|ko| ko.contains(&last)) {
+            return RonMin::Minko(ankos.remove(pos));
+        }
+    }
+
+    // いずれでもなければ必ず雀頭になっているはず。
+    assert_eq!(
+        tilesets.last,
+        janto.first(),
+        "ロンした牌によって順子も刻子も雀頭も作られていません。"
+    );
+
+    RonMin::None
 }
 
 #[cfg(test)]
