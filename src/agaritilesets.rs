@@ -1,6 +1,6 @@
 //! アガリ形を保持する牌集合を定義する。
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MachiKind {
     /// 両面待ち。
     ///
