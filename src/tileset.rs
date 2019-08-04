@@ -38,6 +38,12 @@ pub type Result<T> = std::result::Result<T, TilesetError>;
 pub struct Tiles(Vec<Tile>);
 
 impl Tiles {
+    /// 牌のかたまりを生成する。渡された牌をソートする。
+    pub fn new(mut tiles: Vec<Tile>) -> Tiles {
+        tiles.sort();
+        Tiles(tiles)
+    }
+
     pub fn into_inner(self) -> Vec<Tile> {
         self.0
     }
@@ -48,6 +54,28 @@ impl Tiles {
 
     pub fn inner_mut(&mut self) -> &mut Vec<Tile> {
         &mut self.0
+    }
+
+    /// 牌のかたまりの最初の牌を確認する。
+    pub fn first(&self) -> Tile {
+        self.inner().first().copied().unwrap()
+    }
+
+    /// 牌のかたまりの最後の牌を確認する。
+    pub fn last(&self) -> Tile {
+        self.inner().last().copied().unwrap()
+    }
+
+    /// 牌のかたまりの真ん中の牌を確認する。これは個数が3つでないとき panic! する。
+    pub fn middle(&self) -> Tile {
+        assert_eq!(
+            self.inner().len(),
+            3,
+            "牌の個数が{}つなのに middle() が呼ばれました。",
+            self.inner().len()
+        );
+
+        self.inner()[2]
     }
 
     /// アガリ牌を確認する。
@@ -180,9 +208,7 @@ pub enum Tag {
 
 impl Tileset {
     /// 牌集合を作る。
-    pub fn new(tag: Tag, mut tiles: Tiles) -> Result<Tileset> {
-        tiles.sort();
-
+    pub fn new(tag: Tag, tiles: Tiles) -> Result<Tileset> {
         // まず牌の集合としておかしいものをチェックしつつ除く。
         let tiles = match tag {
             Tag::Tumo | Tag::Ron => tiles.check_last_tile()?,
