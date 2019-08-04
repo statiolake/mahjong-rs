@@ -142,8 +142,26 @@ impl Tile {
         Ok(tile_constructor(order))
     }
 
-    /// 今の牌の次の牌を返す。常に赤ドラではない牌を返す。
-    pub fn next(self) -> Tile {
+    pub fn next(self) -> Option<Tile> {
+        match self {
+            Tile::Jihai(_) => None,
+            Tile::Souzu(o) => o.next().map(Tile::Souzu),
+            Tile::Manzu(o) => o.next().map(Tile::Manzu),
+            Tile::Pinzu(o) => o.next().map(Tile::Pinzu),
+        }
+    }
+
+    pub fn prev(self) -> Option<Tile> {
+        match self {
+            Tile::Jihai(_) => None,
+            Tile::Souzu(o) => o.prev().map(Tile::Souzu),
+            Tile::Manzu(o) => o.prev().map(Tile::Manzu),
+            Tile::Pinzu(o) => o.prev().map(Tile::Pinzu),
+        }
+    }
+
+    /// 今の牌の次の牌を返す。常に赤ドラではない牌を返す。9の次は1に戻る。
+    pub fn wrapping_next(self) -> Tile {
         match self {
             Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::South),
             Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::West),
@@ -152,14 +170,14 @@ impl Tile {
             Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Hatu),
             Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Chun),
             Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Haku),
-            Tile::Souzu(o) => Tile::Souzu(o.next()),
-            Tile::Manzu(o) => Tile::Manzu(o.next()),
-            Tile::Pinzu(o) => Tile::Pinzu(o.next()),
+            Tile::Souzu(o) => Tile::Souzu(o.wrapping_next()),
+            Tile::Manzu(o) => Tile::Manzu(o.wrapping_next()),
+            Tile::Pinzu(o) => Tile::Pinzu(o.wrapping_next()),
         }
     }
 
-    /// 今の牌の前の牌を返す。常に赤ドラではない牌を返す。
-    pub fn prev(self) -> Tile {
+    /// 今の牌の前の牌を返す。常に赤ドラではない牌を返す。9の次は1に戻る。
+    pub fn wrapping_prev(self) -> Tile {
         match self {
             Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::North),
             Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::East),
@@ -168,9 +186,17 @@ impl Tile {
             Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Chun),
             Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Haku),
             Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Hatu),
-            Tile::Souzu(o) => Tile::Souzu(o.prev()),
-            Tile::Manzu(o) => Tile::Manzu(o.prev()),
-            Tile::Pinzu(o) => Tile::Pinzu(o.prev()),
+            Tile::Souzu(o) => Tile::Souzu(o.wrapping_prev()),
+            Tile::Manzu(o) => Tile::Manzu(o.wrapping_prev()),
+            Tile::Pinzu(o) => Tile::Pinzu(o.wrapping_prev()),
+        }
+    }
+
+    /// オーダーを取得する。もし字牌なら None となる。
+    pub fn order(self) -> Option<Order> {
+        match self {
+            Tile::Jihai(_) => None,
+            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => Some(o),
         }
     }
 
@@ -185,26 +211,17 @@ impl Tile {
 
     /// 赤ドラかどうか調べる。
     pub fn is_red(self) -> bool {
-        match self {
-            Tile::Jihai(_) => false,
-            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_red(),
-        }
+        self.order().map(|o| o.is_red()).unwrap_or(false)
     }
 
     /// 中張牌かどうか調べる
     pub fn is_chunchan(self) -> bool {
-        match self {
-            Tile::Jihai(_) => false,
-            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_chunchan(),
-        }
+        self.order().map(|o| o.is_chunchan()).unwrap_or(false)
     }
 
     /// 么九牌かどうか調べる。 `!self.is_chunchan()` と同じ。
     pub fn is_yaochu(self) -> bool {
-        match self {
-            Tile::Jihai(_) => false,
-            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => o.is_yaochu(),
-        }
+        self.order().map(|o| o.is_yaochu()).unwrap_or(false)
     }
 
     /// 風牌かどうか調べる。風牌は「東南西北」のどれか。
@@ -300,21 +317,27 @@ impl Order {
     }
 
     /// 次の番号。9であれば1に戻る。
-    pub fn next(self) -> Order {
+    pub fn wrapping_next(self) -> Order {
         assert!(1 <= self.order && self.order <= 9);
-        let zcurr = self.order - 1;
-        let znext = (zcurr + 1) % 9;
-        let next = znext + 1;
-        Order::new(next).expect("次の Order が不正です。")
+        self.next().unwrap_or_else(|| Order::new(1).unwrap())
     }
 
     /// 前の番号。1であれば9に戻る。
-    pub fn prev(self) -> Order {
+    pub fn wrapping_prev(self) -> Order {
         assert!(1 <= self.order && self.order <= 9);
-        let zcurr = self.order - 1;
-        let zprev = (zcurr + 8) % 9;
-        let prev = zprev + 1;
-        Order::new(prev).expect("前の Order が不正です。")
+        self.prev().unwrap_or_else(|| Order::new(9).unwrap())
+    }
+
+    /// 次の番号。9であればNoneとなる。
+    pub fn next(self) -> Option<Order> {
+        assert!(1 <= self.order && self.order <= 9);
+        Order::new(self.order + 1).ok()
+    }
+
+    /// 前の番号。1であればNoneとなる。
+    pub fn prev(self) -> Option<Order> {
+        assert!(1 <= self.order && self.order <= 9);
+        Order::new(self.order - 1).ok()
     }
 
     /// 赤ドラかどうか調べる。
@@ -520,6 +543,8 @@ mod tests {
         let s5 = Tile::Souzu(order_of(5, false));
         let m4 = Tile::Manzu(order_of(4, false));
         let rm5 = Tile::Manzu(order_of(5, true));
+        let m9 = Tile::Manzu(order_of(9, false));
+        let m1 = Tile::Manzu(order_of(1, false));
         let east = Tile::Jihai(Jihai::East);
         let south = Tile::Jihai(Jihai::South);
         let west = Tile::Jihai(Jihai::West);
@@ -528,25 +553,29 @@ mod tests {
         let hatu = Tile::Jihai(Jihai::Hatu);
         let chun = Tile::Jihai(Jihai::Chun);
 
-        assert_eq!(s4.next(), s5);
-        assert_eq!(s5.prev(), s4);
-        assert_eq!(rm5.prev(), m4);
+        assert_eq!(s4.wrapping_next(), s5);
+        assert_eq!(s5.wrapping_prev(), s4);
+        assert_eq!(rm5.wrapping_prev(), m4);
+        assert_eq!(m9.wrapping_next(), m1);
+        assert_eq!(m1.wrapping_prev(), m9);
+        assert_eq!(m9.next(), None);
+        assert_eq!(m1.prev(), None);
 
-        assert_eq!(east.next(), south);
-        assert_eq!(south.next(), west);
-        assert_eq!(west.next(), north);
-        assert_eq!(north.next(), east);
-        assert_eq!(haku.next(), hatu);
-        assert_eq!(hatu.next(), chun);
-        assert_eq!(chun.next(), haku);
+        assert_eq!(east.wrapping_next(), south);
+        assert_eq!(south.wrapping_next(), west);
+        assert_eq!(west.wrapping_next(), north);
+        assert_eq!(north.wrapping_next(), east);
+        assert_eq!(haku.wrapping_next(), hatu);
+        assert_eq!(hatu.wrapping_next(), chun);
+        assert_eq!(chun.wrapping_next(), haku);
 
-        assert_eq!(east.prev(), north);
-        assert_eq!(south.prev(), east);
-        assert_eq!(west.prev(), south);
-        assert_eq!(north.prev(), west);
-        assert_eq!(haku.prev(), chun);
-        assert_eq!(hatu.prev(), haku);
-        assert_eq!(chun.prev(), hatu);
+        assert_eq!(east.wrapping_prev(), north);
+        assert_eq!(south.wrapping_prev(), east);
+        assert_eq!(west.wrapping_prev(), south);
+        assert_eq!(north.wrapping_prev(), west);
+        assert_eq!(haku.wrapping_prev(), chun);
+        assert_eq!(hatu.wrapping_prev(), haku);
+        assert_eq!(chun.wrapping_prev(), hatu);
     }
 
     #[test]

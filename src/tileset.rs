@@ -75,7 +75,7 @@ impl Tiles {
             self.inner().len()
         );
 
-        self.inner()[2]
+        self.inner()[1]
     }
 
     /// アガリ牌を確認する。
@@ -115,7 +115,7 @@ impl Tiles {
             if *tile != expect {
                 return Err(TilesetError::InvalidQi(self));
             }
-            expect = expect.next();
+            expect = expect.wrapping_next();
         }
 
         Ok(self)
@@ -242,5 +242,23 @@ impl fmt::Display for Tag {
             Tag::Ankan => write!(b, "暗槓"),
             Tag::Dora => write!(b, "ドラ"),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tile::{Order, Tile};
+
+    #[test]
+    fn tiles() {
+        let s1 = Tile::Souzu(Order::new(1).unwrap());
+        let s2 = Tile::Souzu(Order::new(2).unwrap());
+        let s3 = Tile::Souzu(Order::new(3).unwrap());
+        let tiles = Tiles::new(vec![s1, s2, s3]);
+
+        assert_eq!(tiles.first(), s1);
+        assert_eq!(tiles.middle(), s2);
+        assert_eq!(tiles.last(), s3);
     }
 }
