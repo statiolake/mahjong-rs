@@ -144,14 +144,6 @@ impl Tile {
 
     /// 今の牌の次の牌を返す。常に赤ドラではない牌を返す。
     pub fn next(self) -> Tile {
-        // 次の番号
-        let next_order = |curr: u8| -> u8 {
-            assert!(1 <= curr && curr <= 9);
-            let zcurr = curr - 1;
-            let znext = (zcurr + 1) % 9;
-            znext + 1
-        };
-
         match self {
             Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::South),
             Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::West),
@@ -160,22 +152,14 @@ impl Tile {
             Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Hatu),
             Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Chun),
             Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Haku),
-            Tile::Souzu(o) => Tile::Souzu(Order::new(next_order(o.order)).unwrap()),
-            Tile::Manzu(o) => Tile::Manzu(Order::new(next_order(o.order)).unwrap()),
-            Tile::Pinzu(o) => Tile::Pinzu(Order::new(next_order(o.order)).unwrap()),
+            Tile::Souzu(o) => Tile::Souzu(o.next()),
+            Tile::Manzu(o) => Tile::Manzu(o.next()),
+            Tile::Pinzu(o) => Tile::Pinzu(o.next()),
         }
     }
 
     /// 今の牌の前の牌を返す。常に赤ドラではない牌を返す。
     pub fn prev(self) -> Tile {
-        // 次の番号
-        let prev_order = |curr: u8| -> u8 {
-            assert!(1 <= curr && curr <= 9);
-            let zcurr = curr - 1;
-            let znext = (zcurr + 8) % 9;
-            znext + 1
-        };
-
         match self {
             Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::North),
             Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::East),
@@ -184,9 +168,9 @@ impl Tile {
             Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Chun),
             Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Haku),
             Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Hatu),
-            Tile::Souzu(o) => Tile::Souzu(Order::new(prev_order(o.order)).unwrap()),
-            Tile::Manzu(o) => Tile::Manzu(Order::new(prev_order(o.order)).unwrap()),
-            Tile::Pinzu(o) => Tile::Pinzu(Order::new(prev_order(o.order)).unwrap()),
+            Tile::Souzu(o) => Tile::Souzu(o.prev()),
+            Tile::Manzu(o) => Tile::Manzu(o.prev()),
+            Tile::Pinzu(o) => Tile::Pinzu(o.prev()),
         }
     }
 
@@ -306,13 +290,31 @@ impl Order {
         })
     }
 
-    /// 赤ドラにした同じ番号のものを作る
+    /// 赤ドラにした同じ番号のものを作る。
     pub fn with_red(self, is_red: bool) -> Result<Order> {
         if is_red && self.order != 5 {
             return Err(TileError::InvalidRed);
         }
 
         Ok(Order { is_red, ..self })
+    }
+
+    /// 次の番号。9であれば1に戻る。
+    pub fn next(self) -> Order {
+        assert!(1 <= self.order && self.order <= 9);
+        let zcurr = self.order - 1;
+        let znext = (zcurr + 1) % 9;
+        let next = znext + 1;
+        Order::new(next).expect("次の Order が不正です。")
+    }
+
+    /// 前の番号。1であれば9に戻る。
+    pub fn prev(self) -> Order {
+        assert!(1 <= self.order && self.order <= 9);
+        let zcurr = self.order - 1;
+        let zprev = (zcurr + 8) % 9;
+        let prev = zprev + 1;
+        Order::new(prev).expect("前の Order が不正です。")
     }
 
     /// 赤ドラかどうか調べる。
