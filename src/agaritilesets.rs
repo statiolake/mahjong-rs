@@ -2,9 +2,10 @@
 
 use crate::tile::Order;
 use crate::tile::Tile;
-use crate::tileset::Tiles;
+use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;
 use std::fmt;
+use std::ops::Range;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MachiKind {
@@ -215,6 +216,7 @@ impl<'a> MachiEnumerator<'a> {
 }
 
 /// ロンによる明刻・明順を保持する。
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum RonMin {
     Minko(Tiles),
     Minjun(Tiles),
@@ -248,6 +250,7 @@ impl RonMin {
 }
 
 /// アガリ形に整理された牌集合たち。
+#[derive(Debug, Clone)]
 pub struct AgariTilesets {
     tilesets: Tilesets,
     machi: MachiKind,
@@ -258,6 +261,48 @@ pub struct AgariTilesets {
 }
 
 impl AgariTilesets {
+    pub fn enumerate(tilesets: Tilesets) -> Vec<AgariTilesets> {
+        // ツモにせよロンにせよ、とりあえず最後に引いた牌を手牌にくっつけておく。
+        let hand = {
+            let mut v = tilesets.hand.clone();
+            v.push(tilesets.last);
+            v
+        };
+        let mut res = Vec::new();
+
+        // 雀頭のありえかたを列挙する
+        for (janto, rest) in enumerate_janto(&hand) {
+            // 刻子を全て列挙する
+            for (kotus_in_hand, rest) in enumerate_kotu(&rest) {
+                // 順子を全てとりだす
+                let juntus_in_hand = match extract_juntu(rest) {
+                    // あがれなかった (取り出し方が不適切、など)
+                    None => continue,
+
+                    // あがれた
+                    Some(t) => t,
+                };
+
+                // 待ちを全て列挙する
+                let last = tilesets.last;
+                let machis = enumerate_machis(&janto, &juntus_in_hand, &kotus_in_hand, last);
+
+                // それら全てに対して AgariTilesets を作成する
+                for machi in machis {
+                    res.push(AgariTilesets::new(
+                        tilesets.clone(),
+                        machi,
+                        janto.clone(),
+                        kotus_in_hand.clone(),
+                        juntus_in_hand.clone(),
+                    ));
+                }
+            }
+        }
+
+        res
+    }
+
     fn new(
         mut tilesets: Tilesets,
         machi: MachiKind,
@@ -283,7 +328,7 @@ impl AgariTilesets {
     }
 
     /// 明刻。ポンと明槓、ロンによる明刻を合わせたもの。
-    fn minkos(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn minkos(&self) -> impl Iterator<Item = &Tiles> {
         self.tilesets
             .pons
             .iter()
@@ -292,32 +337,32 @@ impl AgariTilesets {
     }
 
     /// 暗刻。手札の刻子と暗槓を合わせたもの。
-    fn ankos(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn ankos(&self) -> impl Iterator<Item = &Tiles> {
         self.kotus_in_hand.iter().chain(self.tilesets.ankans.iter())
     }
 
     /// 明順。チーとロンによる順子を合わせたもの。
-    fn minjuns(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn minjuns(&self) -> impl Iterator<Item = &Tiles> {
         self.tilesets.qis.iter().chain(self.ronmin.iter_minjun())
     }
 
     /// 暗順。手札の順子のみ。
-    fn anjuns(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn anjuns(&self) -> impl Iterator<Item = &Tiles> {
         self.juntus_in_hand.iter()
     }
 
     /// 刻子。明刻、暗刻を合わせたもの。
-    fn kotus(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn kotus(&self) -> impl Iterator<Item = &Tiles> {
         self.minkos().chain(self.ankos())
     }
 
     /// 順子。明順、暗順を合わせたもの。
-    fn juntus(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn juntus(&self) -> impl Iterator<Item = &Tiles> {
         self.minjuns().chain(self.anjuns())
     }
 
     /// 面子。刻子と順子を合わせたもの。
-    fn mentus(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn mentus(&self) -> impl Iterator<Item = &Tiles> {
         self.kotus().chain(self.juntus())
     }
 }
@@ -363,60 +408,241 @@ fn fix_ron_an_mins(
     RonMin::None
 }
 
+fn range_same_tiles(tiles: &Tiles) -> Vec<Range<usize>> {
+    let mut res = Vec::new();
+    let mut start = 0;
+    let mut curr = None;
+
+    for (index, &tile) in tiles.iter().enumerate() {
+        if curr.is_none() {
+            curr = Some(tile);
+            continue;
+        }
+
+        if curr != Some(tile) {
+            res.push(start..index);
+            curr = Some(tile);
+            start = index;
+        }
+    }
+
+    res.push(start..tiles.len());
+
+    res
+}
+
+/// 雀頭を全てのパターンで抽出して列挙する。
+fn enumerate_janto(tiles: &Tiles) -> Vec<(Tiles, Tiles)> {
+    range_same_tiles(tiles)
+        .into_iter()
+        .filter(|range| range.len() >= 2)
+        .map(|range| range.start..range.start + 2)
+        .map(|range| {
+            let mut tiles = tiles.clone();
+            (tiles.drain(range).collect(), tiles)
+        })
+        .collect()
+}
+
+/// 刻子を全てのパターンで抽出して列挙する。
+fn enumerate_kotu(tiles: &Tiles) -> Vec<(Vec<Tiles>, Tiles)> {
+    assert!(
+        tiles.len() % 3 == 0,
+        "残りの牌の個数が3の倍数ではありません : {}",
+        tiles.len()
+    );
+
+    // 全パターンを入れる Vec
+    let mut res = Vec::new();
+
+    // 候補を全て洗い出す。
+    let cand_ranges: Vec<_> = range_same_tiles(tiles)
+        .into_iter()
+        .filter(|range| range.len() >= 3)
+        .map(|range| range.start..range.start + 3)
+        .collect();
+
+    // 刻子はせいぜい4つしかないはず
+    assert!(cand_ranges.len() <= 4, "刻子が5つ以上あります。");
+
+    // 高々 2^4 == 8 通りさえ試せばよい。ビットでやる。
+    for set in 0..(1u8 << cand_ranges.len()) {
+        // 編集用にコピーしておく。
+        let mut tiles = tiles.clone();
+
+        // set で指定された牌を集合にしたもの。
+        let mut kotus = Vec::new();
+
+        // 抜きとった要素の個数。
+        let mut num_removed = 0;
+
+        for (i, range) in cand_ranges.iter().enumerate() {
+            if (set >> i) & 1 != 0 {
+                // 既に抜きとった要素の分、正しいインデックスが前にずれているので補正する。
+                let start = range.start - num_removed;
+                let end = range.end - num_removed;
+                let range = start..end;
+
+                // 修正した range の牌を抜きとる。
+                num_removed += range.len();
+                kotus.push(Tiles::new(tiles.drain(range).collect()));
+            }
+        }
+
+        assert_eq!(
+            set.count_ones() as usize,
+            kotus.len(),
+            "to_use で立っているビットの個数と実際に選ばれた Tiles の個数が違います。"
+        );
+
+        // 分解した刻子と残った牌をおいておく。
+        res.push((kotus, tiles));
+    }
+
+    res
+}
+
+/// 刻子をのぞいた牌から順子を貪欲に分解する。
+fn extract_juntu(mut tiles: Tiles) -> Option<Vec<Tiles>> {
+    assert!(
+        tiles.len() % 3 == 0,
+        "残りの牌の個数が3の倍数ではありません : {}",
+        tiles.len()
+    );
+
+    // チェックしたいんだけど is_sorted() が unstable であった。ある時点で牌集合にいる一番後ろの牌が
+    // 「最大」であることに依存するのでソートされている必要がある。
+
+    // assert!(
+    //     juntu_tiles.is_sorted(),
+    //     "順子がソートされていません。"
+    // );
+
+    // 残りは順子しかないはずなので貪欲に分解する。
+    let mut juntus = Vec::new();
+
+    // なくなるまでループ
+    while !tiles.is_empty() {
+        fn pop_last(tiles: &mut Tiles, t: Tile) -> Option<Tile> {
+            // 順序を保ちたいので swap_remove() は使えない
+            tiles.iter().rposition(|&s| s == t).map(|i| tiles.remove(i))
+        }
+
+        // とりあえず最後の牌をとる (前からやるよりたぶんはやいよね？)
+        let last = tiles.pop()?;
+
+        // 最後の牌の一つ前を見つけてきて取り出す。
+        let mid = pop_last(&mut tiles, last.prev()?)?;
+
+        // 真ん中の牌の一つ前を見つけてきて取り出す。
+        let first = pop_last(&mut tiles, mid.prev()?)?;
+
+        // 以下はとり方から成立するはずのことたち
+        assert_eq!(first.next(), Some(mid));
+        assert_eq!(mid.next(), Some(last));
+        assert!(tiles.len() % 3 == 0);
+
+        juntus.push(Tiles::new(vec![first, mid, last]));
+    }
+
+    Some(juntus)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::Context;
+    use crate::tileset::{Tag, Tileset};
 
     #[test]
     fn machi() {
-        let order_1 = Order::new(1).unwrap();
-        let order_2 = Order::new(2).unwrap();
-        let order_3 = Order::new(3).unwrap();
-        let order_4 = Order::new(4).unwrap();
-
-        let m1 = Tile::Manzu(order_1);
-        let m2 = Tile::Manzu(order_2);
-        let s1 = Tile::Souzu(order_1);
-        let s2 = Tile::Souzu(order_2);
-        let s3 = Tile::Souzu(order_3);
-        let s4 = Tile::Souzu(order_4);
-
-        let janto = &Tiles::new(vec![s4, s4]);
-        let anjuns = &[Tiles::new(vec![s1, s2, s3])];
+        let janto = &"4s4s".parse().unwrap();
+        let anjuns = &["1s2s3s".parse().unwrap()];
         let ankos = &[
-            Tiles::new(vec![s1, s1, s1]),
-            Tiles::new(vec![m1, m1, m1]),
-            Tiles::new(vec![m2, m2, m2]),
+            "1s1s1s".parse().unwrap(),
+            "1m1m1m".parse().unwrap(),
+            "2m2m2m".parse().unwrap(),
         ];
 
         assert_eq!(
             &[MachiKind::Ryanmen, MachiKind::Shanpon],
-            &*enumerate_machis(janto, anjuns, ankos, s1)
+            &*enumerate_machis(janto, anjuns, ankos, "1s".parse().unwrap())
         );
 
         assert_eq!(
             &[MachiKind::Kanchan],
-            &*enumerate_machis(janto, anjuns, ankos, s2)
+            &*enumerate_machis(janto, anjuns, ankos, "2s".parse().unwrap())
         );
 
         assert_eq!(
             &[MachiKind::Penchan],
-            &*enumerate_machis(janto, anjuns, ankos, s3)
+            &*enumerate_machis(janto, anjuns, ankos, "3s".parse().unwrap())
         );
 
         assert_eq!(
             &[MachiKind::Shanpon],
-            &*enumerate_machis(janto, anjuns, ankos, m1)
+            &*enumerate_machis(janto, anjuns, ankos, "1m".parse().unwrap())
         );
 
         assert_eq!(
             &[MachiKind::Kanchan, MachiKind::Tanki],
-            &*enumerate_machis(&Tiles::new(vec![s2, s2]), anjuns, ankos, s2)
+            &*enumerate_machis(
+                &"2s2s".parse().unwrap(),
+                anjuns,
+                ankos,
+                "2s".parse().unwrap()
+            )
         );
 
         assert_eq!(
             &[MachiKind::Nobetan],
-            &*enumerate_machis(janto, anjuns, ankos, s4)
+            &*enumerate_machis(janto, anjuns, ankos, "4s".parse().unwrap())
         );
+    }
+
+    fn tiles(tiles: &str) -> Tiles {
+        tiles.parse().unwrap()
+    }
+
+    fn tilesets(hand: &str, last: &str) -> Tilesets {
+        let tilesets = vec![
+            Tileset::new(Tag::Hand, tiles(hand)).unwrap(),
+            Tileset::new(Tag::Tumo, tiles(last)).unwrap(),
+            Tileset::new(Tag::Dora, Tiles::new(Vec::new())).unwrap(),
+        ];
+
+        Tilesets::new(Context::default(), tilesets).unwrap()
+    }
+
+    #[test]
+    fn same_tile_counting() {
+        let v: Vec<_> = range_same_tiles(&tiles("1s1s1s2s2s2s3s3s3s4s4s4s東東"));
+        assert_eq!(v, [0..3, 3..6, 6..9, 9..12, 12..14]);
+    }
+
+    #[test]
+    fn janto() {
+        let hand = tiles("1s1s1s2s2s2s3s3s3s4s4s4s東東");
+        let cands = enumerate_janto(&hand);
+
+        assert_eq!(
+            cands,
+            [
+                (tiles("1s1s"), tiles("1s2s2s2s3s3s3s4s4s4s東東")),
+                (tiles("2s2s"), tiles("1s1s1s2s3s3s3s4s4s4s東東")),
+                (tiles("3s3s"), tiles("1s1s1s2s2s2s3s4s4s4s東東")),
+                (tiles("4s4s"), tiles("1s1s1s2s2s2s3s3s3s4s東東")),
+                (tiles("東東"), tiles("1s1s1s2s2s2s3s3s3s4s4s4s")),
+            ]
+        )
+    }
+
+    #[test]
+    fn decompose() {
+        let tilesets = tilesets("1s1s1s2s2s2s3s3s3s4s4s4s東", "東");
+        let agaris = AgariTilesets::enumerate(tilesets);
+
+        assert_eq!(agaris.len(), 3);
+        eprintln!("{:#?}", agaris);
     }
 }

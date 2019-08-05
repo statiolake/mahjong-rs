@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
 use std::hash;
+use std::str::FromStr;
 
 pub type Result<T> = std::result::Result<T, TileError>;
 
@@ -98,50 +99,6 @@ pub enum Jihai {
 }
 
 impl Tile {
-    /// 与えられた文字列をパースして牌を作る。
-    ///
-    /// # エラー
-    ///
-    /// もしフォーマットがおかしければエラーを返す。
-    pub fn parse(from: &str) -> Result<Tile> {
-        // 字牌
-        //------------------------------
-        match from {
-            "東" => return Ok(Tile::Jihai(Jihai::East)),
-            "南" => return Ok(Tile::Jihai(Jihai::South)),
-            "西" => return Ok(Tile::Jihai(Jihai::West)),
-            "北" => return Ok(Tile::Jihai(Jihai::North)),
-            "白" => return Ok(Tile::Jihai(Jihai::Haku)),
-            "發" => return Ok(Tile::Jihai(Jihai::Hatu)),
-            "中" => return Ok(Tile::Jihai(Jihai::Chun)),
-            _ => (),
-        };
-
-        // 他の牌
-        //------------------------------
-        let mut chars = from.chars();
-        let (order, suit) = match (chars.next(), chars.next(), chars.next()) {
-            (Some(order), Some(suit), None) => (order, suit),
-            _ => return Err(TileError::InvalidStringLen),
-        };
-
-        let (tile_constructor, is_red): (fn(Order) -> Tile, bool) = match suit {
-            's' => (Tile::Souzu, false),
-            'm' => (Tile::Manzu, false),
-            'p' => (Tile::Pinzu, false),
-
-            'S' => (Tile::Souzu, true),
-            'M' => (Tile::Manzu, true),
-            'P' => (Tile::Pinzu, true),
-
-            ch => return Err(TileError::InvalidChar(ch)),
-        };
-
-        let order = Order::new(order as u8 - b'0')?.with_red(is_red)?;
-
-        Ok(tile_constructor(order))
-    }
-
     pub fn next(self) -> Option<Tile> {
         match self {
             Tile::Jihai(_) => None,
@@ -290,6 +247,49 @@ impl Tile {
     }
 }
 
+impl FromStr for Tile {
+    type Err = TileError;
+
+    fn from_str(from: &str) -> Result<Tile> {
+        // 字牌
+        //------------------------------
+        match from {
+            "東" => return Ok(Tile::Jihai(Jihai::East)),
+            "南" => return Ok(Tile::Jihai(Jihai::South)),
+            "西" => return Ok(Tile::Jihai(Jihai::West)),
+            "北" => return Ok(Tile::Jihai(Jihai::North)),
+            "白" => return Ok(Tile::Jihai(Jihai::Haku)),
+            "發" => return Ok(Tile::Jihai(Jihai::Hatu)),
+            "中" => return Ok(Tile::Jihai(Jihai::Chun)),
+            _ => (),
+        };
+
+        // 他の牌
+        //------------------------------
+        let mut chars = from.chars();
+        let (order, suit) = match (chars.next(), chars.next(), chars.next()) {
+            (Some(order), Some(suit), None) => (order, suit),
+            _ => return Err(TileError::InvalidStringLen),
+        };
+
+        let (tile_constructor, is_red): (fn(Order) -> Tile, bool) = match suit {
+            's' => (Tile::Souzu, false),
+            'm' => (Tile::Manzu, false),
+            'p' => (Tile::Pinzu, false),
+
+            'S' => (Tile::Souzu, true),
+            'M' => (Tile::Manzu, true),
+            'P' => (Tile::Pinzu, true),
+
+            ch => return Err(TileError::InvalidChar(ch)),
+        };
+
+        let order = Order::new(order as u8 - b'0')?.with_red(is_red)?;
+
+        Ok(tile_constructor(order))
+    }
+}
+
 impl Order {
     /// 牌の順序を作る。
     ///
@@ -370,7 +370,7 @@ impl Order {
 impl TryFrom<&str> for Tile {
     type Error = TileError;
     fn try_from(from: &str) -> Result<Tile> {
-        Tile::parse(from)
+        from.parse()
     }
 }
 
@@ -499,21 +499,39 @@ mod tests {
 
     #[test]
     fn parse() {
-        assert_eq!(Tile::parse("4s").unwrap(), Tile::Souzu(order_of(4, false)));
-        assert_eq!(Tile::parse("5m").unwrap(), Tile::Manzu(order_of(5, false)));
-        assert_eq!(Tile::parse("6p").unwrap(), Tile::Pinzu(order_of(6, false)));
-        assert_eq!(Tile::parse("5S").unwrap(), Tile::Souzu(order_of(5, true)));
-        assert_eq!(Tile::parse("5M").unwrap(), Tile::Manzu(order_of(5, true)));
-        assert_eq!(Tile::parse("5P").unwrap(), Tile::Pinzu(order_of(5, true)));
-        assert_eq!(Tile::parse("東").unwrap(), Tile::Jihai(Jihai::East));
-        assert_eq!(Tile::parse("南").unwrap(), Tile::Jihai(Jihai::South));
-        assert_eq!(Tile::parse("西").unwrap(), Tile::Jihai(Jihai::West));
-        assert_eq!(Tile::parse("北").unwrap(), Tile::Jihai(Jihai::North));
-        assert_eq!(Tile::parse("白").unwrap(), Tile::Jihai(Jihai::Haku));
-        assert_eq!(Tile::parse("發").unwrap(), Tile::Jihai(Jihai::Hatu));
-        assert_eq!(Tile::parse("中").unwrap(), Tile::Jihai(Jihai::Chun));
-        assert!(Tile::parse("あ").is_err());
-        assert!(Tile::parse("あい").is_err());
+        assert_eq!(
+            "4s".parse::<Tile>().unwrap(),
+            Tile::Souzu(order_of(4, false))
+        );
+        assert_eq!(
+            "5m".parse::<Tile>().unwrap(),
+            Tile::Manzu(order_of(5, false))
+        );
+        assert_eq!(
+            "6p".parse::<Tile>().unwrap(),
+            Tile::Pinzu(order_of(6, false))
+        );
+        assert_eq!(
+            "5S".parse::<Tile>().unwrap(),
+            Tile::Souzu(order_of(5, true))
+        );
+        assert_eq!(
+            "5M".parse::<Tile>().unwrap(),
+            Tile::Manzu(order_of(5, true))
+        );
+        assert_eq!(
+            "5P".parse::<Tile>().unwrap(),
+            Tile::Pinzu(order_of(5, true))
+        );
+        assert_eq!("東".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::East));
+        assert_eq!("南".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::South));
+        assert_eq!("西".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::West));
+        assert_eq!("北".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::North));
+        assert_eq!("白".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::Haku));
+        assert_eq!("發".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::Hatu));
+        assert_eq!("中".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::Chun));
+        assert!("あ".parse::<Tile>().is_err());
+        assert!("あい".parse::<Tile>().is_err());
     }
 
     #[test]

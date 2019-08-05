@@ -2,7 +2,8 @@
 
 use crate::config::{Context, Riichi};
 use crate::tile::{Tile, TileKind};
-use crate::tileset::{Tag, Tiles, Tileset};
+use crate::tiles::Tiles;
+use crate::tileset::{Tag, Tileset};
 use failure::Fail;
 use std::fmt;
 
@@ -52,6 +53,7 @@ pub enum TilesetsError {
 }
 
 /// 牌集合の集合。これをもとに判定を行う。
+#[derive(Debug, Clone)]
 pub struct Tilesets {
     /// コンテキスト (場風・自風やリーチの状態など) 。
     pub context: Context,
