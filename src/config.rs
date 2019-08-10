@@ -1,5 +1,7 @@
 //! リーチやコンテキストなどを定義する。
 
+use crate::form::Form;
+
 /// 場風や自風を表す。例 : 東家、東場
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
@@ -25,8 +27,14 @@ pub enum Riichi {
     /// 立直
     Riichi,
 
+    /// 立直一発
+    RiichiIppatu,
+
     /// ダブル立直
     DoubleRiichi,
+
+    /// ダブル立直一発
+    DoubleRiichiIppatu,
 }
 
 /// アガリ牌がどういうものだったか。
@@ -40,9 +48,10 @@ pub enum LastDraw {
 }
 
 /// 牌を解釈する状況。
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Context {
     pub riichi: Riichi,
+    pub lucky_forms: Vec<Form>,
     pub place: Direction,
     pub player: Direction,
 }
@@ -51,6 +60,7 @@ impl Default for Context {
     fn default() -> Context {
         Context {
             riichi: Riichi::None,
+            lucky_forms: Vec::new(),
             place: Direction::East,
             player: Direction::East,
         }

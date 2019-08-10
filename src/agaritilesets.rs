@@ -252,7 +252,7 @@ impl RonMin {
 /// アガリ形に整理された牌集合たち。
 #[derive(Debug, Clone)]
 pub struct AgariTilesets {
-    tilesets: Tilesets,
+    pub tilesets: Tilesets,
     machi: MachiKind,
     ronmin: RonMin,
     janto: Tiles,

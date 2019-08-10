@@ -1,5 +1,6 @@
 pub mod agaritilesets;
 pub mod config;
+pub mod form;
 pub mod tile;
 pub mod tiles;
 pub mod tileset;
