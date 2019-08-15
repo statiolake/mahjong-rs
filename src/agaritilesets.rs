@@ -253,7 +253,7 @@ impl RonMin {
 #[derive(Debug, Clone)]
 pub struct AgariTilesets {
     pub tilesets: Tilesets,
-    machi: MachiKind,
+    pub machi: MachiKind,
     ronmin: RonMin,
     janto: Tiles,
     kotus_in_hand: Vec<Tiles>,
@@ -364,6 +364,11 @@ impl AgariTilesets {
     /// 面子。刻子と順子を合わせたもの。
     pub fn mentus(&self) -> impl Iterator<Item = &Tiles> {
         self.kotus().chain(self.juntus())
+    }
+
+    /// 雀頭。
+    pub fn janto(&self) -> &Tiles {
+        &self.janto
     }
 }
 

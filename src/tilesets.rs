@@ -105,6 +105,13 @@ impl Tilesets {
         !self.pons.is_empty() || !self.qis.is_empty() || !self.minkans.is_empty()
     }
 
+    /// 門前かどうか。
+    ///
+    /// これは副露をしていないことと同値。
+    pub fn is_menzen(&self) -> bool {
+        !self.did_furo()
+    }
+
     /// 単純に牌集合の列を受け取って、整理した Tilesets を返す。
     fn dispatch(context: Context, tilesets: Vec<Tileset>) -> Result<Tilesets> {
         fn set<T>(storage: &mut Option<T>, value: T, error: TilesetsError) -> Result<()> {
@@ -197,7 +204,7 @@ impl Tilesets {
     }
 
     /// ドラ以外の全ての牌をまわすイテレータを得る。
-    fn tiles_without_doras<'a>(&'a self) -> impl Iterator<Item = Tile> + 'a {
+    pub fn tiles_without_doras<'a>(&'a self) -> impl Iterator<Item = Tile> + 'a {
         use std::iter::once;
         once(self.last)
             .chain(self.hand.iter().copied())

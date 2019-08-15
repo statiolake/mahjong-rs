@@ -1,5 +1,6 @@
 //! 牌などを定義する。
 
+use crate::config::Context;
 use crate::config::Direction;
 use failure::Fail;
 use std::cmp::Ordering;
@@ -31,7 +32,7 @@ pub enum TileError {
 }
 
 /// 牌の種類。
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TileKind {
     /// 索子。
     Souzu,
@@ -157,12 +158,23 @@ impl Tile {
         }
     }
 
+    /// 赤ドラかどうかを変更した牌を作る。
     pub fn with_red(self, is_red: bool) -> Result<Tile> {
         match self {
             Tile::Jihai(_) => Err(TileError::InvalidRed),
             Tile::Souzu(o) => Ok(Tile::Souzu(o.with_red(is_red)?)),
             Tile::Manzu(o) => Ok(Tile::Manzu(o.with_red(is_red)?)),
             Tile::Pinzu(o) => Ok(Tile::Pinzu(o.with_red(is_red)?)),
+        }
+    }
+
+    /// 種類を調べる。
+    pub fn kind(self) -> TileKind {
+        match self {
+            Tile::Manzu(_) => TileKind::Manzu,
+            Tile::Souzu(_) => TileKind::Souzu,
+            Tile::Pinzu(_) => TileKind::Pinzu,
+            Tile::Jihai(_) => TileKind::Jihai,
         }
     }
 
@@ -223,16 +235,16 @@ impl Tile {
     /// - 役牌ではない : 0
     /// - ダブってはないが役牌である : 1
     /// - 東場の東家のようにダブ東である : 2
-    pub fn num_yakuhai(self, place: Direction, player: Direction) -> u32 {
+    pub fn num_yakuhai(self, ctx: &Context) -> u32 {
         match self {
             Tile::Jihai(jihai) => {
                 let mut res = 0;
 
-                if jihai == place {
+                if jihai == ctx.place {
                     res += 1;
                 }
 
-                if jihai == player {
+                if jihai == ctx.player {
                     res += 1;
                 }
 
@@ -598,13 +610,30 @@ mod tests {
 
     #[test]
     fn yakuhai() {
+        let make_ctx = |player: Direction, place: Direction| Context {
+            player,
+            place,
+            ..Context::default()
+        };
+
         let east = Tile::Jihai(Jihai::East);
         let haku = Tile::Jihai(Jihai::Haku);
 
-        assert_eq!(east.num_yakuhai(Direction::East, Direction::East), 2);
-        assert_eq!(east.num_yakuhai(Direction::East, Direction::West), 1);
-        assert_eq!(east.num_yakuhai(Direction::North, Direction::West), 0);
-
-        assert_eq!(haku.num_yakuhai(Direction::East, Direction::East), 1);
+        assert_eq!(
+            east.num_yakuhai(&make_ctx(Direction::East, Direction::East)),
+            2
+        );
+        assert_eq!(
+            east.num_yakuhai(&make_ctx(Direction::East, Direction::West)),
+            1
+        );
+        assert_eq!(
+            east.num_yakuhai(&make_ctx(Direction::North, Direction::West)),
+            0
+        );
+        assert_eq!(
+            haku.num_yakuhai(&make_ctx(Direction::East, Direction::East)),
+            1
+        );
     }
 }
