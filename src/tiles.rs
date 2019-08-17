@@ -1,4 +1,4 @@
-use crate::tile::{Result as TileResult, Tile, TileError};
+use crate::tile::{ParseError as ParseTileError, Tile};
 use failure::Fail;
 use std::fmt;
 use std::iter::FromIterator;
@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 /// 牌のかたまりに関するエラー。
 #[derive(Debug, Fail)]
-pub enum TilesError {
+pub enum Error {
     /// アガリ牌が複数回指定されている。
     #[fail(display = "アガリ牌が複数枚指定されています: {}", 0)]
     InvalidLastTile(Tiles),
@@ -25,7 +25,7 @@ pub enum TilesError {
     InvalidKan(Tiles),
 }
 
-pub type Result<T> = std::result::Result<T, TilesError>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// 牌のかたまり。
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -77,7 +77,7 @@ impl Tiles {
     /// - 枚数が 1 枚かどうか
     pub fn check_last_tile(self) -> Result<Tiles> {
         if self.len() != 1 {
-            return Err(TilesError::InvalidLastTile(self));
+            return Err(Error::InvalidLastTile(self));
         }
 
         Ok(self)
@@ -89,7 +89,7 @@ impl Tiles {
     /// - 刻子になっているかどうか
     pub fn check_pon(self) -> Result<Tiles> {
         if self.len() != 3 {
-            return Err(TilesError::InvalidPon(self));
+            return Err(Error::InvalidPon(self));
         }
 
         self.check_kotu()
@@ -101,13 +101,13 @@ impl Tiles {
     /// - 順子になっているかどうか
     pub fn check_qi(self) -> Result<Tiles> {
         if self.len() != 3 {
-            return Err(TilesError::InvalidPon(self));
+            return Err(Error::InvalidPon(self));
         }
 
         let mut expect = self[0];
         for tile in self.inner() {
             if *tile != expect {
-                return Err(TilesError::InvalidQi(self));
+                return Err(Error::InvalidQi(self));
             }
             expect = expect.wrapping_next();
         }
@@ -121,7 +121,7 @@ impl Tiles {
     /// - 刻子になっているかどうか
     pub fn check_kan(self) -> Result<Tiles> {
         if self.len() != 4 {
-            return Err(TilesError::InvalidPon(self));
+            return Err(Error::InvalidPon(self));
         }
 
         self.check_kotu()
@@ -132,7 +132,7 @@ impl Tiles {
         let expect = &self[0];
         for tile in &self[1..] {
             if tile != expect {
-                return Err(TilesError::InvalidPon(self));
+                return Err(Error::InvalidPon(self));
             }
         }
 
@@ -168,9 +168,21 @@ impl FromIterator<Tile> for Tiles {
     }
 }
 
+#[derive(Debug, Fail)]
+pub enum ParseError {
+    #[fail(display = "牌のパースに失敗しました: {}", 0)]
+    ParseTileError(#[fail(cause)] ParseTileError),
+}
+
+impl From<ParseTileError> for ParseError {
+    fn from(err: ParseTileError) -> ParseError {
+        ParseError::ParseTileError(err)
+    }
+}
+
 impl FromStr for Tiles {
-    type Err = TileError;
-    fn from_str(mut s: &str) -> TileResult<Tiles> {
+    type Err = ParseError;
+    fn from_str(mut s: &str) -> std::result::Result<Tiles, ParseError> {
         let mut res = Vec::new();
         while let Some(ch) = s.chars().next() {
             let bytes = if ch.is_numeric() {

@@ -9,19 +9,11 @@ use std::fmt;
 use std::hash;
 use std::str::FromStr;
 
-pub type Result<T> = std::result::Result<T, TileError>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// 牌を作るときまたはパース中に生じたエラー。
 #[derive(Debug, Fail, Copy, Clone, PartialEq, Eq)]
-pub enum TileError {
-    /// (パース) 文字列の長さが変。
-    #[fail(display = "文字列の長さが変です。")]
-    InvalidStringLen,
-
-    /// (パース) 予期しない文字が出現した。
-    #[fail(display = "予期しない文字です: {}。", 0)]
-    InvalidChar(char),
-
+pub enum Error {
     /// 番号がおかしい。 (例: 10m など)
     #[fail(display = "索子・萬子・筒子の番号が範囲外です。")]
     InvalidOrder,
@@ -161,7 +153,7 @@ impl Tile {
     /// 赤ドラかどうかを変更した牌を作る。
     pub fn with_red(self, is_red: bool) -> Result<Tile> {
         match self {
-            Tile::Jihai(_) => Err(TileError::InvalidRed),
+            Tile::Jihai(_) => Err(Error::InvalidRed),
             Tile::Souzu(o) => Ok(Tile::Souzu(o.with_red(is_red)?)),
             Tile::Manzu(o) => Ok(Tile::Manzu(o.with_red(is_red)?)),
             Tile::Pinzu(o) => Ok(Tile::Pinzu(o.with_red(is_red)?)),
@@ -259,10 +251,31 @@ impl Tile {
     }
 }
 
-impl FromStr for Tile {
-    type Err = TileError;
+#[derive(Debug, Fail)]
+pub enum ParseError {
+    /// 文字列の長さが変。
+    #[fail(display = "文字列の長さが変です。")]
+    InvalidStringLen,
 
-    fn from_str(from: &str) -> Result<Tile> {
+    /// 予期しない文字が出現した。
+    #[fail(display = "予期しない文字です: {}", 0)]
+    InvalidChar(char),
+
+    /// その他、牌をつくるときにエラーが起きた
+    #[fail(display = "牌を作成できませんでした: {}", 0)]
+    TileError(Error),
+}
+
+impl From<Error> for ParseError {
+    fn from(err: Error) -> ParseError {
+        ParseError::TileError(err)
+    }
+}
+
+impl FromStr for Tile {
+    type Err = ParseError;
+
+    fn from_str(from: &str) -> std::result::Result<Tile, ParseError> {
         // 字牌
         //------------------------------
         match from {
@@ -281,7 +294,7 @@ impl FromStr for Tile {
         let mut chars = from.chars();
         let (order, suit) = match (chars.next(), chars.next(), chars.next()) {
             (Some(order), Some(suit), None) => (order, suit),
-            _ => return Err(TileError::InvalidStringLen),
+            _ => return Err(ParseError::InvalidStringLen),
         };
 
         let (tile_constructor, is_red): (fn(Order) -> Tile, bool) = match suit {
@@ -293,7 +306,7 @@ impl FromStr for Tile {
             'M' => (Tile::Manzu, true),
             'P' => (Tile::Pinzu, true),
 
-            ch => return Err(TileError::InvalidChar(ch)),
+            ch => return Err(ParseError::InvalidChar(ch)),
         };
 
         let order = Order::new(order as u8 - b'0')?.with_red(is_red)?;
@@ -310,7 +323,7 @@ impl Order {
     /// もし `order` が範囲外になっていればエラーを返す。
     pub fn new(order: u8) -> Result<Order> {
         if order < 1 || 9 < order {
-            return Err(TileError::InvalidOrder);
+            return Err(Error::InvalidOrder);
         }
 
         Ok(Order {
@@ -322,7 +335,7 @@ impl Order {
     /// 赤ドラにした同じ番号のものを作る。
     pub fn with_red(self, is_red: bool) -> Result<Order> {
         if is_red && self.order != 5 {
-            return Err(TileError::InvalidRed);
+            return Err(Error::InvalidRed);
         }
 
         Ok(Order { is_red, ..self })
@@ -380,8 +393,8 @@ impl Order {
 }
 
 impl TryFrom<&str> for Tile {
-    type Error = TileError;
-    fn try_from(from: &str) -> Result<Tile> {
+    type Error = ParseError;
+    fn try_from(from: &str) -> std::result::Result<Tile, ParseError> {
         from.parse()
     }
 }
