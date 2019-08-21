@@ -66,9 +66,364 @@ impl fmt::Display for Point {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Form {
+    /// 立直
+    Lizhi,
+
+    /// 一発
+    Ippatu,
+
+    /// 門前清自摸
+    Menqianqingzimohu,
+
+    /// 役牌
+    ///
+    /// `u32`: 役牌の個数。
+    Fanpai(u32),
+
+    /// 断么九
+    Duanyaojiu,
+
+    /// 平和
+    Pinghe,
+
+    /// 一盃口
+    Yibeikou,
+
+    /// 海底撈月
+    Haidimoyue,
+
+    /// 河底撈魚
+    Hedilaoyu,
+
+    /// 嶺上開花
+    Lingshangkaihua,
+
+    /// 槍槓
+    Chenggang,
+
+    /// ダブル立直
+    Doublelizhi,
+
+    /// 三色同順
+    ///
+    /// `bool`: 門前かどうか
+    Sanshokudojun(bool),
+
+    /// 三色同刻
+    Sanshokudoko,
+
+    /// 三暗刻
+    Sananke,
+
+    /// 一気通貫
+    ///
+    /// `bool`: 門前かどうか
+    Ikkitukan(bool),
+
+    /// 七対子
+    Qiduizi,
+
+    /// 対々和
+    Duiduihe,
+
+    /// 混全帯幺九
+    ///
+    /// `bool`: 門前かどうか
+    Hunquandaiyaojiu(bool),
+
+    /// 三槓子
+    Sangangzi,
+
+    /// 二盃口
+    Liangbeigou,
+
+    /// 純全帯公九
+    ///
+    /// `bool`: 門前かどうか
+    Chunquandaiyaojiu(bool),
+
+    /// 混一色
+    ///
+    /// `bool`: 門前かどうか
+    Hungyise(bool),
+
+    /// 小三元
+    Shousangen,
+
+    /// 混老頭
+    Hunlaotou,
+
+    /// 清一色
+    ///
+    /// `bool`: 門前かどうか
+    Qingyise(bool),
+
+    /// 四暗刻
+    ///
+    /// `bool`: 単騎待ちかどうか
+    Sianke(bool),
+
+    /// 大三元
+    Daisangen,
+
+    /// 国士無双
+    ///
+    /// `bool`: 13面待ちかどうか
+    Kokusimusou(bool),
+
+    /// 緑一色
+    Luyise,
+
+    /// 字一色
+    Ziyise,
+
+    /// 清老頭
+    Qinglaotou,
+
+    /// 四槓子
+    Sigangzi,
+
+    /// 小四喜
+    Shousushi,
+
+    /// 大四喜
+    Daisushi,
+
+    /// 九蓮宝燈
+    ///
+    /// `bool`: 純正かどうか
+    Jiulianbaodeng(bool),
+
+    /// 地和
+    Dihe,
+
+    /// 天和
+    Tianhe,
+
+    /// ドラ
+    ///
+    /// `u32`: ドラの枚数
+    Dora(u32),
+}
+
+impl Form {
+    pub fn display(self) -> FormDisplay {
+        match self {
+            Form::Lizhi => FormDisplay {
+                name: "立直",
+                point: Point::new(1),
+            },
+
+            Form::Ippatu => FormDisplay {
+                name: "一発",
+                point: Point::new(1),
+            },
+
+            Form::Menqianqingzimohu => FormDisplay {
+                name: "門前清自摸和",
+                point: Point::new(1),
+            },
+
+            Form::Fanpai(n) => FormDisplay {
+                name: "役牌",
+                point: Point::new(n),
+            },
+
+            Form::Duanyaojiu => FormDisplay {
+                name: "断么九",
+                point: Point::new(1),
+            },
+
+            Form::Pinghe => FormDisplay {
+                name: "平和",
+                point: Point::new(1),
+            },
+
+            Form::Yibeikou => FormDisplay {
+                name: "一盃口",
+                point: Point::new(1),
+            },
+
+            Form::Haidimoyue => FormDisplay {
+                name: "海底撈月",
+                point: Point::new(1),
+            },
+
+            Form::Hedilaoyu => FormDisplay {
+                name: "河底撈魚",
+                point: Point::new(1),
+            },
+
+            Form::Lingshangkaihua => FormDisplay {
+                name: "嶺上開花",
+                point: Point::new(1),
+            },
+
+            Form::Chenggang => FormDisplay {
+                name: "槍槓",
+                point: Point::new(1),
+            },
+
+            Form::Doublelizhi => FormDisplay {
+                name: "ダブル立直",
+                point: Point::new(2),
+            },
+
+            Form::Sanshokudojun(is_menzen) => FormDisplay {
+                name: "三色同順",
+                point: Point::new(if is_menzen { 2 } else { 1 }),
+            },
+
+            Form::Sanshokudoko => FormDisplay {
+                name: "三色同刻",
+                point: Point::new(2),
+            },
+
+            Form::Sananke => FormDisplay {
+                name: "三暗刻",
+                point: Point::new(2),
+            },
+
+            Form::Ikkitukan(is_menzen) => FormDisplay {
+                name: "一気通貫",
+                point: Point::new(if is_menzen { 2 } else { 1 }),
+            },
+
+            Form::Qiduizi => FormDisplay {
+                name: "七対子",
+                point: Point::with_fu(2, 5),
+            },
+
+            Form::Duiduihe => FormDisplay {
+                name: "対々和",
+                point: Point::new(2),
+            },
+
+            Form::Hunquandaiyaojiu(is_menzen) => FormDisplay {
+                name: "混全帯幺九",
+                point: Point::new(if is_menzen { 2 } else { 1 }),
+            },
+
+            Form::Sangangzi => FormDisplay {
+                name: "三槓子",
+                point: Point::new(2),
+            },
+
+            Form::Liangbeigou => FormDisplay {
+                name: "二盃口",
+                point: Point::new(3),
+            },
+
+            Form::Chunquandaiyaojiu(is_menzen) => FormDisplay {
+                name: "純全帯公九",
+                point: Point::new(if is_menzen { 2 } else { 1 }),
+            },
+
+            Form::Hungyise(is_menzen) => FormDisplay {
+                name: "混一色",
+                point: Point::new(if is_menzen { 3 } else { 2 }),
+            },
+
+            Form::Shousangen => FormDisplay {
+                name: "小三元",
+                point: Point::new(4),
+            },
+
+            Form::Hunlaotou => FormDisplay {
+                name: "混老頭",
+                point: Point::new(2),
+            },
+
+            Form::Qingyise(is_menzen) => FormDisplay {
+                name: "清一色",
+                point: Point::new(if is_menzen { 6 } else { 5 }),
+            },
+
+            Form::Sianke(is_tanki) => FormDisplay {
+                name: if is_tanki {
+                    "四暗刻単騎"
+                } else {
+                    "四暗刻"
+                },
+                point: Point::new_yakuman(),
+            },
+
+            Form::Daisangen => FormDisplay {
+                name: "大三元",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Kokusimusou(is_genuine) => FormDisplay {
+                name: if is_genuine {
+                    "国士無双13面待ち"
+                } else {
+                    "国士無双"
+                },
+                point: Point::new_yakuman(),
+            },
+
+            Form::Luyise => FormDisplay {
+                name: "緑一色",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Ziyise => FormDisplay {
+                name: "字一色",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Qinglaotou => FormDisplay {
+                name: "清老頭",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Sigangzi => FormDisplay {
+                name: "四槓子",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Shousushi => FormDisplay {
+                name: "小四喜",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Daisushi => FormDisplay {
+                name: "大四喜",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Jiulianbaodeng(is_genuine) => FormDisplay {
+                name: if is_genuine {
+                    "純正九蓮宝燈"
+                } else {
+                    "九蓮宝燈"
+                },
+                point: Point::new_yakuman(),
+            },
+
+            Form::Dihe => FormDisplay {
+                name: "地和",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Tianhe => FormDisplay {
+                name: "天和",
+                point: Point::new_yakuman(),
+            },
+
+            Form::Dora(n) => FormDisplay {
+                name: "ドラ",
+                point: Point::new(n),
+            },
+        }
+    }
+}
+
 /// 役。
 #[derive(Debug, Clone, Copy)]
-pub struct Form {
+pub struct FormDisplay {
     /// 名前
     name: &'static str,
 
@@ -76,7 +431,7 @@ pub struct Form {
     point: Point,
 }
 
-impl fmt::Display for Form {
+impl fmt::Display for FormDisplay {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         write!(b, "{}　{}", self.point, self.name)
     }
@@ -84,36 +439,21 @@ impl fmt::Display for Form {
 
 /// [1]立直・[2]ダブルリーチ・[1]一発
 fn special_check_lizhi(tilesets: &Tilesets) -> impl IntoIterator<Item = Form> {
-    let lizhi = || Form {
-        name: "立直",
-        point: Point::new(1),
-    };
-
-    let ippatu = || Form {
-        name: "一発",
-        point: Point::new(1),
-    };
-
-    let double_lizhi = || Form {
-        name: "ダブル立直",
-        point: Point::new(1),
-    };
-
     // 立直類は最初から指定されており、 Context として渡されている。
     match tilesets.context.riichi {
         Riichi::None => SmallVec::new(),
-        Riichi::Riichi => SmallVec::from_elem(lizhi(), 1),
+        Riichi::Riichi => SmallVec::from_elem(Form::Lizhi, 1),
         Riichi::RiichiIppatu => {
             let mut v = SmallVec::new();
-            v.push(lizhi());
-            v.push(ippatu());
+            v.push(Form::Lizhi);
+            v.push(Form::Ippatu);
             v
         }
-        Riichi::DoubleRiichi => SmallVec::from_elem(double_lizhi(), 1),
+        Riichi::DoubleRiichi => SmallVec::from_elem(Form::Doublelizhi, 1),
         Riichi::DoubleRiichiIppatu => {
             let mut v = SmallVec::new();
-            v.push(double_lizhi());
-            v.push(ippatu());
+            v.push(Form::Doublelizhi);
+            v.push(Form::Ippatu);
             v
         }
     }
@@ -146,17 +486,14 @@ fn checkall_qiduizi(tilesets: &Tilesets) -> impl IntoIterator<Item = Form> {
     }
 
     // そうであれば七対子
-    once(Form {
-        name: "七対子",
-        point: Point::with_fu(2, 25),
-    })
-    .chain(special_check_lizhi(tilesets))
-    .chain(special_check_menqianqingzimohu(tilesets))
-    .chain(special_check_ziyise(tilesets))
-    .chain(special_check_hungyise_qingyise(tilesets))
-    .chain(special_check_hunlaotou(tilesets))
-    .chain(special_check_duanyaojiu(tilesets))
-    .collect()
+    once(Form::Qiduizi)
+        .chain(special_check_lizhi(tilesets))
+        .chain(special_check_menqianqingzimohu(tilesets))
+        .chain(special_check_duanyaojiu(tilesets))
+        .chain(special_check_ziyise(tilesets))
+        .chain(special_check_hungyise_qingyise(tilesets))
+        .chain(special_check_hunlaotou(tilesets))
+        .collect()
 }
 
 /// [1]門前清自摸和
@@ -164,10 +501,7 @@ fn checkall_qiduizi(tilesets: &Tilesets) -> impl IntoIterator<Item = Form> {
 /// - 門前でツモ上がりをした。
 fn special_check_menqianqingzimohu(tilesets: &Tilesets) -> impl IntoIterator<Item = Form> {
     if tilesets.is_tumo && tilesets.is_menzen() {
-        Some(Form {
-            name: "門前清自摸和",
-            point: Point::new(1),
-        })
+        Some(Form::Menqianqingzimohu)
     } else {
         None
     }
@@ -180,10 +514,7 @@ fn special_check_duanyaojiu(tilesets: &Tilesets) -> impl IntoIterator<Item = For
     let is_chunchan = tilesets.tiles_without_doras().all(|t| t.is_chunchan());
 
     if is_chunchan {
-        Some(Form {
-            name: "断么九",
-            point: Point::new(1),
-        })
+        Some(Form::Duanyaojiu)
     } else {
         None
     }
@@ -218,14 +549,8 @@ fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> impl IntoIterator<Ite
     let all_same = kinds_not_jihai().all(|kind| kind == target_kind);
 
     match (all_same, has_jihai) {
-        (true, false) => Some(Form {
-            name: "清一色",
-            point: Point::new(if tilesets.is_menzen() { 6 } else { 5 }),
-        }),
-        (true, true) => Some(Form {
-            name: "混一色",
-            point: Point::new(if tilesets.is_menzen() { 3 } else { 2 }),
-        }),
+        (true, false) => Some(Form::Qingyise(tilesets.is_menzen())),
+        (true, true) => Some(Form::Hungyise(tilesets.is_menzen())),
         _ => None,
     }
 }
@@ -237,10 +562,7 @@ fn special_check_hunlaotou(tilesets: &Tilesets) -> impl IntoIterator<Item = Form
     let is_hunalotou = tilesets.tiles_without_doras().all(|tile| tile.is_yaochu());
 
     if is_hunalotou {
-        Some(Form {
-            name: "混老頭",
-            point: Point::new(2),
-        })
+        Some(Form::Hunlaotou)
     } else {
         None
     }
@@ -254,9 +576,7 @@ fn special_check_hunlaotou(tilesets: &Tilesets) -> impl IntoIterator<Item = Form
 fn special_check_certainform(
     tilesets: &Tilesets,
     mut target: Tiles,
-    name_genuine: &'static str,
-    name: &'static str,
-    point: Point,
+    form_constructor: fn(bool) -> Form,
 ) -> impl IntoIterator<Item = Form> {
     // ポン・チー・カンをしていたらならないので終了。
     if tilesets.did_furo() || !tilesets.ankans.is_empty() {
@@ -277,14 +597,7 @@ fn special_check_certainform(
 
         // 一致した場合は国士無双成立。
         if target == hand {
-            return if add == tilesets.last {
-                Some(Form {
-                    name: name_genuine,
-                    point,
-                })
-            } else {
-                Some(Form { name, point })
-            };
+            return Some(form_constructor(add == tilesets.last));
         }
 
         target.pop();
@@ -312,9 +625,7 @@ fn special_check_kokusimusou(tilesets: &Tilesets) -> impl IntoIterator<Item = Fo
             Tile::Jihai(Jihai::Hatu),
             Tile::Jihai(Jihai::Chun),
         ]),
-        "国士無双13面待ち",
-        "国士無双",
-        Point::new_yakuman(),
+        Form::Kokusimusou,
     )
 }
 
@@ -344,9 +655,7 @@ fn special_check_jiulianbaodeng<'a>(tilesets: &'a Tilesets) -> impl IntoIterator
             Some(special_check_certainform(
                 tilesets,
                 orders.iter().copied().map(|o| ctor(o)).collect(),
-                "純正九蓮宝燈",
-                "九蓮宝燈",
-                Point::new_yakuman(),
+                Form::Jiulianbaodeng,
             ))
         })
         .flatten()
@@ -359,10 +668,7 @@ fn special_check_luyise(tilesets: &Tilesets) -> impl IntoIterator<Item = Form> {
     let is_luyise = tilesets.tiles_without_doras().all(|tile| tile.is_green());
 
     if is_luyise {
-        Some(Form {
-            name: "緑一色",
-            point: Point::new_yakuman(),
-        })
+        Some(Form::Luyise)
     } else {
         None
     }
@@ -377,10 +683,7 @@ fn special_check_ziyise(tilesets: &Tilesets) -> impl IntoIterator<Item = Form> {
         .all(|tile| tile.kind() == TileKind::Jihai);
 
     if is_ziyise {
-        Some(Form {
-            name: "字一色",
-            point: Point::new_yakuman(),
-        })
+        Some(Form::Ziyise)
     } else {
         None
     }
@@ -395,10 +698,7 @@ fn special_check_qinglaotou(tilesets: &Tilesets) -> impl IntoIterator<Item = For
         .all(|tile| tile.kind() != TileKind::Jihai && tile.is_yaochu());
 
     if is_qinglaotou {
-        Some(Form {
-            name: "清老頭",
-            point: Point::new_yakuman(),
-        })
+        Some(Form::Qinglaotou)
     } else {
         None
     }
@@ -414,10 +714,7 @@ fn check_fanpai(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
     }
 
     if sum != 0 {
-        Some(Form {
-            name: "役牌",
-            point: Point::new(sum),
-        })
+        Some(Form::Fanpai(sum))
     } else {
         None
     }
@@ -434,10 +731,7 @@ fn check_pinghe(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
         && agari.janto().first().kind() == TileKind::Jihai
         && agari.machi == MachiKind::Ryanmen
     {
-        Some(Form {
-            name: "平和",
-            point: Point::new(1),
-        })
+        Some(Form::Pinghe)
     } else {
         None
     }
@@ -476,14 +770,8 @@ fn check_yibeikou_liangbeigou(agari: &AgariTilesets) -> impl IntoIterator<Item =
 
     match cnt {
         0 => None,
-        1 => Some(Form {
-            name: "一盃口",
-            point: Point::new(1),
-        }),
-        2 => Some(Form {
-            name: "二盃口",
-            point: Point::new(3),
-        }),
+        1 => Some(Form::Yibeikou),
+        2 => Some(Form::Liangbeigou),
         _ => panic!("二盃口以上があります。"),
     }
 }
@@ -507,10 +795,7 @@ fn check_sanshoku_dojun(agari: &AgariTilesets) -> impl IntoIterator<Item = Form>
 
     if does_match {
         // 喰い下がりがあるので注意。
-        Some(Form {
-            name: "三色同順",
-            point: Point::new(if agari.tilesets.is_menzen() { 2 } else { 1 }),
-        })
+        Some(Form::Sanshokudojun(agari.tilesets.is_menzen()))
     } else {
         None
     }
@@ -534,10 +819,7 @@ fn check_sanshoku_doko(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> 
     });
 
     if does_match {
-        Some(Form {
-            name: "三色同順",
-            point: Point::new(2),
-        })
+        Some(Form::Sanshokudoko)
     } else {
         None
     }
@@ -552,22 +834,9 @@ fn check_sanshoku_doko(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> 
 /// - 暗刻が3つある
 fn check_sananke_sianke(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
     if agari.ankos().count() == 4 {
-        if agari.machi == MachiKind::Tanki {
-            Some(Form {
-                name: "四暗刻単騎",
-                point: Point::new_yakuman(),
-            })
-        } else {
-            Some(Form {
-                name: "四暗刻",
-                point: Point::new_yakuman(),
-            })
-        }
+        Some(Form::Sianke(agari.machi == MachiKind::Tanki))
     } else if agari.ankos().count() == 3 {
-        Some(Form {
-            name: "三暗刻",
-            point: Point::new(2),
-        })
+        Some(Form::Sananke)
     } else {
         None
     }
@@ -589,10 +858,7 @@ fn check_ikki_tukan(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
     });
 
     if does_match {
-        Some(Form {
-            name: "一気通貫",
-            point: Point::new(if agari.tilesets.is_menzen() { 2 } else { 1 }),
-        })
+        Some(Form::Ikkitukan(agari.tilesets.is_menzen()))
     } else {
         None
     }
@@ -603,10 +869,7 @@ fn check_ikki_tukan(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
 /// - 刻子が4つある。
 fn check_duiduihe(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
     if agari.kotus().count() == 4 {
-        Some(Form {
-            name: "対々和",
-            point: Point::new(2),
-        })
+        Some(Form::Duiduihe)
     } else {
         None
     }
@@ -618,7 +881,7 @@ fn check_duiduihe(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
 /// - 全ての面子と雀頭に幺九牌が絡んでいる。
 /// 〈純全帯公九〉
 /// - 全ての面子と雀頭に 1, 9 が絡んでいる。
-fn check_hunquandaiyaojiu_chunquandaiyaojiu_hunlaotou(
+fn check_hunquandaiyaojiu_chunquandaiyaojiu(
     agari: &AgariTilesets,
 ) -> impl IntoIterator<Item = Form> {
     let mut has_jihai = false;
@@ -635,14 +898,8 @@ fn check_hunquandaiyaojiu_chunquandaiyaojiu_hunlaotou(
     }
 
     match (has_jihai, has_chunchan) {
-        (false, true) => Some(Form {
-            name: "純全帯公九",
-            point: Point::new(3),
-        }),
-        (true, true) => Some(Form {
-            name: "混全帯幺九",
-            point: Point::new(3),
-        }),
+        (false, true) => Some(Form::Chunquandaiyaojiu(agari.tilesets.is_menzen())),
+        (true, true) => Some(Form::Hunquandaiyaojiu(agari.tilesets.is_menzen())),
         // 混老頭は別扱いのため、ここでは None
         _ => None,
     }
@@ -654,16 +911,10 @@ fn check_hunquandaiyaojiu_chunquandaiyaojiu_hunlaotou(
 /// - 槓を4回行う
 /// 〈三槓子〉
 /// - 槓を3回行う
-fn check_sangangzi(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
+fn check_sangangzi_sigangzi(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
     match agari.tilesets.ankans.len() + agari.tilesets.minkans.len() {
-        4 => Some(Form {
-            name: "四槓子",
-            point: Point::new_yakuman(),
-        }),
-        3 => Some(Form {
-            name: "三槓子",
-            point: Point::new(2),
-        }),
+        4 => Some(Form::Sigangzi),
+        3 => Some(Form::Sangangzi),
         _ => None,
     }
 }
@@ -684,10 +935,7 @@ fn check_shousangen(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
         .count();
 
     if num_sangen >= 2 {
-        Some(Form {
-            name: "小三元",
-            point: Point::new(4),
-        })
+        Some(Form::Shousangen)
     } else {
         None
     }
@@ -704,10 +952,7 @@ fn check_daisangen(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
 
     // 刻子が3つあれば自動的に全種類で刻子を作っていることになるのでOK。そもそも数がないため。
     if num_sangen == 3 {
-        Some(Form {
-            name: "大三元",
-            point: Point::new_yakuman(),
-        })
+        Some(Form::Daisangen)
     } else {
         None
     }
@@ -720,7 +965,7 @@ fn check_daisangen(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
 ///
 /// 〈小四喜〉
 /// - 雀頭と3面子が風牌
-fn check_shousushi(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
+fn check_shousushi_daisushi(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
     let extract_jihai_kind = |tiles: &Tiles| {
         if let Tile::Jihai(kind) = tiles.first() {
             Some(kind)
@@ -731,28 +976,25 @@ fn check_shousushi(agari: &AgariTilesets) -> impl IntoIterator<Item = Form> {
 
     let mut set: HashSet<Jihai> = agari.kotus().filter_map(extract_jihai_kind).collect();
 
-    let check = |set: &HashSet<Jihai>, name: &'static str| {
+    let check = |set: &HashSet<Jihai>, form: Form| {
         if set.contains(&Jihai::East)
             && set.contains(&Jihai::South)
             && set.contains(&Jihai::West)
             && set.contains(&Jihai::North)
         {
-            Some(Form {
-                name,
-                point: Point::new_yakuman(),
-            })
+            Some(form)
         } else {
             None
         }
     };
 
     // まずここで大四喜を確認
-    check(&set, "大四喜")?;
+    check(&set, Form::Daisushi)?;
 
     // 続いて雀頭を追加し、小四喜を確認
     set.insert(extract_jihai_kind(agari.janto())?);
 
-    check(&set, "小四喜")
+    check(&set, Form::Shousushi)
 }
 
 #[cfg(test)]
