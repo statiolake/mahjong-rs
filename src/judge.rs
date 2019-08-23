@@ -315,6 +315,15 @@ mod tests {
             "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n1翻 門前清自摸和\n2翻5符 七対子\n6翻 清一色\n9翻 24000点 倍満"
         );
 
+        let tilesets: Tilesets = "1p1p1p2p2p2p3p3p3p5p ツモ5P ポン4p4p4p"
+            .parse()
+            .unwrap();
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1p1p1p2p2p2p3p3p3p5p ポン4p4p4p ツモ5P\n1翻 ドラ\n2翻 三暗刻\n2翻 対々和\n5翻 清一色\n10翻 24000点 倍満"
+        );
+
         let tilesets: Tilesets = "5s6s7s4m5m6m4p4p4p5p6p西西 ロン西".parse().unwrap();
         let tilesets = Tilesets {
             context: Context {
@@ -323,7 +332,6 @@ mod tests {
             },
             ..tilesets
         };
-
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),

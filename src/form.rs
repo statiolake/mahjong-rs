@@ -540,10 +540,13 @@ pub fn special_check_lizhi(tilesets: &Tilesets) -> SmallVec {
 }
 
 pub fn special_check_dora(tilesets: &Tilesets) -> Option<Form> {
-    let num_dora: usize = tilesets
-        .tiles_without_doras()
-        .map(|tile| tilesets.doras.iter().filter(|&&dora| tile == dora).count())
-        .sum();
+    let count_dora = |tile: Tile| {
+        let num_dora = tilesets.doras.iter().filter(|&&dora| tile == dora).count();
+        let red_dora = if tile.is_red() { 1 } else { 0 };
+        num_dora + red_dora
+    };
+
+    let num_dora: usize = tilesets.tiles_without_doras().map(count_dora).sum();
 
     if num_dora > 0 {
         Some(Form::Dora(num_dora as _))
