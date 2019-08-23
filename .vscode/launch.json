@@ -1,0 +1,23 @@
+{
+  // IntelliSense を使用して利用可能な属性を学べます。
+  // 既存の属性の説明をホバーして表示します。
+  // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(Windows) Launch",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "preLaunchTask": "build_for_test",
+      "program": "./target/debug/deps/mahjong_rs-264e200a74c0ed10.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "sourceFileMap": {
+        "c:/rustc/a53f9df32fbb0b5f4382caaad8f1a46f36ea887c/src": "${env:HOMEPATH}/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/src"
+      },
+      "externalConsole": false
+    }
+  ]
+}

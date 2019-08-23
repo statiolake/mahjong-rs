@@ -1,6 +1,7 @@
 //! リーチやコンテキストなどを定義する。
 
 use crate::form::Form;
+use std::fmt;
 
 /// 場風や自風を表す。例 : 東家、東場
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16,6 +17,17 @@ pub enum Direction {
 
     /// 北場 / 北家。
     North,
+}
+
+impl fmt::Display for Direction {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Direction::East => write!(b, "東"),
+            Direction::South => write!(b, "南"),
+            Direction::West => write!(b, "西"),
+            Direction::North => write!(b, "北"),
+        }
+    }
 }
 
 /// どの種類のリーチか。
@@ -54,6 +66,13 @@ pub struct Context {
     pub lucky_forms: Vec<Form>,
     pub place: Direction,
     pub player: Direction,
+    pub player_name: String,
+}
+
+impl Context {
+    pub fn is_oya(&self) -> bool {
+        self.player == Direction::East
+    }
 }
 
 impl Default for Context {
@@ -63,6 +82,7 @@ impl Default for Context {
             lucky_forms: Vec::new(),
             place: Direction::East,
             player: Direction::East,
+            player_name: String::new(),
         }
     }
 }

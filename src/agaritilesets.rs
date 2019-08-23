@@ -217,14 +217,14 @@ impl<'a> MachiEnumerator<'a> {
 
 /// ロンによる明刻・明順を保持する。
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum RonMin {
+pub enum RonMin {
     Minko(Tiles),
     Minjun(Tiles),
     None,
 }
 
 impl RonMin {
-    fn minko(&self) -> Option<&Tiles> {
+    pub fn minko(&self) -> Option<&Tiles> {
         match self {
             RonMin::Minko(tiles) => Some(tiles),
             RonMin::Minjun(_) => None,
@@ -232,7 +232,7 @@ impl RonMin {
         }
     }
 
-    fn minjun(&self) -> Option<&Tiles> {
+    pub fn minjun(&self) -> Option<&Tiles> {
         match self {
             RonMin::Minko(_) => None,
             RonMin::Minjun(tiles) => Some(tiles),
@@ -240,11 +240,11 @@ impl RonMin {
         }
     }
 
-    fn iter_minko(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn iter_minko(&self) -> impl Iterator<Item = &Tiles> {
         self.minko().into_iter()
     }
 
-    fn iter_minjun(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn iter_minjun(&self) -> impl Iterator<Item = &Tiles> {
         self.minjun().into_iter()
     }
 }
@@ -254,14 +254,14 @@ impl RonMin {
 pub struct AgariTilesets {
     pub tilesets: Tilesets,
     pub machi: MachiKind,
-    ronmin: RonMin,
+    pub ronmin: RonMin,
     janto: Tiles,
     kotus_in_hand: Vec<Tiles>,
     juntus_in_hand: Vec<Tiles>,
 }
 
 impl AgariTilesets {
-    pub fn enumerate(tilesets: Tilesets) -> Vec<AgariTilesets> {
+    pub fn enumerate(tilesets: &Tilesets) -> Vec<AgariTilesets> {
         // ツモにせよロンにせよ、とりあえず最後に引いた牌を手牌にくっつけておく。
         let hand = {
             let mut v = tilesets.hand.clone();
@@ -325,6 +325,11 @@ impl AgariTilesets {
             kotus_in_hand,
             juntus_in_hand,
         }
+    }
+
+    /// 手札の刻子。
+    pub fn kotus_in_hand(&self) -> impl Iterator<Item = &Tiles> {
+        self.kotus_in_hand.iter()
     }
 
     /// 明刻。ポンと明槓、ロンによる明刻を合わせたもの。
@@ -645,7 +650,7 @@ mod tests {
     #[test]
     fn decompose() {
         let tilesets = tilesets("1s1s1s2s2s2s3s3s3s4s4s4s東", "東");
-        let agaris = AgariTilesets::enumerate(tilesets);
+        let agaris = AgariTilesets::enumerate(&tilesets);
 
         assert_eq!(agaris.len(), 3);
         eprintln!("{:#?}", agaris);

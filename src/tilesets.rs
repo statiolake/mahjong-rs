@@ -3,9 +3,11 @@
 use crate::config::{Context, Riichi};
 use crate::tile::{Tile, TileKind};
 use crate::tiles::Tiles;
+use crate::tileset::ParseError as ParseTilesetError;
 use crate::tileset::{Tag, Tileset};
 use failure::Fail;
 use std::fmt;
+use std::str::FromStr;
 
 pub type Result<T> = std::result::Result<T, TilesetsError>;
 
@@ -26,10 +28,6 @@ pub enum TilesetsError {
     /// アガリ牌が 2 回以上指定された。
     #[fail(display = "アガリ牌が二回以上指定されています。")]
     LastTileSpecifiedMoreThanOnce,
-
-    /// ドラが指定されなかった。
-    #[fail(display = "ドラが指定されていません。")]
-    DorasNotFound,
 
     /// ドラが 2 回以上指定された。
     #[fail(display = "ドラが二回以上指定されています。")]
@@ -175,7 +173,7 @@ impl Tilesets {
             .expect("last tile must have at least one tile.");
         let is_tumo = is_tumo.expect("last was some but is_tumo is none.");
         let hand = hand.ok_or(TilesetsError::HandNotFound)?;
-        let doras = doras.ok_or(TilesetsError::DorasNotFound)?;
+        let doras = doras.unwrap_or_else(|| Tiles::new(Vec::new()));
 
         Ok(Tilesets {
             context,
@@ -303,5 +301,40 @@ impl fmt::Display for Tilesets {
         }
 
         Ok(())
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum ParseError {
+    #[fail(display = "牌集合のパースに失敗しました: {}", 0)]
+    ParseTilesetError(#[fail(cause)] ParseTilesetError),
+
+    #[fail(display = "牌集合の生成に失敗しました: {}", 0)]
+    TilesetsError(#[fail(cause)] TilesetsError),
+}
+
+impl From<ParseTilesetError> for ParseError {
+    fn from(x: ParseTilesetError) -> ParseError {
+        ParseError::ParseTilesetError(x)
+    }
+}
+
+impl From<TilesetsError> for ParseError {
+    fn from(x: TilesetsError) -> ParseError {
+        ParseError::TilesetsError(x)
+    }
+}
+
+impl FromStr for Tilesets {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> std::result::Result<Tilesets, ParseError> {
+        let context = Context::default();
+        let tilesets = s
+            .split_whitespace()
+            .map(|s| s.parse())
+            .collect::<std::result::Result<Vec<Tileset>, _>>()?;
+
+        Tilesets::new(context, tilesets).map_err(|e| e.into())
     }
 }
