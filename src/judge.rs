@@ -289,7 +289,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p\n13翻 四暗刻単騎\n13翻 48000点 役満"
+            "東場 東家 \n1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p\n13翻 四暗刻単騎\n48000点 役満"
         );
 
         let tilesets: Tilesets = "1s9s1m9m1p9p東南西北白發中 ツモ中"
@@ -298,7 +298,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1s9s1m9m1p9p東南西北白發中 ツモ中\n13翻 国士無双13面待ち\n13翻 48000点 役満"
+            "東場 東家 \n1s9s1m9m1p9p東南西北白發中 ツモ中\n13翻 国士無双13面待ち\n48000点 役満"
         );
 
         let tilesets: Tilesets = "1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p".parse().unwrap();

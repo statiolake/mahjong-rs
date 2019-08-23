@@ -216,7 +216,12 @@ impl fmt::Display for PointDisplayFull {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         let &PointDisplayFull { point, is_oya } = self;
 
-        write!(b, "{} {}点", point, point.value(is_oya))?;
+        if !point.is_yakuman() {
+            write!(b, "{} ", point)?;
+        }
+
+        write!(b, "{}点", point.value(is_oya))?;
+
         if let Some(rank) = point.rank(is_oya) {
             write!(b, " {}", rank)?;
         }
