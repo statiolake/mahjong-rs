@@ -6,14 +6,20 @@ use std::fmt;
 use std::iter::once;
 
 #[derive(Debug, Clone)]
+enum JudgeTilesets {
+    Tilesets(Tilesets),
+    AgariTilesets(AgariTilesets),
+}
+
+#[derive(Debug, Clone)]
 pub struct Judge {
     forms: Vec<Form>,
     total: Point,
-    tilesets: Tilesets,
+    tilesets: JudgeTilesets,
 }
 
 impl Judge {
-    fn new(forms: Vec<Form>, total: Point, tilesets: Tilesets) -> Option<Judge> {
+    fn new(forms: Vec<Form>, total: Point, tilesets: JudgeTilesets) -> Option<Judge> {
         if forms.is_empty() {
             None
         } else {
@@ -42,7 +48,7 @@ impl Judge {
         // 合計の翻数を計算する。
         let total: Point = forms.iter().map(|f| f.point()).sum();
 
-        Judge::new(forms, total, tilesets)
+        Judge::new(forms, total, JudgeTilesets::Tilesets(tilesets))
     }
 
     fn from_agaritilesets(agari: AgariTilesets, mut forms: Vec<Form>) -> Option<Judge> {
@@ -56,7 +62,14 @@ impl Judge {
         assert_eq!(total.fu, 0);
         total.fu = FuCalculator::new(&agari, &forms).calculate();
 
-        Judge::new(forms, total, agari.tilesets)
+        Judge::new(forms, total, JudgeTilesets::AgariTilesets(agari))
+    }
+
+    fn tilesets(&self) -> &Tilesets {
+        match &self.tilesets {
+            JudgeTilesets::Tilesets(tilesets) => tilesets,
+            JudgeTilesets::AgariTilesets(agari) => &agari.tilesets,
+        }
     }
 }
 
@@ -88,12 +101,16 @@ impl fmt::Display for Judge {
         writeln!(
             b,
             "{}場 {}家 {}",
-            self.tilesets.context.place,
-            self.tilesets.context.player,
-            self.tilesets.context.player_name
+            self.tilesets().context.place,
+            self.tilesets().context.player,
+            self.tilesets().context.player_name
         )?;
 
-        writeln!(b, "{}", self.tilesets)?;
+        writeln!(b, "{}", self.tilesets())?;
+
+        if let JudgeTilesets::AgariTilesets(ref agari) = self.tilesets {
+            writeln!(b, "({})", agari)?;
+        }
 
         for form in &self.forms {
             writeln!(b, "{}", form.display())?;
@@ -102,7 +119,7 @@ impl fmt::Display for Judge {
         write!(
             b,
             "{}",
-            self.total.display_full(self.tilesets.context.is_oya())
+            self.total.display_full(self.tilesets().context.is_oya())
         )
     }
 }
@@ -283,59 +300,70 @@ mod tests {
     use crate::config::{Context, Direction};
     use crate::tilesets::Tilesets;
 
+    fn parse(s: &str) -> Tilesets {
+        s.parse().unwrap()
+    }
+
+    fn with_context(tilesets: Tilesets, player: Direction, place: Direction) -> Tilesets {
+        Tilesets {
+            context: Context {
+                player,
+                place,
+                ..Context::default()
+            },
+            ..tilesets
+        }
+    }
+
     #[test]
-    fn test_judge() {
-        let tilesets: Tilesets = "1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p".parse().unwrap();
+    fn judge_simple() {
+        let tilesets = parse("1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p\n13翻 四暗刻単騎\n48000点 役満"
+            "東場 東家 \n1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p\n(1p1p1p 2p2p2p 3p3p3p 4p4p4p 5p5p 待ち: 単騎)\n13翻 四暗刻単騎\n48000点 役満"
         );
+    }
 
-        let tilesets: Tilesets = "1s9s1m9m1p9p東南西北白發中 ツモ中"
-            .parse()
-            .unwrap();
+    #[test]
+    fn judge_kokusimusou() {
+        let tilesets = parse("1s9s1m9m1p9p東南西北白發中 ツモ中");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
             "東場 東家 \n1s9s1m9m1p9p東南西北白發中 ツモ中\n13翻 国士無双13面待ち\n48000点 役満"
         );
+    }
 
-        let tilesets: Tilesets = "1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p".parse().unwrap();
+    #[test]
+    fn judge_qiduizi() {
+        let tilesets = parse("1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
             "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n1翻 門前清自摸和\n2翻5符 七対子\n6翻 清一色\n9翻 24000点 倍満"
         );
+    }
 
-        let tilesets: Tilesets = "1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p".parse().unwrap();
+    #[test]
+    fn judge_pon() {
+        let tilesets = parse("1p1p1p2p2p2p3p3p3p5p ツモ5P ポン4p4p4p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n1翻 門前清自摸和\n2翻5符 七対子\n6翻 清一色\n9翻 24000点 倍満"
+            "東場 東家 \n1p1p1p2p2p2p3p3p3p5p ポン4p4p4p ツモ5P\n(4p4p4p 1p1p1p 2p2p2p 3p3p3p 5p5P 待ち: 単騎)\n1翻 ドラ\n2翻 三暗刻\n2翻 対々和\n5翻 清一色\n10翻 24000点 倍満"
         );
+    }
 
-        let tilesets: Tilesets = "1p1p1p2p2p2p3p3p3p5p ツモ5P ポン4p4p4p"
-            .parse()
-            .unwrap();
+    #[test]
+    fn judge_xijia() {
+        let tilesets = parse("5s6s7s4m5m6m4p4p4p5p6p西西 ロン西");
+        let tilesets = with_context(tilesets, Direction::West, Direction::East);
+
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p1p2p2p2p3p3p3p5p ポン4p4p4p ツモ5P\n1翻 ドラ\n2翻 三暗刻\n2翻 対々和\n5翻 清一色\n10翻 24000点 倍満"
-        );
-
-        let tilesets: Tilesets = "5s6s7s4m5m6m4p4p4p5p6p西西 ロン西".parse().unwrap();
-        let tilesets = Tilesets {
-            context: Context {
-                player: Direction::West,
-                ..Context::default()
-            },
-            ..tilesets
-        };
-        let res = dbg!(judge(&tilesets)).unwrap();
-        assert_eq!(
-            res.to_string(),
-            "東場 西家 \n5s6s7s4m5m6m4p4p4p5p6p西西 ロン西\n1翻 役牌\n1翻40符 1300点"
+            "東場 西家 \n5s6s7s4m5m6m4p4p4p5p6p西西 ロン西\n(西西西 4p5p6p 4m5m6m 5s6s7s 4p4p 待ち: シャンポン)\n1翻 役牌\n1翻40符 1300点"
         );
     }
 }

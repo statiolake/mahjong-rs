@@ -377,6 +377,19 @@ impl AgariTilesets {
     }
 }
 
+impl fmt::Display for AgariTilesets {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        for mentu in self.mentus() {
+            write!(b, "{} ", mentu)?;
+        }
+
+        write!(b, "{} ", self.janto())?;
+        write!(b, "待ち: {}", self.machi)?;
+
+        Ok(())
+    }
+}
+
 /// ロンによる暗刻と明刻を調整する。ロンによってできた刻子は明刻として扱うルールがあるため、最初は
 /// 手牌の暗刻として扱われているものを一つ明刻へ移さなければならない。
 fn fix_ron_an_mins(
