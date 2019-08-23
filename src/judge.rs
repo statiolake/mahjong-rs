@@ -137,21 +137,22 @@ fn forms_for_all_base(tilesets: &Tilesets) -> impl Iterator<Item = Form> {
 
 fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
     use crate::form::*;
-    let forms = forms_for_all_base(&agari.tilesets)
-        .chain(check_fanpai(&agari))
-        .chain(check_pinghe(&agari))
-        .chain(check_yibeikou_liangbeigou(&agari))
-        .chain(check_sanshoku_dojun(&agari))
-        .chain(check_sanshoku_doko(&agari))
-        .chain(check_sananke_sianke(&agari))
-        .chain(check_ikki_tukan(&agari))
-        .chain(check_duiduihe(&agari))
-        .chain(check_hunquandaiyaojiu_chunquandaiyaojiu(&agari))
-        .chain(check_sangangzi_sigangzi(&agari))
-        .chain(check_shousangen(&agari))
-        .chain(check_daisangen(&agari))
-        .chain(check_shousushi_daisushi(&agari))
-        .collect();
+
+    let mut forms = Vec::with_capacity(10);
+    forms.extend(forms_for_all_base(&agari.tilesets));
+    forms.extend(check_fanpai(&agari));
+    forms.extend(check_pinghe(&agari));
+    forms.extend(check_yibeikou_liangbeigou(&agari));
+    forms.extend(check_sanshoku_dojun(&agari));
+    forms.extend(check_sanshoku_doko(&agari));
+    forms.extend(check_sananke_sianke(&agari));
+    forms.extend(check_ikki_tukan(&agari));
+    forms.extend(check_duiduihe(&agari));
+    forms.extend(check_hunquandaiyaojiu_chunquandaiyaojiu(&agari));
+    forms.extend(check_sangangzi_sigangzi(&agari));
+    forms.extend(check_shousangen(&agari));
+    forms.extend(check_daisangen(&agari));
+    forms.extend(check_shousushi_daisushi(&agari));
 
     Judge::from_agaritilesets(agari, forms)
 }
