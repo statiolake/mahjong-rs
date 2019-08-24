@@ -1055,35 +1055,29 @@ pub fn check_daisanyuan(agari: &AgariTilesets) -> Option<Form> {
 /// 〈小四喜〉
 /// - 雀頭と3面子が風牌
 pub fn check_shousushi_daisushi(agari: &AgariTilesets) -> Option<Form> {
-    let extract_zipai_kind = |tiles: &Tiles| {
-        if let Tile::Zipai(kind) = tiles.first() {
-            Some(kind)
-        } else {
-            None
-        }
+    let extract_zipai_kind = |tiles: &Tiles| match tiles.first() {
+        Tile::Zipai(kind) => Some(kind),
+        _ => None,
     };
 
-    let mut set: HashSet<Zipai> = agari.kezis().filter_map(extract_zipai_kind).collect();
-
     let check = |set: &HashSet<Zipai>, form: Form| {
-        if set.contains(&Zipai::East)
-            && set.contains(&Zipai::South)
-            && set.contains(&Zipai::West)
-            && set.contains(&Zipai::North)
-        {
+        let ok = [Zipai::East, Zipai::South, Zipai::West, Zipai::North]
+            .iter()
+            .all(|d| set.contains(d));
+        if ok {
             Some(form)
         } else {
             None
         }
     };
 
-    // まずここで大四喜を確認
-    check(&set, Form::Daisushi)?;
-
-    // 続いて雀頭を追加し、小四喜を確認
-    set.insert(extract_zipai_kind(agari.quetou())?);
-
-    check(&set, Form::Shousushi)
+    let mut set: HashSet<Zipai> = agari.kezis().filter_map(extract_zipai_kind).collect();
+    // まずここで大四喜を確認。
+    check(&set, Form::Daisushi).or_else(|| {
+        // 続いて雀頭を追加し、小四喜を確認。
+        set.insert(extract_zipai_kind(agari.quetou())?);
+        check(&set, Form::Shousushi)
+    })
 }
 
 #[cfg(test)]
