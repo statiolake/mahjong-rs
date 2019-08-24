@@ -19,6 +19,12 @@ pub enum Direction {
     North,
 }
 
+impl Default for Direction {
+    fn default() -> Direction {
+        Direction::East
+    }
+}
+
 impl fmt::Display for Direction {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -49,6 +55,12 @@ pub enum Lizhi {
     DoubleLizhiIppatsu,
 }
 
+impl Default for Lizhi {
+    fn default() -> Lizhi {
+        Lizhi::None
+    }
+}
+
 /// アガリ牌がどういうものだったか。
 #[derive(Debug, Clone, Copy)]
 pub enum LastDraw {
@@ -59,8 +71,14 @@ pub enum LastDraw {
     Ronghe,
 }
 
+impl Default for LastDraw {
+    fn default() -> LastDraw {
+        LastDraw::Zimo
+    }
+}
+
 /// 牌を解釈する状況。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Context {
     pub lizhi: Lizhi,
     pub lucky_forms: Vec<Form>,
@@ -72,17 +90,5 @@ pub struct Context {
 impl Context {
     pub fn is_parent(&self) -> bool {
         self.player == Direction::East
-    }
-}
-
-impl Default for Context {
-    fn default() -> Context {
-        Context {
-            lizhi: Lizhi::None,
-            lucky_forms: Vec::new(),
-            place: Direction::East,
-            player: Direction::East,
-            player_name: String::new(),
-        }
     }
 }
