@@ -6,6 +6,7 @@ pub mod tile;
 pub mod tiles;
 pub mod tileset;
 pub mod tilesets;
+mod utils;
 
 #[cfg(test)]
 mod tests {

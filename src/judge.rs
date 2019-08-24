@@ -224,7 +224,7 @@ impl<'a> FuCalculator<'a> {
         let machi_fu = self.calc_machi_fu();
 
         let base = fudi + agari_fu + kezi_fu + quetou_fu + machi_fu;
-        let ceiled = (base + 9) / 10 * 10;
+        let ceiled = crate::utils::ceil_at(base, 10);
 
         // 喰い平和形では 20 符となるが、このときは 30 符に引き上げる
         if !self.agari.is_zimo() && ceiled == 20 {

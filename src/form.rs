@@ -74,7 +74,7 @@ impl Point {
                 manguan
             } else {
                 // それ以外の場合は定義の計算式に従う。百の位以下を切り上げる。
-                (raw + 99) / 100 * 100
+                crate::utils::ceil_at(raw, 100)
             }
         };
 
