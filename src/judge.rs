@@ -1,6 +1,7 @@
 use crate::agaritilesets::AgariTilesets;
 use crate::form::{Form, Point};
 use crate::tilesets::Tilesets;
+use log::debug;
 use std::cmp::Ordering;
 use std::fmt;
 use std::iter::once;
@@ -125,7 +126,12 @@ impl fmt::Display for Judge {
 }
 
 pub fn judge(tilesets: &Tilesets) -> Option<Judge> {
-    judge_all(tilesets).max()
+    debug!("判定を開始します。");
+    debug!("対象: {:#?}", tilesets);
+    let res = judge_all(tilesets).max();
+    debug!("判定が終わりました。結論は {:?}", res);
+
+    res
 }
 
 fn judge_all(tilesets: &Tilesets) -> impl Iterator<Item = Judge> {
@@ -153,6 +159,7 @@ fn forms_for_all_base(tilesets: &Tilesets) -> impl Iterator<Item = Form> {
 }
 
 fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
+    debug!("-> 次のアガリ形について判定: {:#?}", agari);
     use crate::form::*;
 
     let mut forms = Vec::with_capacity(10);
@@ -175,18 +182,21 @@ fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
 }
 
 fn judge_qiduizi(tilesets: &Tilesets) -> Option<Judge> {
+    debug!("-> 七対子を判定...");
     crate::form::special_check_qiduizi(tilesets)
         .map(|q| forms_for_all_base(tilesets).chain(once(q)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
 }
 
 fn judge_kokushimuso(tilesets: &Tilesets) -> Option<Judge> {
+    debug!("-> 国士無双を判定...");
     crate::form::special_check_kokushimuso(tilesets)
         .map(|k| forms_for_all_base(tilesets).chain(once(k)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
 }
 
 fn judge_jiulianbaodeng(tilesets: &Tilesets) -> Option<Judge> {
+    debug!("-> 九蓮宝燈を判定...");
     crate::form::special_check_jiulianbaodeng(tilesets)
         .map(|j| forms_for_all_base(tilesets).chain(once(j)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
@@ -203,31 +213,42 @@ impl<'a> FuCalculator<'a> {
     }
 
     fn calculate(&self) -> u32 {
+        debug!("符計算を行います。");
         // 平和ツモは一律 20 符
         if self.is_pinghe_zimo() {
+            debug!("-> 平和ツモのため 20 符です。");
             return 20;
         }
 
         // アガリ基本符
         let fudi = 20;
+        debug!("-> 副底は {} 符", fudi);
 
         // アガリ方による符
         let agari_fu = self.calc_agari_fu();
+        debug!("-> アガリ方による符は {} 符", agari_fu);
 
         // 刻子、槓によるボーナス
         let kezi_fu = self.calc_kezi_fu();
+        debug!("-> 刻子・槓によるボーナスが {} 符", kezi_fu);
 
         // 雀頭によるボーナス
         let quetou_fu = self.calc_quetou_fu();
+        debug!("-> 雀頭によるボーナスが {} 符", quetou_fu);
 
         // 待ちによるボーナス
         let machi_fu = self.calc_machi_fu();
+        debug!("-> 待ちによるボーナスが {} 符", machi_fu);
 
         let base = fudi + agari_fu + kezi_fu + quetou_fu + machi_fu;
+        debug!("-> 従って、基本の合計が {} 符", base);
+
         let ceiled = crate::utils::ceil_at(base, 10);
+        debug!("-> これを切り上げると {} 符", ceiled);
 
         // 喰い平和形では 20 符となるが、このときは 30 符に引き上げる
         if !self.agari.is_zimo() && ceiled == 20 {
+            debug!("-> これは喰い平和形なので 30 符に切り上げます。");
             return 30;
         }
 
@@ -339,7 +360,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n1翻 門前清自摸和\n2翻5符 七対子\n6翻 清一色\n9翻 24000点 倍満"
+            "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n(5p6p7p 5p6p7p 1p2p3p 1p2p3p 4p4p 待ち: 両面)\n1翻 門前清自摸和\n1翻 平和\n3翻 二盃口\n6翻 清一色\n11翻 36000点 三倍満"
         );
     }
 
