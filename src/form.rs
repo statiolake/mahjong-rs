@@ -1,7 +1,7 @@
 //! 役を定義する。
 
 use crate::agaritilesets::{AgariTilesets, MachiKind};
-use crate::config::Lizhi;
+use crate::context::Lizhi;
 use crate::tile::{Order, Tile, TileKind, Zipai};
 use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;

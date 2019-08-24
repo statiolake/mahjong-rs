@@ -1,6 +1,6 @@
 //! 牌集合を定義する。
 
-use crate::config::{Context, Lizhi};
+use crate::context::{Context, Lizhi};
 use crate::tile::{Tile, TileKind};
 use crate::tiles::Tiles;
 use crate::tileset::ParseError as ParseTilesetError;

@@ -1,7 +1,7 @@
 //! 牌などを定義する。
 
-use crate::config::Context;
-use crate::config::Direction;
+use crate::context::Context;
+use crate::context::Direction;
 use failure::Fail;
 use std::cmp::Ordering;
 use std::convert::TryFrom;

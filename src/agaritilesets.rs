@@ -1,6 +1,6 @@
 //! アガリ形を保持する牌集合を定義する。
 
-use crate::config::Context;
+use crate::context::Context;
 use crate::tile::{Order, Tile};
 use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;
@@ -632,7 +632,7 @@ fn extract_shunzi(mut tiles: Tiles) -> Option<Vec<Tiles>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::Context;
+    use crate::context::Context;
     use crate::tileset::{Tag, Tileset};
 
     #[test]

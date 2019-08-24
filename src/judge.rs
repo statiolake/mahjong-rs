@@ -295,7 +295,7 @@ impl<'a> FuCalculator<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{Context, Direction};
+    use crate::context::{Context, Direction};
     use crate::tilesets::Tilesets;
 
     fn parse(s: &str) -> Tilesets {
