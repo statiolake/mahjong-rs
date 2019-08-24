@@ -1,6 +1,6 @@
 //! 牌集合を定義する。
 
-use crate::config::{Context, Riichi};
+use crate::config::{Context, Lizhi};
 use crate::tile::{Tile, TileKind};
 use crate::tiles::Tiles;
 use crate::tileset::ParseError as ParseTilesetError;
@@ -35,7 +35,7 @@ pub enum TilesetsError {
 
     /// 立直と副露が同時に行われている。
     #[fail(display = "立直と副露が同時に行われています。")]
-    BothRiichiFuro,
+    BothLizhiFulou,
 
     /// 赤ドラが多すぎる。
     #[fail(display = "{} に対する赤ドラが {} 枚もあります。", 0, 1)]
@@ -57,7 +57,7 @@ pub struct Tilesets {
     pub context: Context,
 
     /// ツモかどうか。
-    pub is_tumo: bool,
+    pub is_zimo: bool,
 
     /// アガリ牌。
     pub last: Tile,
@@ -66,16 +66,16 @@ pub struct Tilesets {
     pub hand: Tiles,
 
     /// ポン。
-    pub pons: Vec<Tiles>,
+    pub pengs: Vec<Tiles>,
 
     /// チー。
-    pub qis: Vec<Tiles>,
+    pub chis: Vec<Tiles>,
 
     /// 明槓。
-    pub minkans: Vec<Tiles>,
+    pub minggangs: Vec<Tiles>,
 
     /// 暗槓。
-    pub ankans: Vec<Tiles>,
+    pub angangs: Vec<Tiles>,
 
     /// ドラ。
     ///
@@ -88,7 +88,7 @@ impl Tilesets {
     pub fn new(context: Context, tilesets: Vec<Tileset>) -> Result<Tilesets> {
         let cand = Tilesets::dispatch(context, tilesets)?;
 
-        cand.check_riichi_furo()?;
+        cand.check_lizhi_fulou()?;
         cand.check_num_reds()?;
         cand.check_num_same_tiles()?;
         cand.check_num_tiles()?;
@@ -99,15 +99,15 @@ impl Tilesets {
     /// 副露をしたかどうか。
     ///
     /// 副露とはポン・チー・明槓のいずれかである。
-    pub fn did_furo(&self) -> bool {
-        !self.pons.is_empty() || !self.qis.is_empty() || !self.minkans.is_empty()
+    pub fn did_fulou(&self) -> bool {
+        !self.pengs.is_empty() || !self.chis.is_empty() || !self.minggangs.is_empty()
     }
 
     /// 門前かどうか。
     ///
     /// これは副露をしていないことと同値。
-    pub fn is_menzen(&self) -> bool {
-        !self.did_furo()
+    pub fn is_menqian(&self) -> bool {
+        !self.did_fulou()
     }
 
     /// 単純に牌集合の列を受け取って、整理した Tilesets を返す。
@@ -121,25 +121,25 @@ impl Tilesets {
             }
         }
 
-        let mut is_tumo = None;
+        let mut is_zimo = None;
         let mut last = None;
         let mut hand = None;
 
-        let mut pons = Vec::new();
-        let mut qis = Vec::new();
+        let mut pengs = Vec::new();
+        let mut chis = Vec::new();
 
-        let mut minkans = Vec::new();
-        let mut ankans = Vec::new();
+        let mut minggangs = Vec::new();
+        let mut angangs = Vec::new();
 
         let mut doras = None;
 
         for tileset in tilesets {
             match tileset.tag {
-                tag @ Tag::Tumo | tag @ Tag::Ron => {
+                tag @ Tag::Zimo | tag @ Tag::Ronghe => {
                     match tag {
-                        Tag::Tumo => is_tumo = Some(true),
-                        Tag::Ron => is_tumo = Some(false),
-                        _ => unreachable!("only Tumo or Ron can reach here."),
+                        Tag::Zimo => is_zimo = Some(true),
+                        Tag::Ronghe => is_zimo = Some(false),
+                        _ => unreachable!("only Zimo or Ronghe can reach here."),
                     }
                     set(
                         &mut last,
@@ -152,10 +152,10 @@ impl Tilesets {
                     tileset.tiles,
                     TilesetsError::HandSpecifiedMoreThanOnce,
                 )?,
-                Tag::Pon => pons.push(tileset.tiles),
-                Tag::Qi => qis.push(tileset.tiles),
-                Tag::Minkan => minkans.push(tileset.tiles),
-                Tag::Ankan => ankans.push(tileset.tiles),
+                Tag::Peng => pengs.push(tileset.tiles),
+                Tag::Chi => chis.push(tileset.tiles),
+                Tag::Minggang => minggangs.push(tileset.tiles),
+                Tag::Angang => angangs.push(tileset.tiles),
                 Tag::Dora => set(
                     &mut doras,
                     tileset.tiles,
@@ -171,31 +171,31 @@ impl Tilesets {
             .into_iter()
             .next()
             .expect("last tile must have at least one tile.");
-        let is_tumo = is_tumo.expect("last was some but is_tumo is none.");
+        let is_zimo = is_zimo.expect("last was some but is_zimo is none.");
         let hand = hand.ok_or(TilesetsError::HandNotFound)?;
         let doras = doras.unwrap_or_else(|| Tiles::new(Vec::new()));
 
         Ok(Tilesets {
             context,
-            is_tumo,
+            is_zimo,
             last,
             hand,
-            pons,
-            qis,
-            minkans,
-            ankans,
+            pengs,
+            chis,
+            minggangs,
+            angangs,
             doras,
         })
     }
 
     /// 立直と副露が同時に起きていないかを確かめる。
-    fn check_riichi_furo(&self) -> Result<()> {
-        if self.context.riichi == Riichi::None {
+    fn check_lizhi_fulou(&self) -> Result<()> {
+        if self.context.lizhi == Lizhi::None {
             return Ok(());
         }
 
-        if self.did_furo() {
-            return Err(TilesetsError::BothRiichiFuro);
+        if self.did_fulou() {
+            return Err(TilesetsError::BothLizhiFulou);
         }
 
         Ok(())
@@ -206,10 +206,10 @@ impl Tilesets {
         use std::iter::once;
         once(self.last)
             .chain(self.hand.iter().copied())
-            .chain(self.pons.iter().flat_map(|i| i.iter().copied()))
-            .chain(self.qis.iter().flat_map(|i| i.iter().copied()))
-            .chain(self.minkans.iter().flat_map(|i| i.iter().copied()))
-            .chain(self.ankans.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.pengs.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.chis.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.minggangs.iter().flat_map(|i| i.iter().copied()))
+            .chain(self.angangs.iter().flat_map(|i| i.iter().copied()))
     }
 
     /// ドラを含めた全ての牌をまわすイテレータを得る。
@@ -222,16 +222,16 @@ impl Tilesets {
     fn check_num_reds(&self) -> Result<()> {
         let (mut red_s, mut red_m, mut red_p) = (0, 0, 0);
         self.tiles_without_doras().for_each(|tile| match tile {
-            Tile::Souzu(o) if o.is_red() => red_s += 1,
-            Tile::Manzu(o) if o.is_red() => red_m += 1,
-            Tile::Pinzu(o) if o.is_red() => red_p += 1,
+            Tile::Suozi(o) if o.is_red() => red_s += 1,
+            Tile::Wanzi(o) if o.is_red() => red_m += 1,
+            Tile::Tongzi(o) if o.is_red() => red_p += 1,
             _ => (),
         });
 
         let (kind, num) = match (red_s >= 2, red_m >= 2, red_p >= 2) {
-            (true, _, _) => (TileKind::Souzu, red_s),
-            (_, true, _) => (TileKind::Manzu, red_m),
-            (_, _, true) => (TileKind::Pinzu, red_p),
+            (true, _, _) => (TileKind::Suozi, red_s),
+            (_, true, _) => (TileKind::Wanzi, red_m),
+            (_, _, true) => (TileKind::Tongzi, red_p),
             _ => return Ok(()),
         };
 
@@ -257,14 +257,14 @@ impl Tilesets {
     fn check_num_tiles(&self) -> Result<()> {
         let last = 1;
         let hand = self.hand.len();
-        let pons = self.pons.len() * 3;
-        let qis = self.qis.len() * 3;
+        let pengs = self.pengs.len() * 3;
+        let chis = self.chis.len() * 3;
 
-        // Though kan is actually 4, in judgement this is treated as kotu so count them as 3.
-        let minkans = self.minkans.len() * 3;
-        let ankans = self.ankans.len() * 3;
+        // Though gang is actually 4, in judgement this is treated as kezi so count them as 3.
+        let minggangs = self.minggangs.len() * 3;
+        let angangs = self.angangs.len() * 3;
 
-        let tiles = last + hand + pons + qis + minkans + ankans;
+        let tiles = last + hand + pengs + chis + minggangs + angangs;
 
         if tiles != 14 {
             return Err(TilesetsError::InvalidNumTiles(tiles as _));
@@ -278,23 +278,23 @@ impl fmt::Display for Tilesets {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         write!(b, "{}", self.hand)?;
 
-        for pon in &self.pons {
-            write!(b, " ポン{}", pon)?;
+        for peng in &self.pengs {
+            write!(b, " ポン{}", peng)?;
         }
 
-        for qi in &self.qis {
-            write!(b, " チー{}", qi)?;
+        for chi in &self.chis {
+            write!(b, " チー{}", chi)?;
         }
 
-        for minkan in &self.minkans {
-            write!(b, " 明槓{}", minkan)?;
+        for minggang in &self.minggangs {
+            write!(b, " 明槓{}", minggang)?;
         }
 
-        for ankan in &self.ankans {
-            write!(b, " 暗槓{}", ankan)?;
+        for angang in &self.angangs {
+            write!(b, " 暗槓{}", angang)?;
         }
 
-        if self.is_tumo {
+        if self.is_zimo {
             write!(b, " ツモ{}", self.last)?;
         } else {
             write!(b, " ロン{}", self.last)?;

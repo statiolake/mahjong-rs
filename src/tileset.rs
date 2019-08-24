@@ -39,25 +39,25 @@ pub struct Tileset {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tag {
     /// アガリ牌で、それはツモ。
-    Tumo,
+    Zimo,
 
     /// アガリ牌で、それはロン。
-    Ron,
+    Ronghe,
 
     /// 手牌。
     Hand,
 
     /// ポン。
-    Pon,
+    Peng,
 
     /// チー。
-    Qi,
+    Chi,
 
     /// 明槓。
-    Minkan,
+    Minggang,
 
     /// 暗槓。
-    Ankan,
+    Angang,
 
     /// ドラ。
     Dora,
@@ -68,10 +68,10 @@ impl Tileset {
     pub fn new(tag: Tag, tiles: Tiles) -> Result<Tileset> {
         // まず牌の集合としておかしいものをチェックしつつ除く。
         let tiles = match tag {
-            Tag::Tumo | Tag::Ron => tiles.check_last_tile()?,
-            Tag::Pon => tiles.check_pon()?,
-            Tag::Qi => tiles.check_qi()?,
-            Tag::Minkan | Tag::Ankan => tiles.check_kan()?,
+            Tag::Zimo | Tag::Ronghe => tiles.check_last_tile()?,
+            Tag::Peng => tiles.check_peng()?,
+            Tag::Chi => tiles.check_chi()?,
+            Tag::Minggang | Tag::Angang => tiles.check_gang()?,
             _ => tiles,
         };
 
@@ -82,13 +82,13 @@ impl Tileset {
 impl fmt::Display for Tag {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Tag::Tumo => write!(b, "ツモ"),
-            Tag::Ron => write!(b, "ロン"),
+            Tag::Zimo => write!(b, "ツモ"),
+            Tag::Ronghe => write!(b, "ロン"),
             Tag::Hand => write!(b, ""),
-            Tag::Pon => write!(b, "ポン"),
-            Tag::Qi => write!(b, "チー"),
-            Tag::Minkan => write!(b, "明槓"),
-            Tag::Ankan => write!(b, "暗槓"),
+            Tag::Peng => write!(b, "ポン"),
+            Tag::Chi => write!(b, "チー"),
+            Tag::Minggang => write!(b, "明槓"),
+            Tag::Angang => write!(b, "暗槓"),
             Tag::Dora => write!(b, "ドラ"),
         }
     }
@@ -136,12 +136,12 @@ impl FromStr for Tileset {
             .collect();
 
         let (tag, rest) = match &*annot {
-            "ツモ" => (Tag::Tumo, &s[6..]),
-            "ロン" => (Tag::Ron, &s[6..]),
-            "ポン" => (Tag::Pon, &s[6..]),
-            "チー" => (Tag::Qi, &s[6..]),
-            "明槓" => (Tag::Minkan, &s[6..]),
-            "暗槓" => (Tag::Ankan, &s[6..]),
+            "ツモ" => (Tag::Zimo, &s[6..]),
+            "ロン" => (Tag::Ronghe, &s[6..]),
+            "ポン" => (Tag::Peng, &s[6..]),
+            "チー" => (Tag::Chi, &s[6..]),
+            "明槓" => (Tag::Minggang, &s[6..]),
+            "暗槓" => (Tag::Angang, &s[6..]),
             "ドラ" => (Tag::Dora, &s[6..]),
             "" => (Tag::Hand, &*s),
             _ => return Err(ParseError::UnknownAnnotation(annot)),
@@ -160,25 +160,25 @@ mod tests {
     fn parse() {
         assert_eq!(
             "ロン1p".parse::<Tileset>().unwrap(),
-            Tileset::new(Tag::Ron, "1p".parse().unwrap()).unwrap()
+            Tileset::new(Tag::Ronghe, "1p".parse().unwrap()).unwrap()
         );
 
         assert_eq!(
             "暗槓1p1p1p1p".parse::<Tileset>().unwrap(),
-            Tileset::new(Tag::Ankan, "1p1p1p1p".parse().unwrap()).unwrap()
+            Tileset::new(Tag::Angang, "1p1p1p1p".parse().unwrap()).unwrap()
         );
 
         match "ポン1p2p3p".parse::<Tileset>() {
-            Err(ParseError::TilesetError(Error::TilesError(TilesError::InvalidPon(_)))) => {}
-            _ => panic!("should cause invalid pon error"),
+            Err(ParseError::TilesetError(Error::TilesError(TilesError::InvalidPeng(_)))) => {}
+            _ => panic!("should cause invalid peng error"),
         }
     }
 
     #[test]
     fn tiles() {
-        let s1 = Tile::Souzu(Order::new(1).unwrap());
-        let s2 = Tile::Souzu(Order::new(2).unwrap());
-        let s3 = Tile::Souzu(Order::new(3).unwrap());
+        let s1 = Tile::Suozi(Order::new(1).unwrap());
+        let s2 = Tile::Suozi(Order::new(2).unwrap());
+        let s3 = Tile::Suozi(Order::new(3).unwrap());
         let tiles = Tiles::new(vec![s1, s2, s3]);
 
         assert_eq!(tiles.first(), s1);

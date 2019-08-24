@@ -27,32 +27,32 @@ pub enum Error {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TileKind {
     /// 索子。
-    Souzu,
+    Suozi,
 
     /// 萬子。
-    Manzu,
+    Wanzi,
 
     /// 筒子。
-    Pinzu,
+    Tongzi,
 
     /// 字牌。
-    Jihai,
+    Zipai,
 }
 
 /// 牌。
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Tile {
     /// 索子。
-    Souzu(Order),
+    Suozi(Order),
 
     /// 萬子。
-    Manzu(Order),
+    Wanzi(Order),
 
     /// 筒子。
-    Pinzu(Order),
+    Tongzi(Order),
 
     /// 字牌。
-    Jihai(Jihai),
+    Zipai(Zipai),
 }
 
 /// 索子、萬子、筒子の番号。
@@ -68,7 +68,7 @@ pub struct Order {
 
 /// 字牌。
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum Jihai {
+pub enum Zipai {
     /// 東。
     East,
 
@@ -82,91 +82,91 @@ pub enum Jihai {
     North,
 
     /// 白。
-    Haku,
+    Bai,
 
     /// 發。
-    Hatu,
+    Fa,
 
     /// 中。
-    Chun,
+    Zhong,
 }
 
 impl Tile {
     pub fn next(self) -> Option<Tile> {
         match self {
-            Tile::Jihai(_) => None,
-            Tile::Souzu(o) => o.next().map(Tile::Souzu),
-            Tile::Manzu(o) => o.next().map(Tile::Manzu),
-            Tile::Pinzu(o) => o.next().map(Tile::Pinzu),
+            Tile::Zipai(_) => None,
+            Tile::Suozi(o) => o.next().map(Tile::Suozi),
+            Tile::Wanzi(o) => o.next().map(Tile::Wanzi),
+            Tile::Tongzi(o) => o.next().map(Tile::Tongzi),
         }
     }
 
     pub fn prev(self) -> Option<Tile> {
         match self {
-            Tile::Jihai(_) => None,
-            Tile::Souzu(o) => o.prev().map(Tile::Souzu),
-            Tile::Manzu(o) => o.prev().map(Tile::Manzu),
-            Tile::Pinzu(o) => o.prev().map(Tile::Pinzu),
+            Tile::Zipai(_) => None,
+            Tile::Suozi(o) => o.prev().map(Tile::Suozi),
+            Tile::Wanzi(o) => o.prev().map(Tile::Wanzi),
+            Tile::Tongzi(o) => o.prev().map(Tile::Tongzi),
         }
     }
 
     /// 今の牌の次の牌を返す。常に赤ドラではない牌を返す。9の次は1に戻る。
     pub fn wrapping_next(self) -> Tile {
         match self {
-            Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::South),
-            Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::West),
-            Tile::Jihai(Jihai::West) => Tile::Jihai(Jihai::North),
-            Tile::Jihai(Jihai::North) => Tile::Jihai(Jihai::East),
-            Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Hatu),
-            Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Chun),
-            Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Haku),
-            Tile::Souzu(o) => Tile::Souzu(o.wrapping_next()),
-            Tile::Manzu(o) => Tile::Manzu(o.wrapping_next()),
-            Tile::Pinzu(o) => Tile::Pinzu(o.wrapping_next()),
+            Tile::Zipai(Zipai::East) => Tile::Zipai(Zipai::South),
+            Tile::Zipai(Zipai::South) => Tile::Zipai(Zipai::West),
+            Tile::Zipai(Zipai::West) => Tile::Zipai(Zipai::North),
+            Tile::Zipai(Zipai::North) => Tile::Zipai(Zipai::East),
+            Tile::Zipai(Zipai::Bai) => Tile::Zipai(Zipai::Fa),
+            Tile::Zipai(Zipai::Fa) => Tile::Zipai(Zipai::Zhong),
+            Tile::Zipai(Zipai::Zhong) => Tile::Zipai(Zipai::Bai),
+            Tile::Suozi(o) => Tile::Suozi(o.wrapping_next()),
+            Tile::Wanzi(o) => Tile::Wanzi(o.wrapping_next()),
+            Tile::Tongzi(o) => Tile::Tongzi(o.wrapping_next()),
         }
     }
 
     /// 今の牌の前の牌を返す。常に赤ドラではない牌を返す。9の次は1に戻る。
     pub fn wrapping_prev(self) -> Tile {
         match self {
-            Tile::Jihai(Jihai::East) => Tile::Jihai(Jihai::North),
-            Tile::Jihai(Jihai::South) => Tile::Jihai(Jihai::East),
-            Tile::Jihai(Jihai::West) => Tile::Jihai(Jihai::South),
-            Tile::Jihai(Jihai::North) => Tile::Jihai(Jihai::West),
-            Tile::Jihai(Jihai::Haku) => Tile::Jihai(Jihai::Chun),
-            Tile::Jihai(Jihai::Hatu) => Tile::Jihai(Jihai::Haku),
-            Tile::Jihai(Jihai::Chun) => Tile::Jihai(Jihai::Hatu),
-            Tile::Souzu(o) => Tile::Souzu(o.wrapping_prev()),
-            Tile::Manzu(o) => Tile::Manzu(o.wrapping_prev()),
-            Tile::Pinzu(o) => Tile::Pinzu(o.wrapping_prev()),
+            Tile::Zipai(Zipai::East) => Tile::Zipai(Zipai::North),
+            Tile::Zipai(Zipai::South) => Tile::Zipai(Zipai::East),
+            Tile::Zipai(Zipai::West) => Tile::Zipai(Zipai::South),
+            Tile::Zipai(Zipai::North) => Tile::Zipai(Zipai::West),
+            Tile::Zipai(Zipai::Bai) => Tile::Zipai(Zipai::Zhong),
+            Tile::Zipai(Zipai::Fa) => Tile::Zipai(Zipai::Bai),
+            Tile::Zipai(Zipai::Zhong) => Tile::Zipai(Zipai::Fa),
+            Tile::Suozi(o) => Tile::Suozi(o.wrapping_prev()),
+            Tile::Wanzi(o) => Tile::Wanzi(o.wrapping_prev()),
+            Tile::Tongzi(o) => Tile::Tongzi(o.wrapping_prev()),
         }
     }
 
     /// オーダーを取得する。もし字牌なら None となる。
     pub fn order(self) -> Option<Order> {
         match self {
-            Tile::Jihai(_) => None,
-            Tile::Souzu(o) | Tile::Manzu(o) | Tile::Pinzu(o) => Some(o),
+            Tile::Zipai(_) => None,
+            Tile::Suozi(o) | Tile::Wanzi(o) | Tile::Tongzi(o) => Some(o),
         }
     }
 
     /// 赤ドラかどうかを変更した牌を作る。
     pub fn with_red(self, is_red: bool) -> Result<Tile> {
         match self {
-            Tile::Jihai(_) => Err(Error::InvalidRed),
-            Tile::Souzu(o) => Ok(Tile::Souzu(o.with_red(is_red)?)),
-            Tile::Manzu(o) => Ok(Tile::Manzu(o.with_red(is_red)?)),
-            Tile::Pinzu(o) => Ok(Tile::Pinzu(o.with_red(is_red)?)),
+            Tile::Zipai(_) => Err(Error::InvalidRed),
+            Tile::Suozi(o) => Ok(Tile::Suozi(o.with_red(is_red)?)),
+            Tile::Wanzi(o) => Ok(Tile::Wanzi(o.with_red(is_red)?)),
+            Tile::Tongzi(o) => Ok(Tile::Tongzi(o.with_red(is_red)?)),
         }
     }
 
     /// 種類を調べる。
     pub fn kind(self) -> TileKind {
         match self {
-            Tile::Manzu(_) => TileKind::Manzu,
-            Tile::Souzu(_) => TileKind::Souzu,
-            Tile::Pinzu(_) => TileKind::Pinzu,
-            Tile::Jihai(_) => TileKind::Jihai,
+            Tile::Wanzi(_) => TileKind::Wanzi,
+            Tile::Suozi(_) => TileKind::Suozi,
+            Tile::Tongzi(_) => TileKind::Tongzi,
+            Tile::Zipai(_) => TileKind::Zipai,
         }
     }
 
@@ -176,32 +176,32 @@ impl Tile {
     }
 
     /// 中張牌かどうか調べる
-    pub fn is_chunchan(self) -> bool {
-        self.order().map(|o| o.is_chunchan()).unwrap_or(false)
+    pub fn is_zhongzhang(self) -> bool {
+        self.order().map(|o| o.is_zhongzhang()).unwrap_or(false)
     }
 
-    /// 么九牌かどうか調べる。 `!self.is_chunchan()` と同じ。
-    pub fn is_yaochu(self) -> bool {
-        self.order().map(|o| o.is_yaochu()).unwrap_or(false)
+    /// 么九牌かどうか調べる。 `!self.is_zhongzhang()` と同じ。
+    pub fn is_yaojiu(self) -> bool {
+        self.order().map(|o| o.is_yaojiu()).unwrap_or(false)
     }
 
     /// 風牌かどうか調べる。風牌は「東南西北」のどれか。
-    pub fn is_fan(self) -> bool {
+    pub fn is_feng(self) -> bool {
         match self {
-            Tile::Jihai(Jihai::East) => true,
-            Tile::Jihai(Jihai::South) => true,
-            Tile::Jihai(Jihai::West) => true,
-            Tile::Jihai(Jihai::North) => true,
+            Tile::Zipai(Zipai::East) => true,
+            Tile::Zipai(Zipai::South) => true,
+            Tile::Zipai(Zipai::West) => true,
+            Tile::Zipai(Zipai::North) => true,
             _ => false,
         }
     }
 
     /// 三元牌かどうか調べる。三元牌は「白發中」のどれか。
-    pub fn is_sangen(self) -> bool {
+    pub fn is_sanyuan(self) -> bool {
         match self {
-            Tile::Jihai(Jihai::Haku) => true,
-            Tile::Jihai(Jihai::Hatu) => true,
-            Tile::Jihai(Jihai::Chun) => true,
+            Tile::Zipai(Zipai::Bai) => true,
+            Tile::Zipai(Zipai::Fa) => true,
+            Tile::Zipai(Zipai::Zhong) => true,
             _ => false,
         }
     }
@@ -209,8 +209,8 @@ impl Tile {
     /// 緑一色を構成できる牌かどうか調べる。
     pub fn is_green(self) -> bool {
         match self {
-            Tile::Jihai(Jihai::Hatu) => true,
-            Tile::Souzu(o) => o.is_green_order(),
+            Tile::Zipai(Zipai::Fa) => true,
+            Tile::Suozi(o) => o.is_green_order(),
             _ => false,
         }
     }
@@ -227,20 +227,20 @@ impl Tile {
     /// - 役牌ではない : 0
     /// - ダブってはないが役牌である : 1
     /// - 東場の東家のようにダブ東である : 2
-    pub fn num_yakuhai(self, ctx: &Context) -> u32 {
+    pub fn num_fan(self, ctx: &Context) -> u32 {
         match self {
-            Tile::Jihai(jihai) => {
+            Tile::Zipai(zipai) => {
                 let mut res = 0;
 
-                if jihai == ctx.place {
+                if zipai == ctx.place {
                     res += 1;
                 }
 
-                if jihai == ctx.player {
+                if zipai == ctx.player {
                     res += 1;
                 }
 
-                if self.is_sangen() {
+                if self.is_sanyuan() {
                     res += 1;
                 }
 
@@ -279,32 +279,32 @@ impl FromStr for Tile {
         // 字牌
         //------------------------------
         match from {
-            "東" => return Ok(Tile::Jihai(Jihai::East)),
-            "南" => return Ok(Tile::Jihai(Jihai::South)),
-            "西" => return Ok(Tile::Jihai(Jihai::West)),
-            "北" => return Ok(Tile::Jihai(Jihai::North)),
-            "白" => return Ok(Tile::Jihai(Jihai::Haku)),
-            "發" => return Ok(Tile::Jihai(Jihai::Hatu)),
-            "中" => return Ok(Tile::Jihai(Jihai::Chun)),
+            "東" => return Ok(Tile::Zipai(Zipai::East)),
+            "南" => return Ok(Tile::Zipai(Zipai::South)),
+            "西" => return Ok(Tile::Zipai(Zipai::West)),
+            "北" => return Ok(Tile::Zipai(Zipai::North)),
+            "白" => return Ok(Tile::Zipai(Zipai::Bai)),
+            "發" => return Ok(Tile::Zipai(Zipai::Fa)),
+            "中" => return Ok(Tile::Zipai(Zipai::Zhong)),
             _ => (),
         };
 
         // 他の牌
         //------------------------------
         let mut chars = from.chars();
-        let (order, suit) = match (chars.next(), chars.next(), chars.next()) {
-            (Some(order), Some(suit), None) => (order, suit),
+        let (order, kind) = match (chars.next(), chars.next(), chars.next()) {
+            (Some(order), Some(kind), None) => (order, kind),
             _ => return Err(ParseError::InvalidStringLen),
         };
 
-        let (tile_constructor, is_red): (fn(Order) -> Tile, bool) = match suit {
-            's' => (Tile::Souzu, false),
-            'm' => (Tile::Manzu, false),
-            'p' => (Tile::Pinzu, false),
+        let (tile_constructor, is_red): (fn(Order) -> Tile, bool) = match kind {
+            's' => (Tile::Suozi, false),
+            'm' => (Tile::Wanzi, false),
+            'p' => (Tile::Tongzi, false),
 
-            'S' => (Tile::Souzu, true),
-            'M' => (Tile::Manzu, true),
-            'P' => (Tile::Pinzu, true),
+            'S' => (Tile::Suozi, true),
+            'M' => (Tile::Wanzi, true),
+            'P' => (Tile::Tongzi, true),
 
             ch => return Err(ParseError::InvalidChar(ch)),
         };
@@ -371,13 +371,13 @@ impl Order {
     }
 
     /// 中張牌かどうか調べる。
-    pub fn is_chunchan(self) -> bool {
+    pub fn is_zhongzhang(self) -> bool {
         self.order != 1 && self.order != 9
     }
 
     /// 么九牌かどうか調べる。
-    pub fn is_yaochu(self) -> bool {
-        !self.is_chunchan()
+    pub fn is_yaojiu(self) -> bool {
+        !self.is_zhongzhang()
     }
 
     /// **順序として** 緑一色を構成できる牌かどうかを調べる。
@@ -402,10 +402,10 @@ impl TryFrom<&str> for Tile {
 impl fmt::Display for TileKind {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            TileKind::Souzu => write!(b, "索子"),
-            TileKind::Manzu => write!(b, "萬子"),
-            TileKind::Pinzu => write!(b, "筒子"),
-            TileKind::Jihai => write!(b, "字牌"),
+            TileKind::Suozi => write!(b, "索子"),
+            TileKind::Wanzi => write!(b, "萬子"),
+            TileKind::Tongzi => write!(b, "筒子"),
+            TileKind::Zipai => write!(b, "字牌"),
         }
     }
 }
@@ -413,13 +413,13 @@ impl fmt::Display for TileKind {
 impl fmt::Display for Tile {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         let disp = match self {
-            Tile::Souzu(order) if order.is_red => format!("{}S", order),
-            Tile::Souzu(order) => format!("{}s", order),
-            Tile::Manzu(order) if order.is_red => format!("{}M", order),
-            Tile::Manzu(order) => format!("{}m", order),
-            Tile::Pinzu(order) if order.is_red => format!("{}P", order),
-            Tile::Pinzu(order) => format!("{}p", order),
-            Tile::Jihai(jihai) => format!("{}", jihai),
+            Tile::Suozi(order) if order.is_red => format!("{}S", order),
+            Tile::Suozi(order) => format!("{}s", order),
+            Tile::Wanzi(order) if order.is_red => format!("{}M", order),
+            Tile::Wanzi(order) => format!("{}m", order),
+            Tile::Tongzi(order) if order.is_red => format!("{}P", order),
+            Tile::Tongzi(order) => format!("{}p", order),
+            Tile::Zipai(zipai) => format!("{}", zipai),
         };
 
         write!(b, "{}", disp)
@@ -432,16 +432,16 @@ impl fmt::Display for Order {
     }
 }
 
-impl fmt::Display for Jihai {
+impl fmt::Display for Zipai {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         let disp = match self {
-            Jihai::East => "東",
-            Jihai::South => "南",
-            Jihai::West => "西",
-            Jihai::North => "北",
-            Jihai::Haku => "白",
-            Jihai::Hatu => "發",
-            Jihai::Chun => "中",
+            Zipai::East => "東",
+            Zipai::South => "南",
+            Zipai::West => "西",
+            Zipai::North => "北",
+            Zipai::Bai => "白",
+            Zipai::Fa => "發",
+            Zipai::Zhong => "中",
         };
 
         write!(b, "{}", disp)
@@ -462,13 +462,13 @@ impl hash::Hash for Order {
     }
 }
 
-impl PartialEq<Direction> for Jihai {
+impl PartialEq<Direction> for Zipai {
     fn eq(&self, other: &Direction) -> bool {
         match (self, other) {
-            (Jihai::East, Direction::East) => true,
-            (Jihai::South, Direction::South) => true,
-            (Jihai::West, Direction::West) => true,
-            (Jihai::North, Direction::North) => true,
+            (Zipai::East, Direction::East) => true,
+            (Zipai::South, Direction::South) => true,
+            (Zipai::West, Direction::West) => true,
+            (Zipai::North, Direction::North) => true,
             _ => false,
         }
     }
@@ -499,19 +499,19 @@ mod tests {
 
     #[test]
     fn smp() {
-        assert_eq!("4s", Tile::Souzu(order_of(4, false)).to_string());
-        assert_eq!("5m", Tile::Manzu(order_of(5, false)).to_string());
-        assert_eq!("6p", Tile::Pinzu(order_of(6, false)).to_string());
-        assert_eq!("5S", Tile::Souzu(order_of(5, true)).to_string());
-        assert_eq!("5M", Tile::Manzu(order_of(5, true)).to_string());
-        assert_eq!("5P", Tile::Pinzu(order_of(5, true)).to_string());
-        assert_eq!("東", Tile::Jihai(Jihai::East).to_string());
-        assert_eq!("南", Tile::Jihai(Jihai::South).to_string());
-        assert_eq!("西", Tile::Jihai(Jihai::West).to_string());
-        assert_eq!("北", Tile::Jihai(Jihai::North).to_string());
-        assert_eq!("白", Tile::Jihai(Jihai::Haku).to_string());
-        assert_eq!("發", Tile::Jihai(Jihai::Hatu).to_string());
-        assert_eq!("中", Tile::Jihai(Jihai::Chun).to_string());
+        assert_eq!("4s", Tile::Suozi(order_of(4, false)).to_string());
+        assert_eq!("5m", Tile::Wanzi(order_of(5, false)).to_string());
+        assert_eq!("6p", Tile::Tongzi(order_of(6, false)).to_string());
+        assert_eq!("5S", Tile::Suozi(order_of(5, true)).to_string());
+        assert_eq!("5M", Tile::Wanzi(order_of(5, true)).to_string());
+        assert_eq!("5P", Tile::Tongzi(order_of(5, true)).to_string());
+        assert_eq!("東", Tile::Zipai(Zipai::East).to_string());
+        assert_eq!("南", Tile::Zipai(Zipai::South).to_string());
+        assert_eq!("西", Tile::Zipai(Zipai::West).to_string());
+        assert_eq!("北", Tile::Zipai(Zipai::North).to_string());
+        assert_eq!("白", Tile::Zipai(Zipai::Bai).to_string());
+        assert_eq!("發", Tile::Zipai(Zipai::Fa).to_string());
+        assert_eq!("中", Tile::Zipai(Zipai::Zhong).to_string());
     }
 
     #[test]
@@ -526,49 +526,49 @@ mod tests {
     fn parse() {
         assert_eq!(
             "4s".parse::<Tile>().unwrap(),
-            Tile::Souzu(order_of(4, false))
+            Tile::Suozi(order_of(4, false))
         );
         assert_eq!(
             "5m".parse::<Tile>().unwrap(),
-            Tile::Manzu(order_of(5, false))
+            Tile::Wanzi(order_of(5, false))
         );
         assert_eq!(
             "6p".parse::<Tile>().unwrap(),
-            Tile::Pinzu(order_of(6, false))
+            Tile::Tongzi(order_of(6, false))
         );
         assert_eq!(
             "5S".parse::<Tile>().unwrap(),
-            Tile::Souzu(order_of(5, true))
+            Tile::Suozi(order_of(5, true))
         );
         assert_eq!(
             "5M".parse::<Tile>().unwrap(),
-            Tile::Manzu(order_of(5, true))
+            Tile::Wanzi(order_of(5, true))
         );
         assert_eq!(
             "5P".parse::<Tile>().unwrap(),
-            Tile::Pinzu(order_of(5, true))
+            Tile::Tongzi(order_of(5, true))
         );
-        assert_eq!("東".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::East));
-        assert_eq!("南".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::South));
-        assert_eq!("西".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::West));
-        assert_eq!("北".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::North));
-        assert_eq!("白".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::Haku));
-        assert_eq!("發".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::Hatu));
-        assert_eq!("中".parse::<Tile>().unwrap(), Tile::Jihai(Jihai::Chun));
+        assert_eq!("東".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::East));
+        assert_eq!("南".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::South));
+        assert_eq!("西".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::West));
+        assert_eq!("北".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::North));
+        assert_eq!("白".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Bai));
+        assert_eq!("發".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Fa));
+        assert_eq!("中".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Zhong));
         assert!("あ".parse::<Tile>().is_err());
         assert!("あい".parse::<Tile>().is_err());
     }
 
     #[test]
     fn ordering() {
-        let s4 = Tile::Souzu(order_of(4, false));
-        let m5 = Tile::Manzu(order_of(5, false));
-        let p6 = Tile::Pinzu(order_of(6, false));
-        let rs5 = Tile::Souzu(order_of(5, true));
-        let rm5 = Tile::Manzu(order_of(5, true));
-        let rp5 = Tile::Pinzu(order_of(5, true));
-        let east = Tile::Jihai(Jihai::East);
-        let west = Tile::Jihai(Jihai::West);
+        let s4 = Tile::Suozi(order_of(4, false));
+        let m5 = Tile::Wanzi(order_of(5, false));
+        let p6 = Tile::Tongzi(order_of(6, false));
+        let rs5 = Tile::Suozi(order_of(5, true));
+        let rm5 = Tile::Wanzi(order_of(5, true));
+        let rp5 = Tile::Tongzi(order_of(5, true));
+        let east = Tile::Zipai(Zipai::East);
+        let west = Tile::Zipai(Zipai::West);
 
         assert!(s4 < m5);
         assert!(m5 > s4);
@@ -582,19 +582,19 @@ mod tests {
 
     #[test]
     fn next_prev() {
-        let s4 = Tile::Souzu(order_of(4, false));
-        let s5 = Tile::Souzu(order_of(5, false));
-        let m4 = Tile::Manzu(order_of(4, false));
-        let rm5 = Tile::Manzu(order_of(5, true));
-        let m9 = Tile::Manzu(order_of(9, false));
-        let m1 = Tile::Manzu(order_of(1, false));
-        let east = Tile::Jihai(Jihai::East);
-        let south = Tile::Jihai(Jihai::South);
-        let west = Tile::Jihai(Jihai::West);
-        let north = Tile::Jihai(Jihai::North);
-        let haku = Tile::Jihai(Jihai::Haku);
-        let hatu = Tile::Jihai(Jihai::Hatu);
-        let chun = Tile::Jihai(Jihai::Chun);
+        let s4 = Tile::Suozi(order_of(4, false));
+        let s5 = Tile::Suozi(order_of(5, false));
+        let m4 = Tile::Wanzi(order_of(4, false));
+        let rm5 = Tile::Wanzi(order_of(5, true));
+        let m9 = Tile::Wanzi(order_of(9, false));
+        let m1 = Tile::Wanzi(order_of(1, false));
+        let east = Tile::Zipai(Zipai::East);
+        let south = Tile::Zipai(Zipai::South);
+        let west = Tile::Zipai(Zipai::West);
+        let north = Tile::Zipai(Zipai::North);
+        let haku = Tile::Zipai(Zipai::Bai);
+        let hatu = Tile::Zipai(Zipai::Fa);
+        let chun = Tile::Zipai(Zipai::Zhong);
 
         assert_eq!(s4.wrapping_next(), s5);
         assert_eq!(s5.wrapping_prev(), s4);
@@ -622,31 +622,22 @@ mod tests {
     }
 
     #[test]
-    fn yakuhai() {
+    fn fanpai() {
         let make_ctx = |player: Direction, place: Direction| Context {
             player,
             place,
             ..Context::default()
         };
 
-        let east = Tile::Jihai(Jihai::East);
-        let haku = Tile::Jihai(Jihai::Haku);
+        let east = Tile::Zipai(Zipai::East);
+        let bai = Tile::Zipai(Zipai::Bai);
 
+        assert_eq!(east.num_fan(&make_ctx(Direction::East, Direction::East)), 2);
+        assert_eq!(east.num_fan(&make_ctx(Direction::East, Direction::West)), 1);
         assert_eq!(
-            east.num_yakuhai(&make_ctx(Direction::East, Direction::East)),
-            2
-        );
-        assert_eq!(
-            east.num_yakuhai(&make_ctx(Direction::East, Direction::West)),
-            1
-        );
-        assert_eq!(
-            east.num_yakuhai(&make_ctx(Direction::North, Direction::West)),
+            east.num_fan(&make_ctx(Direction::North, Direction::West)),
             0
         );
-        assert_eq!(
-            haku.num_yakuhai(&make_ctx(Direction::East, Direction::East)),
-            1
-        );
+        assert_eq!(bai.num_fan(&make_ctx(Direction::East, Direction::East)), 1);
     }
 }

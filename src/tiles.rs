@@ -14,15 +14,15 @@ pub enum Error {
 
     /// ポンの長さが変、または全ての牌が同じではない。
     #[fail(display = "変なポンです: {}", 0)]
-    InvalidPon(Tiles),
+    InvalidPeng(Tiles),
 
     /// チーの長さが変、または牌の番号が連続していない。例 : 2s4s5s
     #[fail(display = "変なチーです: {}", 0)]
-    InvalidQi(Tiles),
+    InvalidChi(Tiles),
 
     /// カンの長さが変、または全ての牌が同じではない。
     #[fail(display = "変なカンです: {}", 0)]
-    InvalidKan(Tiles),
+    InvalidGang(Tiles),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -87,27 +87,27 @@ impl Tiles {
     ///
     /// - 枚数が 3 枚かどうか
     /// - 刻子になっているかどうか
-    pub fn check_pon(self) -> Result<Tiles> {
+    pub fn check_peng(self) -> Result<Tiles> {
         if self.len() != 3 {
-            return Err(Error::InvalidPon(self));
+            return Err(Error::InvalidPeng(self));
         }
 
-        self.check_kotu()
+        self.check_kezi()
     }
 
     /// チーを確認する。
     ///
     /// - 枚数が 3 枚かどうか
     /// - 順子になっているかどうか
-    pub fn check_qi(self) -> Result<Tiles> {
+    pub fn check_chi(self) -> Result<Tiles> {
         if self.len() != 3 {
-            return Err(Error::InvalidPon(self));
+            return Err(Error::InvalidPeng(self));
         }
 
         let mut expect = self[0];
         for tile in self.inner() {
             if *tile != expect {
-                return Err(Error::InvalidQi(self));
+                return Err(Error::InvalidChi(self));
             }
             expect = expect.wrapping_next();
         }
@@ -119,20 +119,20 @@ impl Tiles {
     ///
     /// - 枚数が 4 枚かどうか
     /// - 刻子になっているかどうか
-    pub fn check_kan(self) -> Result<Tiles> {
+    pub fn check_gang(self) -> Result<Tiles> {
         if self.len() != 4 {
-            return Err(Error::InvalidPon(self));
+            return Err(Error::InvalidPeng(self));
         }
 
-        self.check_kotu()
+        self.check_kezi()
     }
 
     /// 刻子かどうか確認する
-    fn check_kotu(self) -> Result<Tiles> {
+    fn check_kezi(self) -> Result<Tiles> {
         let expect = &self[0];
         for tile in &self[1..] {
             if tile != expect {
-                return Err(Error::InvalidPon(self));
+                return Err(Error::InvalidPeng(self));
             }
         }
 

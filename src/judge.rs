@@ -36,8 +36,8 @@ impl Judge {
         forms.sort();
 
         // もし真の役満が含まれているなら、それ以外を除く。
-        if forms.iter().any(|form| form.point().is_true_yakuman()) {
-            forms.retain(|form| form.point().is_true_yakuman());
+        if forms.iter().any(|form| form.point().is_true_yiman()) {
+            forms.retain(|form| form.point().is_true_yiman());
         }
     }
 
@@ -119,7 +119,7 @@ impl fmt::Display for Judge {
         write!(
             b,
             "{}",
-            self.total.display_full(self.tilesets().context.is_oya())
+            self.total.display_full(self.tilesets().context.is_parent())
         )
     }
 }
@@ -130,13 +130,13 @@ pub fn judge(tilesets: &Tilesets) -> Option<Judge> {
 
 fn judge_all(tilesets: &Tilesets) -> impl Iterator<Item = Judge> {
     let qiduizi = judge_qiduizi(&tilesets);
-    let kokusimusou = judge_kokusimusou(&tilesets);
+    let kokushimuso = judge_kokushimuso(&tilesets);
     let jiulianbaodeng = judge_jiulianbaodeng(&tilesets);
     let agari = (AgariTilesets::enumerate(tilesets).into_iter()).filter_map(judge_agari);
 
     agari
         .chain(qiduizi)
-        .chain(kokusimusou)
+        .chain(kokushimuso)
         .chain(jiulianbaodeng)
 }
 
@@ -167,8 +167,8 @@ fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
     forms.extend(check_duiduihe(&agari));
     forms.extend(check_hunquandaiyaojiu_chunquandaiyaojiu(&agari));
     forms.extend(check_sangangzi_sigangzi(&agari));
-    forms.extend(check_shousangen(&agari));
-    forms.extend(check_daisangen(&agari));
+    forms.extend(check_shousanyuan(&agari));
+    forms.extend(check_daisanyuan(&agari));
     forms.extend(check_shousushi_daisushi(&agari));
 
     Judge::from_agaritilesets(agari, forms)
@@ -180,8 +180,8 @@ fn judge_qiduizi(tilesets: &Tilesets) -> Option<Judge> {
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
 }
 
-fn judge_kokusimusou(tilesets: &Tilesets) -> Option<Judge> {
-    crate::form::special_check_kokusimusou(tilesets)
+fn judge_kokushimuso(tilesets: &Tilesets) -> Option<Judge> {
+    crate::form::special_check_kokushimuso(tilesets)
         .map(|k| forms_for_all_base(tilesets).chain(once(k)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
 }
@@ -204,7 +204,7 @@ impl<'a> FuCalculator<'a> {
 
     fn calculate(&self) -> u32 {
         // 平和ツモは一律 20 符
-        if self.is_pinghe_tumo() {
+        if self.is_pinghe_zimo() {
             return 20;
         }
 
@@ -215,80 +215,80 @@ impl<'a> FuCalculator<'a> {
         let agari_fu = self.calc_agari_fu();
 
         // 刻子、槓によるボーナス
-        let kotu_fu = self.calc_kotu_fu();
+        let kezi_fu = self.calc_kezi_fu();
 
         // 雀頭によるボーナス
-        let janto_fu = self.calc_janto_fu();
+        let quetou_fu = self.calc_quetou_fu();
 
         // 待ちによるボーナス
         let machi_fu = self.calc_machi_fu();
 
-        let base = fudi + agari_fu + kotu_fu + janto_fu + machi_fu;
+        let base = fudi + agari_fu + kezi_fu + quetou_fu + machi_fu;
         let ceiled = (base + 9) / 10 * 10;
 
         // 喰い平和形では 20 符となるが、このときは 30 符に引き上げる
-        if !self.agari.tilesets.is_tumo && ceiled == 20 {
+        if !self.agari.tilesets.is_zimo && ceiled == 20 {
             return 30;
         }
 
         ceiled
     }
 
-    fn is_pinghe_tumo(&self) -> bool {
-        self.agari.tilesets.is_tumo && self.forms.iter().any(|&form| form == Form::Pinghe)
+    fn is_pinghe_zimo(&self) -> bool {
+        self.agari.tilesets.is_zimo && self.forms.iter().any(|&form| form == Form::Pinghe)
     }
 
     fn calc_agari_fu(&self) -> u32 {
-        if self.agari.tilesets.is_tumo {
+        if self.agari.tilesets.is_zimo {
             2
-        } else if self.agari.tilesets.is_menzen() {
+        } else if self.agari.tilesets.is_menqian() {
             10
         } else {
             0
         }
     }
 
-    fn calc_kotu_fu(&self) -> u32 {
+    fn calc_kezi_fu(&self) -> u32 {
         let mut res = 0;
 
         // 明刻 (槓を除く)
-        res += (self.agari.tilesets.pons.iter())
-            .chain(self.agari.ronmin.iter_minko())
+        res += (self.agari.tilesets.pengs.iter())
+            .chain(self.agari.rongming.iter_mingke())
             .map(|tiles| tiles.first())
-            .map(|tile| if tile.is_chunchan() { 2 } else { 4 })
+            .map(|tile| if tile.is_zhongzhang() { 2 } else { 4 })
             .sum::<u32>();
 
         // 暗刻 (槓を除く)
-        res += (self.agari.kotus_in_hand())
+        res += (self.agari.kezis_in_hand())
             .map(|tiles| tiles.first())
-            .map(|tile| if tile.is_chunchan() { 4 } else { 8 })
+            .map(|tile| if tile.is_zhongzhang() { 4 } else { 8 })
             .sum::<u32>();
 
         // 明槓
-        res += (self.agari.tilesets.minkans.iter())
+        res += (self.agari.tilesets.minggangs.iter())
             .map(|tiles| tiles.first())
-            .map(|tile| if tile.is_chunchan() { 8 } else { 16 })
+            .map(|tile| if tile.is_zhongzhang() { 8 } else { 16 })
             .sum::<u32>();
 
         // 暗槓
-        res += (self.agari.tilesets.ankans.iter())
+        res += (self.agari.tilesets.angangs.iter())
             .map(|tiles| tiles.first())
-            .map(|tile| if tile.is_chunchan() { 16 } else { 32 })
+            .map(|tile| if tile.is_zhongzhang() { 16 } else { 32 })
             .sum::<u32>();
 
         res
     }
 
-    fn calc_janto_fu(&self) -> u32 {
-        (self.agari.janto())
+    fn calc_quetou_fu(&self) -> u32 {
+        (self.agari.quetou())
             .first()
-            .num_yakuhai(&self.agari.tilesets.context)
+            .num_fan(&self.agari.tilesets.context)
     }
 
     fn calc_machi_fu(&self) -> u32 {
         use crate::agaritilesets::MachiKind;
         match self.agari.machi {
-            MachiKind::Ryanmen | MachiKind::Shanpon => 0,
+            MachiKind::Liangmian | MachiKind::Shuangpeng => 0,
             _ => 2,
         }
     }
@@ -326,7 +326,7 @@ mod tests {
     }
 
     #[test]
-    fn judge_kokusimusou() {
+    fn judge_kokushimuso() {
         let tilesets = parse("1s9s1m9m1p9p東南西北白發中 ツモ中");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
@@ -346,7 +346,7 @@ mod tests {
     }
 
     #[test]
-    fn judge_pon() {
+    fn judge_peng() {
         let tilesets = parse("1p1p1p2p2p2p3p3p3p5p ツモ5P ポン4p4p4p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(

@@ -12,77 +12,77 @@ pub enum MachiKind {
     /// 両面待ち。
     ///
     /// 例: 23 に対して 1,4 を待つ形。
-    Ryanmen,
+    Liangmian,
 
     /// シャンポン待ち。
     ///
     /// 例: 22, 33 に対して 2,3 を待つ形。
-    Shanpon,
+    Shuangpeng,
 
     /// ペンチャン待ち。
     ///
     /// 形上は両面と同じだが、 123 または 789 を構成する 3 か 7 であるために実は1通りしか待ちがな
     /// い形。
-    Penchan,
+    Bianzhang,
 
     /// カンチャン待ち
     ///
     /// 例: 24 に対して間の 3 を待つ形。
-    Kanchan,
+    Qianzhang,
 
     /// 単騎待ち
     ///
     /// 4面子が既に完成していて、雀頭が片方しかない状態。例: 1112223334449 で 9 を待つ形。
-    Tanki,
+    Danqi,
 
     /// ノベタン
     ///
     /// 4枚の数字が連続している形。両端のいずれかが来ればそれを雀頭に残りを順子にすることで上がれ
     /// る。例: 1234 で 1,4 を待つ形。 1 が来れば 11 と 234 、 4 が来れば 123 と 44 になる。
-    Nobetan,
+    Yandan,
 }
 
 impl fmt::Display for MachiKind {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            MachiKind::Ryanmen => write!(b, "両面"),
-            MachiKind::Shanpon => write!(b, "シャンポン"),
-            MachiKind::Penchan => write!(b, "ペンチャン"),
-            MachiKind::Kanchan => write!(b, "カンチャン"),
-            MachiKind::Tanki => write!(b, "単騎"),
-            MachiKind::Nobetan => write!(b, "ノベタン"),
+            MachiKind::Liangmian => write!(b, "両面"),
+            MachiKind::Shuangpeng => write!(b, "シャンポン"),
+            MachiKind::Bianzhang => write!(b, "ペンチャン"),
+            MachiKind::Qianzhang => write!(b, "カンチャン"),
+            MachiKind::Danqi => write!(b, "単騎"),
+            MachiKind::Yandan => write!(b, "ノベタン"),
         }
     }
 }
 
 pub fn enumerate_machis(
-    janto: &Tiles,
-    anjuns: &[Tiles],
-    ankos: &[Tiles],
+    quetou: &Tiles,
+    anshuns: &[Tiles],
+    ankes: &[Tiles],
     last: Tile,
 ) -> Vec<MachiKind> {
-    MachiEnumerator::new(janto, anjuns, ankos, last).enumerate()
+    MachiEnumerator::new(quetou, anshuns, ankes, last).enumerate()
 }
 
 /// 待ちを列挙するヘルパー
 struct MachiEnumerator<'a> {
-    janto: &'a Tiles,
-    anjuns: &'a [Tiles],
-    ankos: &'a [Tiles],
+    quetou: &'a Tiles,
+    anshuns: &'a [Tiles],
+    ankes: &'a [Tiles],
     last: Tile,
 }
 
 impl<'a> MachiEnumerator<'a> {
     fn new(
-        janto: &'a Tiles,
-        anjuns: &'a [Tiles],
-        ankos: &'a [Tiles],
+        quetou: &'a Tiles,
+        anshuns: &'a [Tiles],
+        ankes: &'a [Tiles],
         last: Tile,
     ) -> MachiEnumerator<'a> {
         MachiEnumerator {
-            janto,
-            anjuns,
-            ankos,
+            quetou,
+            anshuns,
+            ankes,
             last,
         }
     }
@@ -91,81 +91,81 @@ impl<'a> MachiEnumerator<'a> {
     fn enumerate(&self) -> Vec<MachiKind> {
         let mut result = Vec::new();
 
-        if self.is_ryanmen() {
-            result.push(MachiKind::Ryanmen);
+        if self.is_liangmian() {
+            result.push(MachiKind::Liangmian);
         }
 
-        if self.is_shanpon() {
-            result.push(MachiKind::Shanpon);
+        if self.is_shuangpeng() {
+            result.push(MachiKind::Shuangpeng);
         }
 
-        if self.is_penchan() {
-            result.push(MachiKind::Penchan);
+        if self.is_bianzhang() {
+            result.push(MachiKind::Bianzhang);
         }
 
-        if self.is_kanchan() {
-            result.push(MachiKind::Kanchan);
+        if self.is_qianzhang() {
+            result.push(MachiKind::Qianzhang);
         }
 
-        if self.is_tanki() {
-            result.push(MachiKind::Tanki);
+        if self.is_danqi() {
+            result.push(MachiKind::Danqi);
         }
 
-        if self.is_nobetan() {
-            result.push(MachiKind::Nobetan);
+        if self.is_yandan() {
+            result.push(MachiKind::Yandan);
         }
 
         result
     }
 
     /// 両面待ちにあたるかどうか。
-    fn is_ryanmen(&self) -> bool {
-        self.is_ryanmen_penchan() == Some(MachiKind::Ryanmen)
+    fn is_liangmian(&self) -> bool {
+        self.is_liangmian_bianzhang() == Some(MachiKind::Liangmian)
     }
 
     /// シャンポン待ちにあたるかどうか。
-    fn is_shanpon(&self) -> bool {
+    fn is_shuangpeng(&self) -> bool {
         // 最後に引いてきたやつが刻子を構成しているなら、雀頭と合わせてシャンポン待ちになっていたは
         // ず。
-        self.ankos.iter().any(|kotu| kotu.first() == self.last)
+        self.ankes.iter().any(|kezi| kezi.first() == self.last)
     }
 
     /// ペンチャン待ちにあたるかどうか。
-    fn is_penchan(&self) -> bool {
-        self.is_ryanmen_penchan() == Some(MachiKind::Penchan)
+    fn is_bianzhang(&self) -> bool {
+        self.is_liangmian_bianzhang() == Some(MachiKind::Bianzhang)
     }
 
     /// カンチャン待ちにあたるかどうか。
-    fn is_kanchan(&self) -> bool {
-        self.anjuns.iter().any(|juntu| juntu.middle() == self.last)
+    fn is_qianzhang(&self) -> bool {
+        (self.anshuns.iter()).any(|shunzi| shunzi.middle() == self.last)
     }
 
     /// 単騎待ちにあたるかどうか。
-    fn is_tanki(&self) -> bool {
-        self.is_tanki_nobetan() == Some(MachiKind::Tanki)
+    fn is_danqi(&self) -> bool {
+        self.is_danqi_yandan() == Some(MachiKind::Danqi)
     }
 
     /// ノベタンにあたるかどうか。
-    fn is_nobetan(&self) -> bool {
-        self.is_tanki_nobetan() == Some(MachiKind::Nobetan)
+    fn is_yandan(&self) -> bool {
+        self.is_danqi_yandan() == Some(MachiKind::Yandan)
     }
 
-    fn is_ryanmen_penchan(&self) -> Option<MachiKind> {
+    fn is_liangmian_bianzhang(&self) -> Option<MachiKind> {
         // まずオーダーをとる。そもそも字牌なら両面もペンチャンもありえない。
         let order_last = self.last.order()?;
 
-        for juntu in self.anjuns.iter() {
+        for shunzi in self.anshuns.iter() {
             // そもそも両端でないなら次へ
-            if self.last != juntu.first() && self.last != juntu.last() {
+            if self.last != shunzi.first() && self.last != shunzi.last() {
                 continue;
             }
 
-            let order_juntu_first = match juntu.first().order() {
+            let order_shunzi_first = match shunzi.first().order() {
                 Some(o) => o,
                 None => continue,
             };
 
-            let order_juntu_last = match juntu.last().order() {
+            let order_shunzi_last = match shunzi.last().order() {
                 Some(o) => o,
                 None => continue,
             };
@@ -176,76 +176,76 @@ impl<'a> MachiEnumerator<'a> {
             // この順子の右端が3かつ3を引いてきた場合か、
             // この順子の左端が7かつ7を引いてきた場合はペンチャン待ち。
             let order_3 = Order::new(3).unwrap();
-            if order_juntu_last == order_3 && order_last == order_3 {
-                return Some(MachiKind::Penchan);
+            if order_shunzi_last == order_3 && order_last == order_3 {
+                return Some(MachiKind::Bianzhang);
             }
 
             let order_7 = Order::new(7).unwrap();
-            if order_juntu_first == order_7 && order_last == order_7 {
-                return Some(MachiKind::Penchan);
+            if order_shunzi_first == order_7 && order_last == order_7 {
+                return Some(MachiKind::Bianzhang);
             }
 
             // ここまでこれば、この牌で両面待ちとできる。
-            return Some(MachiKind::Ryanmen);
+            return Some(MachiKind::Liangmian);
         }
 
         None
     }
 
-    fn is_tanki_nobetan(&self) -> Option<MachiKind> {
+    fn is_danqi_yandan(&self) -> Option<MachiKind> {
         // まず最後の牌が雀頭になっている必要がある。
-        if self.janto.first() != self.last {
+        if self.quetou.first() != self.last {
             return None;
         }
 
         // その上でその牌が順子と連続していなければ単騎待ちとなる。逆にそうでなければノベタンとな
         // る。なぜなら、もしある順子が雀頭と連続していれば、もともと4連続の順子だったところにその両
         // 端の牌を引いてきたことになり、これはノベタンとなるからである。
-        for juntu in self.anjuns {
-            if Some(juntu.first()) == self.last.next() {
-                return Some(MachiKind::Nobetan);
+        for shunzi in self.anshuns {
+            if Some(shunzi.first()) == self.last.next() {
+                return Some(MachiKind::Yandan);
             }
 
-            if Some(juntu.last()) == self.last.prev() {
-                return Some(MachiKind::Nobetan);
+            if Some(shunzi.last()) == self.last.prev() {
+                return Some(MachiKind::Yandan);
             }
         }
 
-        Some(MachiKind::Tanki)
+        Some(MachiKind::Danqi)
     }
 }
 
 /// ロンによる明刻・明順を保持する。
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum RonMin {
-    Minko(Tiles),
-    Minjun(Tiles),
+pub enum Rongming {
+    Mingke(Tiles),
+    Mingshun(Tiles),
     None,
 }
 
-impl RonMin {
-    pub fn minko(&self) -> Option<&Tiles> {
+impl Rongming {
+    pub fn mingke(&self) -> Option<&Tiles> {
         match self {
-            RonMin::Minko(tiles) => Some(tiles),
-            RonMin::Minjun(_) => None,
-            RonMin::None => None,
+            Rongming::Mingke(tiles) => Some(tiles),
+            Rongming::Mingshun(_) => None,
+            Rongming::None => None,
         }
     }
 
-    pub fn minjun(&self) -> Option<&Tiles> {
+    pub fn mingshun(&self) -> Option<&Tiles> {
         match self {
-            RonMin::Minko(_) => None,
-            RonMin::Minjun(tiles) => Some(tiles),
-            RonMin::None => None,
+            Rongming::Mingke(_) => None,
+            Rongming::Mingshun(tiles) => Some(tiles),
+            Rongming::None => None,
         }
     }
 
-    pub fn iter_minko(&self) -> impl Iterator<Item = &Tiles> {
-        self.minko().into_iter()
+    pub fn iter_mingke(&self) -> impl Iterator<Item = &Tiles> {
+        self.mingke().into_iter()
     }
 
-    pub fn iter_minjun(&self) -> impl Iterator<Item = &Tiles> {
-        self.minjun().into_iter()
+    pub fn iter_mingshun(&self) -> impl Iterator<Item = &Tiles> {
+        self.mingshun().into_iter()
     }
 }
 
@@ -254,10 +254,10 @@ impl RonMin {
 pub struct AgariTilesets {
     pub tilesets: Tilesets,
     pub machi: MachiKind,
-    pub ronmin: RonMin,
-    janto: Tiles,
-    kotus_in_hand: Vec<Tiles>,
-    juntus_in_hand: Vec<Tiles>,
+    pub rongming: Rongming,
+    quetou: Tiles,
+    kezis_in_hand: Vec<Tiles>,
+    shunzis_in_hand: Vec<Tiles>,
 }
 
 impl AgariTilesets {
@@ -271,11 +271,11 @@ impl AgariTilesets {
         let mut res = Vec::new();
 
         // 雀頭のありえかたを列挙する
-        for (janto, rest) in enumerate_janto(&hand) {
+        for (quetou, rest) in enumerate_quetou(&hand) {
             // 刻子を全て列挙する
-            for (kotus_in_hand, rest) in enumerate_kotu(&rest) {
+            for (kezis_in_hand, rest) in enumerate_kezi(&rest) {
                 // 順子を全てとりだす
-                let juntus_in_hand = match extract_juntu(rest) {
+                let shunzis_in_hand = match extract_shunzi(rest) {
                     // あがれなかった (取り出し方が不適切、など)
                     None => continue,
 
@@ -285,16 +285,16 @@ impl AgariTilesets {
 
                 // 待ちを全て列挙する
                 let last = tilesets.last;
-                let machis = enumerate_machis(&janto, &juntus_in_hand, &kotus_in_hand, last);
+                let machis = enumerate_machis(&quetou, &shunzis_in_hand, &kezis_in_hand, last);
 
                 // それら全てに対して AgariTilesets を作成する
                 for machi in machis {
                     res.push(AgariTilesets::new(
                         tilesets.clone(),
                         machi,
-                        janto.clone(),
-                        kotus_in_hand.clone(),
-                        juntus_in_hand.clone(),
+                        quetou.clone(),
+                        kezis_in_hand.clone(),
+                        shunzis_in_hand.clone(),
                     ));
                 }
             }
@@ -306,84 +306,89 @@ impl AgariTilesets {
     fn new(
         mut tilesets: Tilesets,
         machi: MachiKind,
-        janto: Tiles,
-        mut kotus_in_hand: Vec<Tiles>,
-        mut juntus_in_hand: Vec<Tiles>,
+        quetou: Tiles,
+        mut kezis_in_hand: Vec<Tiles>,
+        mut shunzis_in_hand: Vec<Tiles>,
     ) -> AgariTilesets {
-        let ronmin = fix_ron_an_mins(
+        let rongming = fix_rong_an_mings(
             &mut tilesets,
-            &janto,
-            &mut kotus_in_hand,
-            &mut juntus_in_hand,
+            &quetou,
+            &mut kezis_in_hand,
+            &mut shunzis_in_hand,
         );
 
         AgariTilesets {
             tilesets,
             machi,
-            ronmin,
-            janto,
-            kotus_in_hand,
-            juntus_in_hand,
+            rongming,
+            quetou,
+            kezis_in_hand,
+            shunzis_in_hand,
         }
     }
 
     /// 手札の刻子。
-    pub fn kotus_in_hand(&self) -> impl Iterator<Item = &Tiles> {
-        self.kotus_in_hand.iter()
+    pub fn kezis_in_hand(&self) -> impl Iterator<Item = &Tiles> {
+        self.kezis_in_hand.iter()
     }
 
     /// 明刻。ポンと明槓、ロンによる明刻を合わせたもの。
-    pub fn minkos(&self) -> impl Iterator<Item = &Tiles> {
+    pub fn mingkes(&self) -> impl Iterator<Item = &Tiles> {
         self.tilesets
-            .pons
+            .pengs
             .iter()
-            .chain(self.tilesets.minkans.iter())
-            .chain(self.ronmin.iter_minko())
+            .chain(self.tilesets.minggangs.iter())
+            .chain(self.rongming.iter_mingke())
     }
 
     /// 暗刻。手札の刻子と暗槓を合わせたもの。
-    pub fn ankos(&self) -> impl Iterator<Item = &Tiles> {
-        self.kotus_in_hand.iter().chain(self.tilesets.ankans.iter())
+    pub fn ankes(&self) -> impl Iterator<Item = &Tiles> {
+        self.kezis_in_hand
+            .iter()
+            .chain(self.tilesets.angangs.iter())
     }
 
     /// 明順。チーとロンによる順子を合わせたもの。
-    pub fn minjuns(&self) -> impl Iterator<Item = &Tiles> {
-        self.tilesets.qis.iter().chain(self.ronmin.iter_minjun())
+    pub fn mingshuns(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets
+            .chis
+            .iter()
+            .chain(self.rongming.iter_mingshun())
     }
 
     /// 暗順。手札の順子のみ。
-    pub fn anjuns(&self) -> impl Iterator<Item = &Tiles> {
-        self.juntus_in_hand.iter()
+    pub fn anshuns(&self) -> impl Iterator<Item = &Tiles> {
+        self.shunzis_in_hand.iter()
     }
 
     /// 刻子。明刻、暗刻を合わせたもの。
-    pub fn kotus(&self) -> impl Iterator<Item = &Tiles> {
-        self.minkos().chain(self.ankos())
+    pub fn kezis(&self) -> impl Iterator<Item = &Tiles> {
+        self.mingkes().chain(self.ankes())
     }
 
     /// 順子。明順、暗順を合わせたもの。
-    pub fn juntus(&self) -> impl Iterator<Item = &Tiles> {
-        self.minjuns().chain(self.anjuns())
+    pub fn shunzis(&self) -> impl Iterator<Item = &Tiles> {
+        self.mingshuns().chain(self.anshuns())
     }
 
     /// 面子。刻子と順子を合わせたもの。
-    pub fn mentus(&self) -> impl Iterator<Item = &Tiles> {
-        self.kotus().chain(self.juntus())
+    pub fn mianzis(&self) -> impl Iterator<Item = &Tiles> {
+        self.kezis().chain(self.shunzis())
     }
 
     /// 雀頭。
-    pub fn janto(&self) -> &Tiles {
-        &self.janto
+    pub fn quetou(&self) -> &Tiles {
+        &self.quetou
     }
 }
 
 impl fmt::Display for AgariTilesets {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
-        for mentu in self.mentus() {
-            write!(b, "{} ", mentu)?;
+        for mianzi in self.mianzis() {
+            write!(b, "{} ", mianzi)?;
         }
 
-        write!(b, "{} ", self.janto())?;
+        write!(b, "{} ", self.quetou())?;
         write!(b, "待ち: {}", self.machi)?;
 
         Ok(())
@@ -392,15 +397,15 @@ impl fmt::Display for AgariTilesets {
 
 /// ロンによる暗刻と明刻を調整する。ロンによってできた刻子は明刻として扱うルールがあるため、最初は
 /// 手牌の暗刻として扱われているものを一つ明刻へ移さなければならない。
-fn fix_ron_an_mins(
+fn fix_rong_an_mings(
     tilesets: &mut Tilesets,
-    janto: &Tiles,
-    kotus_in_hand: &mut Vec<Tiles>,
-    juntus_in_hand: &mut Vec<Tiles>,
-) -> RonMin {
+    quetou: &Tiles,
+    kezis_in_hand: &mut Vec<Tiles>,
+    shunzis_in_hand: &mut Vec<Tiles>,
+) -> Rongming {
     // ツモなら関係がない。
-    if tilesets.is_tumo {
-        return RonMin::None;
+    if tilesets.is_zimo {
+        return Rongming::None;
     }
 
     let last = tilesets.last;
@@ -408,27 +413,27 @@ fn fix_ron_an_mins(
     // まず、暗順に `last` を含む順子があるなら、ロンした牌は常にその順子を作ったと考える。刻子では
     // 暗刻か明刻かが重要になるのに対し、順子に関しては鳴いたかどうかは問題でも暗順か明順かの区別は
     // 一切無関係である。よって、どのような場合も常に順子を優先的に明順にする方がよい。
-    for anjuns in &mut [juntus_in_hand] {
-        if let Some(pos) = anjuns.iter().position(|jun| jun.contains(&last)) {
-            return RonMin::Minjun(anjuns.remove(pos));
+    for anshuns in &mut [shunzis_in_hand] {
+        if let Some(pos) = anshuns.iter().position(|jun| jun.contains(&last)) {
+            return Rongming::Mingshun(anshuns.remove(pos));
         }
     }
 
     // そうでないなら仕方ないので刻子を確認する。
-    for ankos in &mut [kotus_in_hand, &mut tilesets.ankans] {
-        if let Some(pos) = ankos.iter().position(|ko| ko.contains(&last)) {
-            return RonMin::Minko(ankos.remove(pos));
+    for ankes in &mut [kezis_in_hand, &mut tilesets.angangs] {
+        if let Some(pos) = ankes.iter().position(|ko| ko.contains(&last)) {
+            return Rongming::Mingke(ankes.remove(pos));
         }
     }
 
     // いずれでもなければ必ず雀頭になっているはず。
     assert_eq!(
         tilesets.last,
-        janto.first(),
+        quetou.first(),
         "ロンした牌によって順子も刻子も雀頭も作られていません。"
     );
 
-    RonMin::None
+    Rongming::None
 }
 
 fn range_same_tiles(tiles: &Tiles) -> Vec<Range<usize>> {
@@ -455,7 +460,7 @@ fn range_same_tiles(tiles: &Tiles) -> Vec<Range<usize>> {
 }
 
 /// 雀頭を全てのパターンで抽出して列挙する。
-fn enumerate_janto(tiles: &Tiles) -> Vec<(Tiles, Tiles)> {
+fn enumerate_quetou(tiles: &Tiles) -> Vec<(Tiles, Tiles)> {
     range_same_tiles(tiles)
         .into_iter()
         .filter(|range| range.len() >= 2)
@@ -468,7 +473,7 @@ fn enumerate_janto(tiles: &Tiles) -> Vec<(Tiles, Tiles)> {
 }
 
 /// 刻子を全てのパターンで抽出して列挙する。
-fn enumerate_kotu(tiles: &Tiles) -> Vec<(Vec<Tiles>, Tiles)> {
+fn enumerate_kezi(tiles: &Tiles) -> Vec<(Vec<Tiles>, Tiles)> {
     assert!(
         tiles.len() % 3 == 0,
         "残りの牌の個数が3の倍数ではありません : {}",
@@ -494,7 +499,7 @@ fn enumerate_kotu(tiles: &Tiles) -> Vec<(Vec<Tiles>, Tiles)> {
         let mut tiles = tiles.clone();
 
         // set で指定された牌を集合にしたもの。
-        let mut kotus = Vec::new();
+        let mut kezis = Vec::new();
 
         // 抜きとった要素の個数。
         let mut num_removed = 0;
@@ -508,25 +513,25 @@ fn enumerate_kotu(tiles: &Tiles) -> Vec<(Vec<Tiles>, Tiles)> {
 
                 // 修正した range の牌を抜きとる。
                 num_removed += range.len();
-                kotus.push(Tiles::new(tiles.drain(range).collect()));
+                kezis.push(Tiles::new(tiles.drain(range).collect()));
             }
         }
 
         assert_eq!(
             set.count_ones() as usize,
-            kotus.len(),
+            kezis.len(),
             "to_use で立っているビットの個数と実際に選ばれた Tiles の個数が違います。"
         );
 
         // 分解した刻子と残った牌をおいておく。
-        res.push((kotus, tiles));
+        res.push((kezis, tiles));
     }
 
     res
 }
 
 /// 刻子をのぞいた牌から順子を貪欲に分解する。
-fn extract_juntu(mut tiles: Tiles) -> Option<Vec<Tiles>> {
+fn extract_shunzi(mut tiles: Tiles) -> Option<Vec<Tiles>> {
     assert!(
         tiles.len() % 3 == 0,
         "残りの牌の個数が3の倍数ではありません : {}",
@@ -537,12 +542,12 @@ fn extract_juntu(mut tiles: Tiles) -> Option<Vec<Tiles>> {
     // 「最大」であることに依存するのでソートされている必要がある。
 
     // assert!(
-    //     juntu_tiles.is_sorted(),
+    //     shunzi_tiles.is_sorted(),
     //     "順子がソートされていません。"
     // );
 
     // 残りは順子しかないはずなので貪欲に分解する。
-    let mut juntus = Vec::new();
+    let mut shunzis = Vec::new();
 
     // なくなるまでループ
     while !tiles.is_empty() {
@@ -565,10 +570,10 @@ fn extract_juntu(mut tiles: Tiles) -> Option<Vec<Tiles>> {
         assert_eq!(mid.next(), Some(last));
         assert!(tiles.len() % 3 == 0);
 
-        juntus.push(Tiles::new(vec![first, mid, last]));
+        shunzis.push(Tiles::new(vec![first, mid, last]));
     }
 
-    Some(juntus)
+    Some(shunzis)
 }
 
 #[cfg(test)]
@@ -579,47 +584,47 @@ mod tests {
 
     #[test]
     fn machi() {
-        let janto = &"4s4s".parse().unwrap();
-        let anjuns = &["1s2s3s".parse().unwrap()];
-        let ankos = &[
+        let quetou = &"4s4s".parse().unwrap();
+        let anshuns = &["1s2s3s".parse().unwrap()];
+        let ankes = &[
             "1s1s1s".parse().unwrap(),
             "1m1m1m".parse().unwrap(),
             "2m2m2m".parse().unwrap(),
         ];
 
         assert_eq!(
-            &[MachiKind::Ryanmen, MachiKind::Shanpon],
-            &*enumerate_machis(janto, anjuns, ankos, "1s".parse().unwrap())
+            &[MachiKind::Liangmian, MachiKind::Shuangpeng],
+            &*enumerate_machis(quetou, anshuns, ankes, "1s".parse().unwrap())
         );
 
         assert_eq!(
-            &[MachiKind::Kanchan],
-            &*enumerate_machis(janto, anjuns, ankos, "2s".parse().unwrap())
+            &[MachiKind::Qianzhang],
+            &*enumerate_machis(quetou, anshuns, ankes, "2s".parse().unwrap())
         );
 
         assert_eq!(
-            &[MachiKind::Penchan],
-            &*enumerate_machis(janto, anjuns, ankos, "3s".parse().unwrap())
+            &[MachiKind::Bianzhang],
+            &*enumerate_machis(quetou, anshuns, ankes, "3s".parse().unwrap())
         );
 
         assert_eq!(
-            &[MachiKind::Shanpon],
-            &*enumerate_machis(janto, anjuns, ankos, "1m".parse().unwrap())
+            &[MachiKind::Shuangpeng],
+            &*enumerate_machis(quetou, anshuns, ankes, "1m".parse().unwrap())
         );
 
         assert_eq!(
-            &[MachiKind::Kanchan, MachiKind::Tanki],
+            &[MachiKind::Qianzhang, MachiKind::Danqi],
             &*enumerate_machis(
                 &"2s2s".parse().unwrap(),
-                anjuns,
-                ankos,
+                anshuns,
+                ankes,
                 "2s".parse().unwrap()
             )
         );
 
         assert_eq!(
-            &[MachiKind::Nobetan],
-            &*enumerate_machis(janto, anjuns, ankos, "4s".parse().unwrap())
+            &[MachiKind::Yandan],
+            &*enumerate_machis(quetou, anshuns, ankes, "4s".parse().unwrap())
         );
     }
 
@@ -630,7 +635,7 @@ mod tests {
     fn tilesets(hand: &str, last: &str) -> Tilesets {
         let tilesets = vec![
             Tileset::new(Tag::Hand, tiles(hand)).unwrap(),
-            Tileset::new(Tag::Tumo, tiles(last)).unwrap(),
+            Tileset::new(Tag::Zimo, tiles(last)).unwrap(),
             Tileset::new(Tag::Dora, Tiles::new(Vec::new())).unwrap(),
         ];
 
@@ -644,9 +649,9 @@ mod tests {
     }
 
     #[test]
-    fn janto() {
+    fn quetou() {
         let hand = tiles("1s1s1s2s2s2s3s3s3s4s4s4s東東");
-        let cands = enumerate_janto(&hand);
+        let cands = enumerate_quetou(&hand);
 
         assert_eq!(
             cands,

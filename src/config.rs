@@ -32,37 +32,37 @@ impl fmt::Display for Direction {
 
 /// どの種類のリーチか。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Riichi {
+pub enum Lizhi {
     /// 立直なし
     None,
 
     /// 立直
-    Riichi,
+    Lizhi,
 
     /// 立直一発
-    RiichiIppatu,
+    LizhiIppatsu,
 
     /// ダブル立直
-    DoubleRiichi,
+    DoubleLizhi,
 
     /// ダブル立直一発
-    DoubleRiichiIppatu,
+    DoubleLizhiIppatsu,
 }
 
 /// アガリ牌がどういうものだったか。
 #[derive(Debug, Clone, Copy)]
 pub enum LastDraw {
     /// ツモ
-    Tumo,
+    Zimo,
 
     /// ロン
-    Ron,
+    Ronghe,
 }
 
 /// 牌を解釈する状況。
 #[derive(Debug, Clone)]
 pub struct Context {
-    pub riichi: Riichi,
+    pub lizhi: Lizhi,
     pub lucky_forms: Vec<Form>,
     pub place: Direction,
     pub player: Direction,
@@ -70,7 +70,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn is_oya(&self) -> bool {
+    pub fn is_parent(&self) -> bool {
         self.player == Direction::East
     }
 }
@@ -78,7 +78,7 @@ impl Context {
 impl Default for Context {
     fn default() -> Context {
         Context {
-            riichi: Riichi::None,
+            lizhi: Lizhi::None,
             lucky_forms: Vec::new(),
             place: Direction::East,
             player: Direction::East,
