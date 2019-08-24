@@ -1150,6 +1150,10 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
     for tiles in agari.mianzis().chain(once(agari.quetou())) {
         // その面子の牌の全てが中張牌であれば対象の役のどれも成立しえないので放置。
         if tiles.iter().all(|&tile| tile.is_zhongzhang()) {
+            info!(
+                "    全てが中張牌で構成された面子{}があったため、いずれも成立しません。",
+                tiles
+            );
             return None;
         }
 
