@@ -127,10 +127,13 @@ impl fmt::Display for Judge {
 
 pub fn judge(tilesets: &Tilesets) -> Option<Judge> {
     info!("判定を開始します。");
-    info!("対象: {:#?}", tilesets);
+    info!("対象: {}", tilesets);
     let res = judge_all(tilesets).max();
-    info!("判定が終わりました。結論は {:?}", res);
 
+    info!(
+        "判定が終わりました。結論は: {:?}",
+        res.as_ref().map(|j| j.to_string())
+    );
     res
 }
 
@@ -159,7 +162,7 @@ fn forms_for_all_base(tilesets: &Tilesets) -> impl Iterator<Item = Form> {
 }
 
 fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
-    info!("-> 次のアガリ形について判定: {:#?}", agari);
+    info!("-> 次のアガリ形について判定: {}", agari);
     use crate::form::*;
 
     let mut forms = Vec::with_capacity(10);
