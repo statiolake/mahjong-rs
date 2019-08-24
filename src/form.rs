@@ -46,14 +46,14 @@ impl Point {
 
     pub fn new_yiman() -> Point {
         Point {
-            fan: 0,
+            fan: 13,
             fu: 0,
             yiman: 1,
         }
     }
 
     pub fn is_yiman(self) -> bool {
-        self.is_true_yiman() || self.fan >= 13
+        self.fan >= 13
     }
 
     pub fn is_true_yiman(self) -> bool {
@@ -177,7 +177,7 @@ impl Ord for Point {
 
 impl fmt::Display for Point {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
-        let fan = 13 * self.yiman + self.fan;
+        let fan = self.fan;
         let fu = self.fu;
 
         if fu == 0 || fan > 4 {
