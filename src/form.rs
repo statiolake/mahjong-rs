@@ -801,7 +801,7 @@ pub fn special_check_qinglaotou(tilesets: &Tilesets) -> Option<Form> {
 pub fn check_fanpai(agari: &AgariTilesets) -> Option<Form> {
     let mut sum = 0;
     for tile in agari.kezis() {
-        sum += tile.first().num_fan(&agari.tilesets.context);
+        sum += tile.first().num_fan(agari.context());
     }
 
     if sum != 0 {
@@ -817,10 +817,10 @@ pub fn check_fanpai(agari: &AgariTilesets) -> Option<Form> {
 /// - 雀頭が役牌でない。
 /// - 両面待ちである。
 pub fn check_pinghe(agari: &AgariTilesets) -> Option<Form> {
-    if agari.tilesets.is_menqian()
+    if agari.is_menqian()
         && agari.shunzis().count() == 4
         && agari.quetou().first().kind() == TileKind::Zipai
-        && agari.machi == MachiKind::Liangmian
+        && agari.machi() == MachiKind::Liangmian
     {
         Some(Form::Pinghe)
     } else {
@@ -838,7 +838,7 @@ pub fn check_pinghe(agari: &AgariTilesets) -> Option<Form> {
 /// 〈二盃口〉
 /// - 同種の牌で同じ順序の順子が2面子、これが2組ある。一盃口二つ。
 pub fn check_yibeikou_liangbeigou(agari: &AgariTilesets) -> Option<Form> {
-    if !agari.tilesets.is_menqian() {
+    if !agari.is_menqian() {
         return None;
     }
 
@@ -886,7 +886,7 @@ pub fn check_sanshoku_dojun(agari: &AgariTilesets) -> Option<Form> {
 
     if does_match {
         // 喰い下がりがあるので注意。
-        Some(Form::Sanshokudojun(agari.tilesets.is_menqian()))
+        Some(Form::Sanshokudojun(agari.is_menqian()))
     } else {
         None
     }
@@ -925,7 +925,7 @@ pub fn check_sanshoku_doko(agari: &AgariTilesets) -> Option<Form> {
 /// - 暗刻が3つある
 pub fn check_sananke_sianke(agari: &AgariTilesets) -> Option<Form> {
     if agari.ankes().count() == 4 {
-        Some(Form::Sianke(agari.machi == MachiKind::Danqi))
+        Some(Form::Sianke(agari.machi() == MachiKind::Danqi))
     } else if agari.ankes().count() == 3 {
         Some(Form::Sananke)
     } else {
@@ -949,7 +949,7 @@ pub fn check_ikki_tukan(agari: &AgariTilesets) -> Option<Form> {
     });
 
     if does_match {
-        Some(Form::Ikkitsukan(agari.tilesets.is_menqian()))
+        Some(Form::Ikkitsukan(agari.is_menqian()))
     } else {
         None
     }
@@ -987,8 +987,8 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
     }
 
     match (has_zipai, has_zhongzhang) {
-        (false, true) => Some(Form::Chunquandaiyaojiu(agari.tilesets.is_menqian())),
-        (true, true) => Some(Form::Hunquandaiyaojiu(agari.tilesets.is_menqian())),
+        (false, true) => Some(Form::Chunquandaiyaojiu(agari.is_menqian())),
+        (true, true) => Some(Form::Hunquandaiyaojiu(agari.is_menqian())),
         // 混老頭は別扱いのため、ここでは None
         _ => None,
     }
@@ -1001,7 +1001,7 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
 /// 〈三槓子〉
 /// - 槓を3回行う
 pub fn check_sangangzi_sigangzi(agari: &AgariTilesets) -> Option<Form> {
-    match agari.tilesets.angangs.len() + agari.tilesets.minggangs.len() {
+    match agari.angangs().count() + agari.minggangs().count() {
         4 => Some(Form::Sigangzi),
         3 => Some(Form::Sangangzi),
         _ => None,

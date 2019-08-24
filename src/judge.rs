@@ -68,7 +68,7 @@ impl Judge {
     fn tilesets(&self) -> &Tilesets {
         match &self.tilesets {
             JudgeTilesets::Tilesets(tilesets) => tilesets,
-            JudgeTilesets::AgariTilesets(agari) => &agari.tilesets,
+            JudgeTilesets::AgariTilesets(agari) => agari.tilesets(),
         }
     }
 }
@@ -156,7 +156,7 @@ fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
     use crate::form::*;
 
     let mut forms = Vec::with_capacity(10);
-    forms.extend(forms_for_all_base(&agari.tilesets));
+    forms.extend(forms_for_all_base(agari.tilesets()));
     forms.extend(check_fanpai(&agari));
     forms.extend(check_pinghe(&agari));
     forms.extend(check_yibeikou_liangbeigou(&agari));
@@ -227,7 +227,7 @@ impl<'a> FuCalculator<'a> {
         let ceiled = (base + 9) / 10 * 10;
 
         // 喰い平和形では 20 符となるが、このときは 30 符に引き上げる
-        if !self.agari.tilesets.is_zimo && ceiled == 20 {
+        if !self.agari.is_zimo() && ceiled == 20 {
             return 30;
         }
 
@@ -235,13 +235,13 @@ impl<'a> FuCalculator<'a> {
     }
 
     fn is_pinghe_zimo(&self) -> bool {
-        self.agari.tilesets.is_zimo && self.forms.iter().any(|&form| form == Form::Pinghe)
+        self.agari.is_zimo() && self.forms.iter().any(|&form| form == Form::Pinghe)
     }
 
     fn calc_agari_fu(&self) -> u32 {
-        if self.agari.tilesets.is_zimo {
+        if self.agari.is_zimo() {
             2
-        } else if self.agari.tilesets.is_menqian() {
+        } else if self.agari.is_menqian() {
             10
         } else {
             0
@@ -252,8 +252,8 @@ impl<'a> FuCalculator<'a> {
         let mut res = 0;
 
         // 明刻 (槓を除く)
-        res += (self.agari.tilesets.pengs.iter())
-            .chain(self.agari.rongming.iter_mingke())
+        res += (self.agari.pengs())
+            .chain(self.agari.ronghe_mingke())
             .map(|tiles| tiles.first())
             .map(|tile| if tile.is_zhongzhang() { 2 } else { 4 })
             .sum::<u32>();
@@ -265,13 +265,13 @@ impl<'a> FuCalculator<'a> {
             .sum::<u32>();
 
         // 明槓
-        res += (self.agari.tilesets.minggangs.iter())
+        res += (self.agari.minggangs())
             .map(|tiles| tiles.first())
             .map(|tile| if tile.is_zhongzhang() { 8 } else { 16 })
             .sum::<u32>();
 
         // 暗槓
-        res += (self.agari.tilesets.angangs.iter())
+        res += (self.agari.angangs())
             .map(|tiles| tiles.first())
             .map(|tile| if tile.is_zhongzhang() { 16 } else { 32 })
             .sum::<u32>();
@@ -280,14 +280,12 @@ impl<'a> FuCalculator<'a> {
     }
 
     fn calc_quetou_fu(&self) -> u32 {
-        (self.agari.quetou())
-            .first()
-            .num_fan(&self.agari.tilesets.context)
+        (self.agari.quetou()).first().num_fan(&self.agari.context())
     }
 
     fn calc_machi_fu(&self) -> u32 {
         use crate::agaritilesets::MachiKind;
-        match self.agari.machi {
+        match self.agari.machi() {
             MachiKind::Liangmian | MachiKind::Shuangpeng => 0,
             _ => 2,
         }

@@ -1,7 +1,7 @@
 //! アガリ形を保持する牌集合を定義する。
 
-use crate::tile::Order;
-use crate::tile::Tile;
+use crate::config::Context;
+use crate::tile::{Order, Tile};
 use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;
 use std::fmt;
@@ -252,9 +252,9 @@ impl Rongming {
 /// アガリ形に整理された牌集合たち。
 #[derive(Debug, Clone)]
 pub struct AgariTilesets {
-    pub tilesets: Tilesets,
-    pub machi: MachiKind,
-    pub rongming: Rongming,
+    tilesets: Tilesets,
+    machi: MachiKind,
+    rongming: Rongming,
     quetou: Tiles,
     kezis_in_hand: Vec<Tiles>,
     shunzis_in_hand: Vec<Tiles>,
@@ -327,38 +327,56 @@ impl AgariTilesets {
         }
     }
 
+    /// ポン
+    pub fn pengs(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets.pengs.iter()
+    }
+
+    /// チー
+    pub fn chis(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets.chis.iter()
+    }
+
+    /// 明槓
+    pub fn minggangs(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets.minggangs.iter()
+    }
+
+    /// 暗槓
+    pub fn angangs(&self) -> impl Iterator<Item = &Tiles> {
+        self.tilesets.angangs.iter()
+    }
+
     /// 手札の刻子。
     pub fn kezis_in_hand(&self) -> impl Iterator<Item = &Tiles> {
         self.kezis_in_hand.iter()
     }
 
+    /// 手札の順子。
+    pub fn shunzis_in_hand(&self) -> impl Iterator<Item = &Tiles> {
+        self.shunzis_in_hand.iter()
+    }
+
     /// 明刻。ポンと明槓、ロンによる明刻を合わせたもの。
     pub fn mingkes(&self) -> impl Iterator<Item = &Tiles> {
-        self.tilesets
-            .pengs
-            .iter()
-            .chain(self.tilesets.minggangs.iter())
-            .chain(self.rongming.iter_mingke())
+        self.pengs()
+            .chain(self.minggangs())
+            .chain(self.ronghe_mingke())
     }
 
     /// 暗刻。手札の刻子と暗槓を合わせたもの。
     pub fn ankes(&self) -> impl Iterator<Item = &Tiles> {
-        self.kezis_in_hand
-            .iter()
-            .chain(self.tilesets.angangs.iter())
+        self.kezis_in_hand().chain(self.angangs())
     }
 
     /// 明順。チーとロンによる順子を合わせたもの。
     pub fn mingshuns(&self) -> impl Iterator<Item = &Tiles> {
-        self.tilesets
-            .chis
-            .iter()
-            .chain(self.rongming.iter_mingshun())
+        self.chis().chain(self.ronghe_mingshun())
     }
 
     /// 暗順。手札の順子のみ。
     pub fn anshuns(&self) -> impl Iterator<Item = &Tiles> {
-        self.shunzis_in_hand.iter()
+        self.shunzis_in_hand()
     }
 
     /// 刻子。明刻、暗刻を合わせたもの。
@@ -379,6 +397,41 @@ impl AgariTilesets {
     /// 雀頭。
     pub fn quetou(&self) -> &Tiles {
         &self.quetou
+    }
+
+    /// ロンによる明刻。
+    pub fn ronghe_mingke(&self) -> impl Iterator<Item = &Tiles> {
+        self.rongming.iter_mingke()
+    }
+
+    /// ロンによる明順。
+    pub fn ronghe_mingshun(&self) -> impl Iterator<Item = &Tiles> {
+        self.rongming.iter_mingshun()
+    }
+
+    /// 待ち。
+    pub fn machi(&self) -> MachiKind {
+        self.machi
+    }
+
+    /// 門前かどうか
+    pub fn is_menqian(&self) -> bool {
+        self.tilesets.is_menqian()
+    }
+
+    /// ツモかどうか
+    pub fn is_zimo(&self) -> bool {
+        self.tilesets.is_zimo
+    }
+
+    /// コンテキスト。
+    pub fn context(&self) -> &Context {
+        &self.tilesets.context
+    }
+
+    /// 牌集合。
+    pub fn tilesets(&self) -> &Tilesets {
+        &self.tilesets
     }
 }
 
