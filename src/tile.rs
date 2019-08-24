@@ -229,23 +229,11 @@ impl Tile {
     /// - 東場の東家のようにダブ東である : 2
     pub fn num_fan(self, ctx: &Context) -> u32 {
         match self {
-            Tile::Zipai(zipai) => {
-                let mut res = 0;
-
-                if zipai == ctx.place {
-                    res += 1;
-                }
-
-                if zipai == ctx.player {
-                    res += 1;
-                }
-
-                if self.is_sanyuan() {
-                    res += 1;
-                }
-
-                res
-            }
+            // 場風、自風、三元牌ならそれぞれ +1 する
+            Tile::Zipai(zipai) => [zipai == ctx.place, zipai == ctx.player, self.is_sanyuan()]
+                .iter()
+                .filter(|&&x| x)
+                .count() as _,
             _ => 0,
         }
     }
