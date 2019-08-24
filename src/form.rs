@@ -724,7 +724,7 @@ pub fn special_check_certainform(
         return None;
     }
 
-    // 手札を追加する。
+    // 手札に最後に引いてきた牌を追加する。
     let hand: Tiles = (tilesets.hand.iter().copied())
         .chain(once(tilesets.last))
         .collect();
@@ -743,7 +743,12 @@ pub fn special_check_certainform(
             return Some(form);
         }
 
-        target.pop();
+        target.remove(
+            target
+                .iter()
+                .position(|&tile| tile == add)
+                .expect("追加した牌を見つけられませんでした。"),
+        );
     }
 
     None

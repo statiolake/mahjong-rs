@@ -2,7 +2,7 @@ use crate::tile::{ParseError as ParseTileError, Tile};
 use failure::Fail;
 use std::fmt;
 use std::iter::FromIterator;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::str::FromStr;
 
 /// 牌のかたまりに関するエラー。
@@ -44,10 +44,6 @@ impl Tiles {
 
     pub fn inner(&self) -> &Vec<Tile> {
         &self.0
-    }
-
-    pub fn inner_mut(&mut self) -> &mut Vec<Tile> {
-        &mut self.0
     }
 
     /// 牌のかたまりの最初の牌を確認する。
@@ -138,18 +134,29 @@ impl Tiles {
 
         Ok(self)
     }
+
+    pub fn push(&mut self, tile: Tile) {
+        self.0.push(tile);
+        self.0.sort();
+    }
+
+    pub fn pop(&mut self) -> Option<Tile> {
+        self.0.pop()
+    }
+
+    pub fn remove(&mut self, idx: usize) -> Tile {
+        self.0.remove(idx)
+    }
+
+    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> std::vec::Drain<Tile> {
+        self.0.drain(range)
+    }
 }
 
 impl Deref for Tiles {
     type Target = Vec<Tile>;
     fn deref(&self) -> &Vec<Tile> {
         self.inner()
-    }
-}
-
-impl DerefMut for Tiles {
-    fn deref_mut(&mut self) -> &mut Vec<Tile> {
-        self.inner_mut()
     }
 }
 

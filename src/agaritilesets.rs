@@ -719,11 +719,20 @@ mod tests {
     }
 
     #[test]
-    fn decompose() {
+    fn decompose1() {
         let tilesets = tilesets("1s1s1s2s2s2s3s3s3s4s4s4s東", "東");
         let agaris = AgariTilesets::enumerate(&tilesets);
 
         assert_eq!(agaris.len(), 3);
+        eprintln!("{:#?}", agaris);
+    }
+
+    #[test]
+    fn decompose2() {
+        let tilesets = tilesets("中中中白白白發發發東東東西", "西");
+        let agaris = AgariTilesets::enumerate(&tilesets);
+
+        assert_eq!(agaris.len(), 1);
         eprintln!("{:#?}", agaris);
     }
 }

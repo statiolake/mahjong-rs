@@ -9,7 +9,7 @@
       "type": "cppvsdbg",
       "request": "launch",
       "preLaunchTask": "build_for_test",
-      "program": "./target/debug/deps/mahjong_rs-264e200a74c0ed10.exe",
+      "program": "./target/debug/deps/mahjong-ae45745b42d0a723.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
