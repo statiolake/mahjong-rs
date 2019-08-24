@@ -62,15 +62,15 @@ impl Point {
     }
 
     pub fn value(self, is_parent: bool) -> u32 {
-        info!("点数計算を行います。");
+        info!("-> 点数計算を行います。");
 
         let calc_few = |fan: u32, fu: u32| {
-            info!("少翻の点数計算を行います。");
+            info!("--> 少翻の点数計算を行います。");
 
             // 符の倍率
             let mul = if is_parent { 6 } else { 4 };
             info!(
-                "符の基本の倍率は{}{}倍です。",
+                "    符の基本の倍率は{}{}倍です。",
                 if is_parent { "親なので" } else { "" },
                 mul
             );
@@ -79,16 +79,16 @@ impl Point {
 
             // 最後の +2 は場ゾロあるいはバンバンと呼ばれる。
             let raw = fu * mul * 2u32.pow(fan + 2);
-            info!("補正なしの点数は{}点です。", raw);
+            info!("    補正なしの点数は{}点です。", raw);
 
             if raw > manguan {
                 // 満貫を越えていたら満貫に強制。
-                info!("満貫の点数を越えているため、満貫に強制します。");
+                info!("    満貫の点数を越えているため、満貫に強制します。");
                 manguan
             } else {
                 // それ以外の場合は定義の計算式に従う。百の位以下を切り上げる。
                 let ceiled = crate::utils::ceil_at(raw, 100);
-                info!("切り上げて{}点です。", ceiled);
+                info!("    切り上げて{}点です。", ceiled);
                 ceiled
             }
         };
