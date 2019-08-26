@@ -604,19 +604,19 @@ fn extract_shunzi(mut tiles: Tiles) -> Option<Vec<Tiles>> {
 
     // なくなるまでループ
     while !tiles.is_empty() {
-        fn pop_last(tiles: &mut Tiles, t: Tile) -> Option<Tile> {
+        fn pop_first(tiles: &mut Tiles, t: Tile) -> Option<Tile> {
             // 順序を保ちたいので swap_remove() は使えない
-            tiles.iter().rposition(|&s| s == t).map(|i| tiles.remove(i))
+            tiles.iter().position(|&s| s == t).map(|i| tiles.remove(i))
         }
 
-        // とりあえず最後の牌をとる (前からやるよりたぶんはやいよね？)
-        let last = tiles.pop()?;
+        // とりあえず最初の牌をとる
+        let first = tiles.remove(0);
 
         // 最後の牌の一つ前を見つけてきて取り出す。
-        let mid = pop_last(&mut tiles, last.prev()?)?;
+        let mid = pop_first(&mut tiles, first.next()?)?;
 
         // 真ん中の牌の一つ前を見つけてきて取り出す。
-        let first = pop_last(&mut tiles, mid.prev()?)?;
+        let last = pop_first(&mut tiles, mid.next()?)?;
 
         // 以下はとり方から成立するはずのことたち
         assert_eq!(first.next(), Some(mid));

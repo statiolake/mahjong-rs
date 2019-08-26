@@ -363,12 +363,12 @@ mod tests {
     }
 
     #[test]
-    fn judge_qiduizi() {
+    fn judge_qiduizi_liangbeigou() {
         let tilesets = parse("1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n(5p6p7p 5p6p7p 1p2p3p 1p2p3p 4p4p 待ち: 両面)\n1翻 門前清自摸和\n1翻 平和\n3翻 二盃口\n6翻 清一色\n11翻 36000点 三倍満"
+            "東場 東家 \n1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p\n(1p2p3p 1p2p3p 5p6p7p 5p6p7p 4p4p 待ち: 両面)\n1翻 門前清自摸和\n1翻 平和\n3翻 二盃口\n6翻 清一色\n11翻 36000点 三倍満"
         );
     }
 
@@ -390,7 +390,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 西家 \n5s6s7s4m5m6m4p4p4p5p6p西西 ロン西\n(西西西 4p5p6p 4m5m6m 5s6s7s 4p4p 待ち: シャンポン)\n1翻 役牌\n1翻40符 1300点"
+            "東場 西家 \n5s6s7s4m5m6m4p4p4p5p6p西西 ロン西\n(西西西 5s6s7s 4m5m6m 4p5p6p 4p4p 待ち: シャンポン)\n1翻 役牌\n1翻40符 1300点"
         );
     }
 
@@ -400,7 +400,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(7s8s9s 6s7s8s 4s5s6s 1s2s3s 西西 待ち: カンチャン)\n2翻 一気通貫\n3翻 混一色\n3翻 ドラ\n8翻 24000点 倍満"
+            "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(6s7s8s 1s2s3s 4s5s6s 7s8s9s 西西 待ち: カンチャン)\n2翻 一気通貫\n3翻 混一色\n3翻 ドラ\n8翻 24000点 倍満"
         );
     }
 }

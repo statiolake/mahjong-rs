@@ -628,4 +628,10 @@ mod tests {
         );
         assert_eq!(bai.num_fan(&make_ctx(Direction::East, Direction::East)), 1);
     }
+
+    #[test]
+    fn order() {
+        assert!("4s".parse::<Tile>().unwrap() < "4m".parse::<Tile>().unwrap());
+        assert!(Tile::Suozi(Order::new(4).unwrap()) < Tile::Wanzi(Order::new(4).unwrap()));
+    }
 }
