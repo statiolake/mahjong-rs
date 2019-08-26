@@ -7,7 +7,6 @@ use crate::tileset::ParseError as ParseTilesetError;
 use crate::tileset::{Tag, Tileset};
 use failure::Fail;
 use std::fmt;
-use std::str::FromStr;
 
 pub type Result<T> = std::result::Result<T, TilesetsError>;
 
@@ -322,19 +321,5 @@ impl From<ParseTilesetError> for ParseError {
 impl From<TilesetsError> for ParseError {
     fn from(x: TilesetsError) -> ParseError {
         ParseError::TilesetsError(x)
-    }
-}
-
-impl FromStr for Tilesets {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> std::result::Result<Tilesets, ParseError> {
-        let context = Context::default();
-        let tilesets = s
-            .split_whitespace()
-            .map(|s| s.parse())
-            .collect::<std::result::Result<Vec<Tileset>, _>>()?;
-
-        Tilesets::new(context, tilesets).map_err(|e| e.into())
     }
 }

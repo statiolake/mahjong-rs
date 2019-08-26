@@ -322,11 +322,16 @@ mod tests {
     use crate::context::{Context, Direction};
     use crate::tilesets::Tilesets;
 
-    fn parse(s: &str) -> Tilesets {
-        s.parse().unwrap()
+    fn parse(from: &str) -> Tilesets {
+        let tilesets = from
+            .split_whitespace()
+            .map(|tileset| tileset.parse().unwrap())
+            .collect();
+
+        Tilesets::new(Context::default(), tilesets).unwrap()
     }
 
-    fn with_context(tilesets: Tilesets, player: Direction, place: Direction) -> Tilesets {
+    fn with_direction(tilesets: Tilesets, player: Direction, place: Direction) -> Tilesets {
         Tilesets {
             context: Context {
                 player,
@@ -380,7 +385,7 @@ mod tests {
     #[test]
     fn judge_xijia() {
         let tilesets = parse("5s6s7s4m5m6m4p4p4p5p6p西西 ロン西");
-        let tilesets = with_context(tilesets, Direction::West, Direction::East);
+        let tilesets = with_direction(tilesets, Direction::West, Direction::East);
 
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
