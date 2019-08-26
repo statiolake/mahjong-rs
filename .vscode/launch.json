@@ -10,7 +10,7 @@
       "request": "launch",
       "preLaunchTask": "build_for_test",
       "program": "./target/debug/deps/mahjong-ae45745b42d0a723.exe",
-      "args": [],
+      "args": ["invalid_num_same_tiles"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

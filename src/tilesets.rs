@@ -243,7 +243,7 @@ impl Tilesets {
         let mut nums = HashMap::new();
 
         for tile in self.tiles_all() {
-            nums.entry(tile).and_modify(|n| *n += 1).or_insert(0);
+            *nums.entry(tile).or_insert(0) += 1;
         }
 
         match nums.into_iter().find(|&(_, num)| num > 4) {
@@ -321,5 +321,22 @@ impl From<ParseTilesetError> for ParseError {
 impl From<TilesetsError> for ParseError {
     fn from(x: TilesetsError) -> ParseError {
         ParseError::TilesetsError(x)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn invalid_num_same_tiles() {
+        assert!(Tilesets::new(
+            Context::default(),
+            vec![
+                Tileset::new(Tag::Hand, "1p1p1p1p2p3p1p2p3p4p5p6p3p".parse().unwrap()).unwrap(),
+                Tileset::new(Tag::Zimo, "3p".parse().unwrap()).unwrap(),
+            ]
+        )
+        .is_err());
     }
 }
