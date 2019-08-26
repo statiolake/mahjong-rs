@@ -676,12 +676,7 @@ pub fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> Option<Form> {
     info!("--> 清一色・混一色を判定...");
 
     // 各面子・雀頭の種類
-    let kinds = || {
-        tilesets
-            .tiles_without_doras()
-            .map(|tile| tile.kind())
-            .filter(|&kind| kind != TileKind::Zipai)
-    };
+    let kinds = || tilesets.tiles_without_doras().map(|tile| tile.kind());
 
     // 字牌があるかどうか
     let has_zipai = kinds().any(|kind| kind == TileKind::Zipai);

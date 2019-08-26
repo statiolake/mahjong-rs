@@ -388,4 +388,14 @@ mod tests {
             "東場 西家 \n5s6s7s4m5m6m4p4p4p5p6p西西 ロン西\n(西西西 4p5p6p 4m5m6m 5s6s7s 4p4p 待ち: シャンポン)\n1翻 役牌\n1翻40符 1300点"
         );
     }
+
+    #[test]
+    fn judge_qingyise() {
+        let tilesets = parse("1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s ドラ1s中6s2p");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(7s8s9s 6s7s8s 4s5s6s 1s2s3s 西西 待ち: カンチャン)\n3翻 混一色\n3翻 ドラ\n2翻 一気通貫\n8翻 24000点 倍満"
+        );
+    }
 }
