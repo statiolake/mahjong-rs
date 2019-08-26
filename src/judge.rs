@@ -400,7 +400,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(7s8s9s 6s7s8s 4s5s6s 1s2s3s 西西 待ち: カンチャン)\n3翻 混一色\n3翻 ドラ\n2翻 一気通貫\n8翻 24000点 倍満"
+            "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(7s8s9s 6s7s8s 4s5s6s 1s2s3s 西西 待ち: カンチャン)\n2翻 一気通貫\n3翻 混一色\n3翻 ドラ\n8翻 24000点 倍満"
         );
     }
 }

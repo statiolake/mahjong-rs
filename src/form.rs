@@ -193,7 +193,9 @@ impl PartialOrd for Point {
 
 impl Ord for Point {
     fn cmp(&self, other: &Point) -> Ordering {
-        self.value(false).cmp(&other.value(false))
+        self.fan
+            .cmp(&other.fan)
+            .then_with(|| self.fu.cmp(&other.fu))
     }
 }
 
@@ -1311,4 +1313,15 @@ pub fn check_shousushi_daisushi(agari: &AgariTilesets) -> Option<Form> {
 }
 
 #[cfg(test)]
-pub mod tests {}
+pub mod tests {
+    use super::*;
+    use std::cmp::Ordering;
+
+    #[test]
+    fn judge_order() {
+        assert_eq!(
+            Form::Ikkitsukan(false).cmp(&Form::Hungyise(false)),
+            Ordering::Less
+        );
+    }
+}
