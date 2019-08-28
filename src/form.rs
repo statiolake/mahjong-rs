@@ -251,7 +251,7 @@ impl fmt::Display for PointDisplayFull {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Form {
     /// 立直
     Lizhi,
@@ -504,26 +504,6 @@ impl Form {
         let name = self.name();
         let point = self.point();
         FormDisplay { name, point }
-    }
-}
-
-impl PartialEq for Form {
-    fn eq(&self, other: &Form) -> bool {
-        self.cmp(&other) == Ordering::Equal
-    }
-}
-
-impl Eq for Form {}
-
-impl PartialOrd for Form {
-    fn partial_cmp(&self, other: &Form) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Form {
-    fn cmp(&self, other: &Form) -> Ordering {
-        self.point().cmp(&other.point())
     }
 }
 
@@ -1320,7 +1300,7 @@ pub mod tests {
     #[test]
     fn judge_order() {
         assert_eq!(
-            Form::Ikkitsukan(false).cmp(&Form::Hungyise(false)),
+            (Form::Ikkitsukan(false).point()).cmp(&Form::Hungyise(false).point()),
             Ordering::Less
         );
     }

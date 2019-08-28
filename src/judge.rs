@@ -33,8 +33,8 @@ impl Judge {
     }
 
     fn fix_forms(forms: &mut Vec<Form>) {
-        // 役を小さい順に並べる。
-        forms.sort();
+        // 役を翻数の順に並べる。
+        forms.sort_by_key(|f| f.point());
 
         // もし真の役満が含まれているなら、それ以外を除く。
         if forms.iter().any(|form| form.point().is_true_yiman()) {
