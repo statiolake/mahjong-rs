@@ -2,7 +2,6 @@ use crate::agaritilesets::AgariTilesets;
 use crate::form::{Form, Point};
 use crate::tilesets::Tilesets;
 use log::debug;
-use std::cmp::Ordering;
 use std::fmt;
 use std::iter::once;
 
@@ -74,29 +73,6 @@ impl Judge {
     }
 }
 
-impl PartialEq for Judge {
-    fn eq(&self, other: &Judge) -> bool {
-        self.cmp(other) == Ordering::Equal
-    }
-}
-
-impl Eq for Judge {}
-
-impl PartialOrd for Judge {
-    fn partial_cmp(&self, other: &Judge) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Judge {
-    fn cmp(&self, other: &Judge) -> Ordering {
-        // まずは得点で比較し、もし同じならば役の個数が少ない方をとる。
-        (self.total.value(false))
-            .cmp(&other.total.value(false))
-            .then_with(|| self.forms.len().cmp(&other.forms.len()).reverse())
-    }
-}
-
 impl fmt::Display for Judge {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         writeln!(
@@ -128,7 +104,12 @@ impl fmt::Display for Judge {
 pub fn judge(tilesets: &Tilesets) -> Option<Judge> {
     debug!("判定を開始します。");
     debug!("対象: {}", tilesets);
-    let res = judge_all(tilesets).max();
+    let res = judge_all(tilesets).max_by(|x, y| {
+        // まずは得点で比較し、等しければ役の数が少ない方をとる。
+        (x.total)
+            .cmp(&y.total)
+            .then((x.forms.len()).cmp(&y.forms.len()).reverse())
+    });
 
     debug!(
         "判定が終わりました。結論は: {:?}",
@@ -438,5 +419,25 @@ mod tests {
             res.to_string(),
             "東場 東家 \n4s5s6s8s8s1m2m3m7m7m西西西 ツモ7m\n(7m7m7m 西西西 4s5s6s 1m2m3m 8s8s 待ち: シャンポン)\n1翻 門前清自摸和\n1翻40符 2000点"
         );
+    }
+
+    #[test]
+    fn judge_pinghe() {
+        use crate::context::Lizhi;
+        crate::logger::init_once();
+
+        let tilesets = parse("1p1p2p3p4p4p5p6p6p7p7p8p9p ツモ5P ドラ9p9p東9m");
+        let tilesets = Tilesets {
+            context: Context {
+                lizhi: Lizhi::Lizhi,
+                ..Context::default()
+            },
+            ..tilesets
+        };
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1p1p2p3p4p4p5p6p6p7p7p8p9p ツモ5P\n(2p3p4p 4p5p6p 5P6p7p 7p8p9p 1p1p 待ち: 両面)\n1翻 立直\n1翻 門前清自摸和\n1翻 平和\n3翻 ドラ\n6翻 清一色\n12翻 36000点 三倍満"
+        )
     }
 }
