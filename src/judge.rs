@@ -344,6 +344,8 @@ mod tests {
 
     #[test]
     fn judge_simple() {
+        crate::logger::init_once();
+
         let tilesets = parse("1p1p1p2p2p2p3p3p3p4p4p4p5p ツモ5p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
@@ -354,6 +356,8 @@ mod tests {
 
     #[test]
     fn judge_kokushimuso() {
+        crate::logger::init_once();
+
         let tilesets = parse("1s9s1m9m1p9p東南西北白發中 ツモ中");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
@@ -364,6 +368,8 @@ mod tests {
 
     #[test]
     fn judge_qiduizi_liangbeigou() {
+        crate::logger::init_once();
+
         let tilesets = parse("1p1p2p2p3p3p4p4p5p5p6p6p7p ツモ7p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
@@ -374,6 +380,8 @@ mod tests {
 
     #[test]
     fn judge_peng() {
+        crate::logger::init_once();
+
         let tilesets = parse("1p1p1p2p2p2p3p3p3p5p ツモ5P ポン4p4p4p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
@@ -384,6 +392,8 @@ mod tests {
 
     #[test]
     fn judge_xijia() {
+        crate::logger::init_once();
+
         let tilesets = parse("5s6s7s4m5m6m4p4p4p5p6p西西 ロン西");
         let tilesets = with_direction(tilesets, Direction::West, Direction::East);
 
@@ -396,11 +406,25 @@ mod tests {
 
     #[test]
     fn judge_qingyise() {
+        crate::logger::init_once();
+
         let tilesets = parse("1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s ドラ1s中6s2p");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
             "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(6s7s8s 1s2s3s 4s5s6s 7s8s9s 西西 待ち: カンチャン)\n2翻 一気通貫\n3翻 混一色\n3翻 ドラ\n8翻 24000点 倍満"
+        );
+    }
+
+    #[test]
+    fn judge_40fu() {
+        crate::logger::init_once();
+
+        let tilesets = parse("1m2m3m7m7m4s5s6s8s8s西西西 ツモ7m");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n4s5s6s8s8s1m2m3m7m7m西西西 ツモ7m\n(7m7m7m 西西西 4s5s6s 1m2m3m 8s8s 待ち: シャンポン)\n1翻 門前清自摸和\n1翻40符 2000点"
         );
     }
 }

@@ -9,13 +9,13 @@
       "type": "cppvsdbg",
       "request": "launch",
       "preLaunchTask": "build_for_test",
-      "program": "./target/debug/deps/mahjong-ae45745b42d0a723.exe",
-      "args": ["invalid_num_same_tiles"],
+      "program": "./target/debug/deps/mahjong-c90def2f716b835e.exe",
+      "args": ["judge_40fu"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
       "sourceFileMap": {
-        "c:/rustc/a53f9df32fbb0b5f4382caaad8f1a46f36ea887c/src": "${env:HOMEPATH}/.rustup/toolchains/stable-x86_64-pc-windows-msvc/lib/rustlib/src/rust/src"
+        "/rustc/eae3437dfe991621e8afdc82734f4a172d7ddf9b": "${env:USERPROFILE}\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib\\rustlib\\src\\rust"
       },
       "externalConsole": false
     }

@@ -75,7 +75,9 @@ impl Point {
                 mul
             );
 
+            debug!("    比較のため満貫の点数を計算します...");
             let manguan = Point::new_manguan().value(is_parent);
+            debug!("    満貫の点数の計算は終わりました。");
 
             // 最後の +2 は場ゾロあるいはバンバンと呼ばれる。
             let raw = fu * mul * 2u32.pow(fan + 2);
@@ -96,12 +98,15 @@ impl Point {
         let value = match self.yiman {
             0 => match (self.fan, is_parent) {
                 (0..=4, is_parent) => {
-                    let manguan = Point::new_manguan().value(is_parent);
+                    let manguan = || Point::new_manguan().value(is_parent);
                     match (self.fan, self.fu) {
                         // 4翻30符と3翻60符は切り上げ満貫
                         (fan @ 4, fu @ 30) | (fan @ 3, fu @ 60) => {
-                            debug!("{}翻{}符のため、切り上げ満貫です。", fan, fu);
-                            manguan
+                            debug!(
+                                "    {}翻{}符のため、切り上げ満貫です。",
+                                fan, fu
+                            );
+                            manguan()
                         }
 
                         // それ以外は通常の計算ルールに従う
@@ -127,7 +132,7 @@ impl Point {
             n => n * if is_parent { 48000 } else { 32000 },
         };
 
-        debug!("結果は{}点です。", value);
+        debug!("    結果は{}点です。", value);
 
         value
     }
