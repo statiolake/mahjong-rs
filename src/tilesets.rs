@@ -259,7 +259,7 @@ impl Tilesets {
         let pengs = self.pengs.len() * 3;
         let chis = self.chis.len() * 3;
 
-        // Though gang is actually 4, in judgement this is treated as kezi so count them as 3.
+        // 槓は実際は 4 枚あるが、枚数確認では 3 枚と扱う。
         let minggangs = self.minggangs.len() * 3;
         let angangs = self.angangs.len() * 3;
 
