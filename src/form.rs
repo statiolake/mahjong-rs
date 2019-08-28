@@ -479,7 +479,7 @@ impl Form {
             Form::Sanshokudoko => Point::new(2),
             Form::Sananke => Point::new(2),
             Form::Ikkitsukan(is_menqian) => Point::new(if is_menqian { 2 } else { 1 }),
-            Form::Qiduizi => Point::with_fu(2, 5),
+            Form::Qiduizi => Point::with_fu(2, 25),
             Form::Duiduihe => Point::new(2),
             Form::Hunquandaiyaojiu(is_menqian) => Point::new(if is_menqian { 2 } else { 1 }),
             Form::Sangangzi => Point::new(2),

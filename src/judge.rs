@@ -367,6 +367,18 @@ mod tests {
     }
 
     #[test]
+    fn judge_qiduizi() {
+        crate::logger::init_once();
+
+        let tilesets = parse("3s3s5s5s1p6p6p東東白白中中 ツモ1p");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n3s3s5s5s1p6p6p東東白白中中 ツモ1p\n1翻 門前清自摸和\n2翻25符 七対子\n3翻25符 4800点"
+        );
+    }
+
+    #[test]
     fn judge_qiduizi_liangbeigou() {
         crate::logger::init_once();
 
