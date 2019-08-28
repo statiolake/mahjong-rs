@@ -124,7 +124,7 @@ impl Point {
                 (_, is_parent) => Point::new_yiman().value(is_parent),
             },
 
-            n => n * if is_parent { 48000 } else { 36000 },
+            n => n * if is_parent { 48000 } else { 32000 },
         };
 
         info!("結果は{}点です。", value);
