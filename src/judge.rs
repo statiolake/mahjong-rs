@@ -1,7 +1,7 @@
 use crate::agaritilesets::AgariTilesets;
 use crate::form::{Form, Point};
 use crate::tilesets::Tilesets;
-use log::info;
+use log::debug;
 use std::cmp::Ordering;
 use std::fmt;
 use std::iter::once;
@@ -126,11 +126,11 @@ impl fmt::Display for Judge {
 }
 
 pub fn judge(tilesets: &Tilesets) -> Option<Judge> {
-    info!("判定を開始します。");
-    info!("対象: {}", tilesets);
+    debug!("判定を開始します。");
+    debug!("対象: {}", tilesets);
     let res = judge_all(tilesets).max();
 
-    info!(
+    debug!(
         "判定が終わりました。結論は: {:?}",
         res.as_ref().map(|j| j.to_string())
     );
@@ -162,7 +162,7 @@ fn forms_for_all_base(tilesets: &Tilesets) -> impl Iterator<Item = Form> {
 }
 
 fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
-    info!("-> 次のアガリ形について判定: {}", agari);
+    debug!("-> 次のアガリ形について判定: {}", agari);
     use crate::form::*;
 
     let mut forms = Vec::with_capacity(10);
@@ -185,21 +185,21 @@ fn judge_agari(agari: AgariTilesets) -> Option<Judge> {
 }
 
 fn judge_qiduizi(tilesets: &Tilesets) -> Option<Judge> {
-    info!("-> 七対子を判定...");
+    debug!("-> 七対子を判定...");
     crate::form::special_check_qiduizi(tilesets)
         .map(|q| forms_for_all_base(tilesets).chain(once(q)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
 }
 
 fn judge_kokushimuso(tilesets: &Tilesets) -> Option<Judge> {
-    info!("-> 国士無双を判定...");
+    debug!("-> 国士無双を判定...");
     crate::form::special_check_kokushimuso(tilesets)
         .map(|k| forms_for_all_base(tilesets).chain(once(k)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
 }
 
 fn judge_jiulianbaodeng(tilesets: &Tilesets) -> Option<Judge> {
-    info!("-> 九蓮宝燈を判定...");
+    debug!("-> 九蓮宝燈を判定...");
     crate::form::special_check_jiulianbaodeng(tilesets)
         .map(|j| forms_for_all_base(tilesets).chain(once(j)).collect())
         .and_then(|forms| Judge::from_tilesets(tilesets.clone(), forms))
@@ -216,42 +216,42 @@ impl<'a> FuCalculator<'a> {
     }
 
     fn calculate(&self) -> u32 {
-        info!("符計算を行います。");
+        debug!("符計算を行います。");
         // 平和ツモは一律 20 符
         if self.is_pinghe_zimo() {
-            info!("-> 平和ツモのため 20 符です。");
+            debug!("-> 平和ツモのため 20 符です。");
             return 20;
         }
 
         // アガリ基本符
         let fudi = 20;
-        info!("-> 副底は {} 符", fudi);
+        debug!("-> 副底は {} 符", fudi);
 
         // アガリ方による符
         let agari_fu = self.calc_agari_fu();
-        info!("-> アガリ方による符は {} 符", agari_fu);
+        debug!("-> アガリ方による符は {} 符", agari_fu);
 
         // 刻子、槓によるボーナス
         let kezi_fu = self.calc_kezi_fu();
-        info!("-> 刻子・槓によるボーナスが {} 符", kezi_fu);
+        debug!("-> 刻子・槓によるボーナスが {} 符", kezi_fu);
 
         // 雀頭によるボーナス
         let quetou_fu = self.calc_quetou_fu();
-        info!("-> 雀頭によるボーナスが {} 符", quetou_fu);
+        debug!("-> 雀頭によるボーナスが {} 符", quetou_fu);
 
         // 待ちによるボーナス
         let machi_fu = self.calc_machi_fu();
-        info!("-> 待ちによるボーナスが {} 符", machi_fu);
+        debug!("-> 待ちによるボーナスが {} 符", machi_fu);
 
         let base = fudi + agari_fu + kezi_fu + quetou_fu + machi_fu;
-        info!("-> 従って、基本の合計が {} 符", base);
+        debug!("-> 従って、基本の合計が {} 符", base);
 
         let ceiled = crate::utils::ceil_at(base, 10);
-        info!("-> これを切り上げると {} 符", ceiled);
+        debug!("-> これを切り上げると {} 符", ceiled);
 
         // 喰い平和形では 20 符となるが、このときは 30 符に引き上げる
         if !self.agari.is_zimo() && ceiled == 20 {
-            info!("-> これは喰い平和形なので 30 符に切り上げます。");
+            debug!("-> これは喰い平和形なので 30 符に切り上げます。");
             return 30;
         }
 

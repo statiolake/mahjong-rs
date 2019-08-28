@@ -5,7 +5,7 @@ use crate::context::Lizhi;
 use crate::tile::{Order, Tile, TileKind, Zipai};
 use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;
-use log::info;
+use log::debug;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -62,14 +62,14 @@ impl Point {
     }
 
     pub fn value(self, is_parent: bool) -> u32 {
-        info!("-> 点数計算を行います。");
+        debug!("-> 点数計算を行います。");
 
         let calc_few = |fan: u32, fu: u32| {
-            info!("--> 少翻の点数計算を行います。");
+            debug!("--> 少翻の点数計算を行います。");
 
             // 符の倍率
             let mul = if is_parent { 6 } else { 4 };
-            info!(
+            debug!(
                 "    符の基本の倍率は{}{}倍です。",
                 if is_parent { "親なので" } else { "" },
                 mul
@@ -79,16 +79,16 @@ impl Point {
 
             // 最後の +2 は場ゾロあるいはバンバンと呼ばれる。
             let raw = fu * mul * 2u32.pow(fan + 2);
-            info!("    補正なしの点数は{}点です。", raw);
+            debug!("    補正なしの点数は{}点です。", raw);
 
             if raw > manguan {
                 // 満貫を越えていたら満貫に強制。
-                info!("    満貫の点数を越えているため、満貫に強制します。");
+                debug!("    満貫の点数を越えているため、満貫に強制します。");
                 manguan
             } else {
                 // それ以外の場合は定義の計算式に従う。百の位以下を切り上げる。
                 let ceiled = crate::utils::ceil_at(raw, 100);
-                info!("    切り上げて{}点です。", ceiled);
+                debug!("    切り上げて{}点です。", ceiled);
                 ceiled
             }
         };
@@ -100,7 +100,7 @@ impl Point {
                     match (self.fan, self.fu) {
                         // 4翻30符と3翻60符は切り上げ満貫
                         (fan @ 4, fu @ 30) | (fan @ 3, fu @ 60) => {
-                            info!("{}翻{}符のため、切り上げ満貫です。", fan, fu);
+                            debug!("{}翻{}符のため、切り上げ満貫です。", fan, fu);
                             manguan
                         }
 
@@ -127,7 +127,7 @@ impl Point {
             n => n * if is_parent { 48000 } else { 32000 },
         };
 
-        info!("結果は{}点です。", value);
+        debug!("結果は{}点です。", value);
 
         value
     }
@@ -545,30 +545,30 @@ impl fmt::Display for FormDisplay {
 
 /// [1]立直・[2]ダブルリーチ・[1]一発
 pub fn special_check_lizhi(tilesets: &Tilesets) -> SmallVec {
-    info!("--> 立直類を判定...");
+    debug!("--> 立直類を判定...");
     // 立直類は最初から指定されており、 Context として渡されている。
     match tilesets.context.lizhi {
         Lizhi::None => {
-            info!("   立直ではありません。");
+            debug!("   立直ではありません。");
             SmallVec::new()
         }
         Lizhi::Lizhi => {
-            info!("    立直です。");
+            debug!("    立直です。");
             SmallVec::from_elem(Form::Lizhi, 1)
         }
         Lizhi::LizhiIppatsu => {
-            info!("    立直・一発です。");
+            debug!("    立直・一発です。");
             let mut v = SmallVec::new();
             v.push(Form::Lizhi);
             v.push(Form::Ippatsu);
             v
         }
         Lizhi::DoubleLizhi => {
-            info!("    ダブル立直です。");
+            debug!("    ダブル立直です。");
             SmallVec::from_elem(Form::Doublelizhi, 1)
         }
         Lizhi::DoubleLizhiIppatsu => {
-            info!("    ダブル立直・一発です。");
+            debug!("    ダブル立直・一発です。");
             let mut v = SmallVec::new();
             v.push(Form::Doublelizhi);
             v.push(Form::Ippatsu);
@@ -578,7 +578,7 @@ pub fn special_check_lizhi(tilesets: &Tilesets) -> SmallVec {
 }
 
 pub fn special_check_dora(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> ドラを判定...");
+    debug!("--> ドラを判定...");
     let count_dora = |tile: Tile| {
         let num_dora = tilesets.doras.iter().filter(|&&dora| tile == dora).count();
         let red_dora = if tile.is_red() { 1 } else { 0 };
@@ -587,7 +587,7 @@ pub fn special_check_dora(tilesets: &Tilesets) -> Option<Form> {
 
     let num_dora: usize = tilesets.tiles_without_doras().map(count_dora).sum();
 
-    info!("    ドラは {} 枚です。", num_dora);
+    debug!("    ドラは {} 枚です。", num_dora);
     if num_dora > 0 {
         Some(Form::Dora(num_dora as _))
     } else {
@@ -597,10 +597,10 @@ pub fn special_check_dora(tilesets: &Tilesets) -> Option<Form> {
 
 /// [2.5]七対子
 pub fn special_check_qiduizi(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 七対子を判定...");
+    debug!("--> 七対子を判定...");
     // ポン・チー・カンをしていたら七対子にならないので終了。
     if tilesets.did_fulou() || !tilesets.angangs.is_empty() {
-        info!("    副露または暗槓があります。");
+        debug!("    副露または暗槓があります。");
         return None;
     }
 
@@ -623,12 +623,12 @@ pub fn special_check_qiduizi(tilesets: &Tilesets) -> Option<Form> {
 
     // 一つでも2枚じゃない牌があれば七対子ではない。
     if map.iter().any(|(_, &cnt)| cnt != 2) {
-        info!("    二枚組でない牌があります。");
+        debug!("    二枚組でない牌があります。");
         return None;
     }
 
     // そうであれば七対子
-    info!("    七対子です。");
+    debug!("    七対子です。");
     Some(Form::Qiduizi)
 }
 
@@ -636,18 +636,18 @@ pub fn special_check_qiduizi(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 門前でツモ上がりをした。
 pub fn special_check_menqianqingzimohu(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 門前清自摸和を判定...");
+    debug!("--> 門前清自摸和を判定...");
     if !tilesets.is_zimo {
-        info!("    ツモではありません。");
+        debug!("    ツモではありません。");
         return None;
     }
 
     if !tilesets.is_menqian() {
-        info!("    門前ではありません。");
+        debug!("    門前ではありません。");
         return None;
     }
 
-    info!("    門前清自摸和です。");
+    debug!("    門前清自摸和です。");
     Some(Form::Menqianqingzimohu)
 }
 
@@ -655,15 +655,15 @@ pub fn special_check_menqianqingzimohu(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 手牌が全て中張牌である。
 pub fn special_check_duanyaojiu(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 断么九を判定...");
+    debug!("--> 断么九を判定...");
     let has_yaojiu = tilesets.tiles_without_doras().all(|t| t.is_zhongzhang());
 
     if !has_yaojiu {
-        info!("    幺九牌があります。");
+        debug!("    幺九牌があります。");
         return None;
     }
 
-    info!("    断么九です。");
+    debug!("    断么九です。");
     Some(Form::Duanyaojiu)
 }
 
@@ -675,14 +675,14 @@ pub fn special_check_duanyaojiu(tilesets: &Tilesets) -> Option<Form> {
 /// 〈混一色〉
 /// - どれか一種類の牌と字牌だけで構成する。
 pub fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 清一色・混一色を判定...");
+    debug!("--> 清一色・混一色を判定...");
 
     // 各面子・雀頭の種類
     let kinds = || tilesets.tiles_without_doras().map(|tile| tile.kind());
 
     // 字牌があるかどうか
     let has_zipai = kinds().any(|kind| kind == TileKind::Zipai);
-    info!(
+    debug!(
         "    字牌はありま{}。",
         if has_zipai { "す" } else { "せん" }
     );
@@ -692,14 +692,14 @@ pub fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> Option<Form> {
 
     // 対象となる種類
     let target_kind = kinds_not_zipai().next()?;
-    info!(
+    debug!(
         "    字牌でない牌の種類の一つは {} です。",
         target_kind
     );
 
     // 全てが同じかどうか
     let all_same = kinds_not_zipai().all(|kind| kind == target_kind);
-    info!(
+    debug!(
         "    字牌以外の牌の種類は全て等し{}。",
         if all_same {
             "いです"
@@ -710,15 +710,15 @@ pub fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> Option<Form> {
 
     match (all_same, has_zipai) {
         (true, false) => {
-            info!("    清一色です。");
+            debug!("    清一色です。");
             Some(Form::Qingyise(tilesets.is_menqian()))
         }
         (true, true) => {
-            info!("    混一色です。");
+            debug!("    混一色です。");
             Some(Form::Hungyise(tilesets.is_menqian()))
         }
         _ => {
-            info!("    清一色・混一色ではありません。");
+            debug!("    清一色・混一色ではありません。");
             None
         }
     }
@@ -728,15 +728,15 @@ pub fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 全ての面子が幺九牌で構成されている。
 pub fn special_check_hunlaotou(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 混老頭を判定...");
+    debug!("--> 混老頭を判定...");
     let has_zhongzhang = tilesets.tiles_without_doras().all(|tile| tile.is_yaojiu());
 
     if !has_zhongzhang {
-        info!("    中張牌があります。");
+        debug!("    中張牌があります。");
         return None;
     }
 
-    info!("    混老頭です。");
+    debug!("    混老頭です。");
     Some(Form::Hunlaotou)
 }
 
@@ -745,14 +745,14 @@ pub fn special_check_hunlaotou(tilesets: &Tilesets) -> Option<Form> {
 /// `target` はベースとなる形 (国士無双なら 1s9s1m9m1p9p東南西北白發中 など) で、これプラスその形の
 /// どれか一つの牌だけがダブっている状態がアガリとなる。 `name_genuine` は純正の場合、つまり最初から
 /// `target` がそろっていて最後に引いた牌がダブっている場合につく。たとえば国士無双13面待ちなど。
-pub fn special_check_certainform(
+pub fn special_check_certadebugrm(
     tilesets: &Tilesets,
     mut target: Tiles,
     form_constructor: fn(bool) -> Form,
 ) -> Option<Form> {
     // ポン・チー・カンをしていたらならないので終了。
     if tilesets.did_fulou() || !tilesets.angangs.is_empty() {
-        info!("    副露があるため所定の形にできません。");
+        debug!("    副露があるため所定の形にできません。");
         return None;
     }
 
@@ -768,7 +768,7 @@ pub fn special_check_certainform(
         // 一致した場合は国士無双などが成立。
         if target == hand {
             let form = form_constructor(add == tilesets.last);
-            info!(
+            debug!(
                 "    形が一致したので {} 成立です。",
                 form.name()
             );
@@ -783,14 +783,14 @@ pub fn special_check_certainform(
         );
     }
 
-    info!("    形が一致しませんでした。");
+    debug!("    形が一致しませんでした。");
     None
 }
 
 /// [13]国士無双
 pub fn special_check_kokushimuso(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 国士無双を判定...");
-    special_check_certainform(
+    debug!("--> 国士無双を判定...");
+    special_check_certadebugrm(
         tilesets,
         Tiles::new(vec![
             Tile::Suozi(Order::new(1).unwrap()),
@@ -813,7 +813,7 @@ pub fn special_check_kokushimuso(tilesets: &Tilesets) -> Option<Form> {
 
 /// [13]九蓮宝燈
 pub fn special_check_jiulianbaodeng(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 九蓮宝燈を判定...");
+    debug!("--> 九蓮宝燈を判定...");
     let constructors: Vec<fn(Order) -> Tile> = vec![Tile::Suozi, Tile::Wanzi, Tile::Tongzi];
 
     let orders = vec![
@@ -835,7 +835,7 @@ pub fn special_check_jiulianbaodeng(tilesets: &Tilesets) -> Option<Form> {
     constructors
         .into_iter()
         .filter_map(move |ctor| {
-            special_check_certainform(
+            special_check_certadebugrm(
                 tilesets,
                 orders.iter().map(|&o| ctor(o)).collect(),
                 Form::Jiulianbaodeng,
@@ -848,15 +848,15 @@ pub fn special_check_jiulianbaodeng(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 全ての牌が緑一色を構成する牌である。
 pub fn special_check_luyise(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 緑一色を判定...");
+    debug!("--> 緑一色を判定...");
     let all_green = tilesets.tiles_without_doras().all(|tile| tile.is_green());
 
     if !all_green {
-        info!("    緑色でない牌が混ざっています。");
+        debug!("    緑色でない牌が混ざっています。");
         return None;
     }
 
-    info!("    緑一色です。");
+    debug!("    緑一色です。");
     Some(Form::Luyise)
 }
 
@@ -864,17 +864,17 @@ pub fn special_check_luyise(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 全ての牌が字牌である。
 pub fn special_check_ziyise(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 字一色を判定...");
+    debug!("--> 字一色を判定...");
     let all_zipai = tilesets
         .tiles_without_doras()
         .all(|tile| tile.kind() == TileKind::Zipai);
 
     if !all_zipai {
-        info!("    字牌以外の牌が混ざっています。");
+        debug!("    字牌以外の牌が混ざっています。");
         return None;
     }
 
-    info!("    字一色です。");
+    debug!("    字一色です。");
     Some(Form::Ziyise)
 }
 
@@ -882,18 +882,18 @@ pub fn special_check_ziyise(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 全ての牌が 1,9 牌のみである。
 pub fn special_check_qinglaotou(tilesets: &Tilesets) -> Option<Form> {
-    info!("--> 清老頭を判定...");
+    debug!("--> 清老頭を判定...");
 
     let all_19 = tilesets
         .tiles_without_doras()
         .all(|tile| tile.kind() != TileKind::Zipai && tile.is_yaojiu());
 
     if !all_19 {
-        info!("    1, 9 以外の牌が混ざっています。");
+        debug!("    1, 9 以外の牌が混ざっています。");
         return None;
     }
 
-    info!("    清老頭です。");
+    debug!("    清老頭です。");
     Some(Form::Qinglaotou)
 }
 
@@ -901,18 +901,18 @@ pub fn special_check_qinglaotou(tilesets: &Tilesets) -> Option<Form> {
 ///
 /// - 刻子・槓子が役牌である。一つにつき1翻。
 pub fn check_fanpai(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 役牌を判定...");
+    debug!("--> 役牌を判定...");
 
     let sum = agari
         .kezis()
         .map(|tile| {
             let num = tile.first().num_fan(agari.context());
-            info!("    {}の役は{}翻です。", tile, num);
+            debug!("    {}の役は{}翻です。", tile, num);
             num
         })
         .sum();
 
-    info!("    役の合計は{}翻です。", sum);
+    debug!("    役の合計は{}翻です。", sum);
     if sum != 0 {
         Some(Form::Fanpai(sum))
     } else {
@@ -926,29 +926,29 @@ pub fn check_fanpai(agari: &AgariTilesets) -> Option<Form> {
 /// - 雀頭が役牌でない。
 /// - 両面待ちである。
 pub fn check_pinghe(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 平和を判定...");
+    debug!("--> 平和を判定...");
 
     if !agari.is_menqian() {
-        info!("    門前ではありません。");
+        debug!("    門前ではありません。");
         return None;
     }
 
     if agari.shunzis().count() != 4 {
-        info!("    順子以外の面子があります。");
+        debug!("    順子以外の面子があります。");
         return None;
     }
 
     if agari.quetou().first().kind() == TileKind::Zipai {
-        info!("    雀頭が字牌です。");
+        debug!("    雀頭が字牌です。");
         return None;
     }
 
     if agari.machi() != MachiKind::Liangmian {
-        info!("    両面待ちではありません。");
+        debug!("    両面待ちではありません。");
         return None;
     }
 
-    info!("    平和です。");
+    debug!("    平和です。");
     Some(Form::Pinghe)
 }
 
@@ -962,9 +962,9 @@ pub fn check_pinghe(agari: &AgariTilesets) -> Option<Form> {
 /// 〈二盃口〉
 /// - 同種の牌で同じ順序の順子が2面子、これが2組ある。一盃口二つ。
 pub fn check_yibeikou_liangbeigou(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 一盃口・二盃口を判定...");
+    debug!("--> 一盃口・二盃口を判定...");
     if !agari.is_menqian() {
-        info!("    門前ではありません。");
+        debug!("    門前ではありません。");
         return None;
     }
 
@@ -978,13 +978,13 @@ pub fn check_yibeikou_liangbeigou(agari: &AgariTilesets) -> Option<Form> {
         match num {
             // 同じ順子が 2 組あるならそれで二盃口が構成される。
             4 => {
-                info!("    同じ順子が2組ありました。");
+                debug!("    同じ順子が2組ありました。");
                 cnt += 2;
             }
             // 同じ順子が 2 または 3 あるならそれで一盃口が構成される。
             // 今後他の牌についてまた一盃口が構成されれば二盃口となる。
             2 | 3 => {
-                info!("    同じ順子が1組ありました。");
+                debug!("    同じ順子が1組ありました。");
                 cnt += 1;
             }
             _ => {}
@@ -993,15 +993,15 @@ pub fn check_yibeikou_liangbeigou(agari: &AgariTilesets) -> Option<Form> {
 
     match cnt {
         0 => {
-            info!("    一盃口・二盃口ではありません。");
+            debug!("    一盃口・二盃口ではありません。");
             None
         }
         1 => {
-            info!("    一盃口です。");
+            debug!("    一盃口です。");
             Some(Form::Yibeikou)
         }
         2 => {
-            info!("    二盃口です。");
+            debug!("    二盃口です。");
             Some(Form::Liangbeigou)
         }
         _ => panic!("二盃口以上があります。"),
@@ -1012,7 +1012,7 @@ pub fn check_yibeikou_liangbeigou(agari: &AgariTilesets) -> Option<Form> {
 ///
 /// - 索子・萬子・筒子で同じ数字から始まる順子を作る。
 pub fn check_sanshoku_dojun(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 三色同順を判定...");
+    debug!("--> 三色同順を判定...");
 
     // 「その順序から始まる順子にはどの種類の牌があるか」を集める
     let mut map: HashMap<Option<Order>, HashSet<TileKind>> = HashMap::new();
@@ -1028,11 +1028,11 @@ pub fn check_sanshoku_dojun(agari: &AgariTilesets) -> Option<Form> {
     });
 
     if !does_match {
-        info!("    全ての種類が揃っている順子はありませんでした。");
+        debug!("    全ての種類が揃っている順子はありませんでした。");
         return None;
     }
 
-    info!("    三色同順です。");
+    debug!("    三色同順です。");
     // 喰い下がりがあるので注意。
     Some(Form::Sanshokudojun(agari.is_menqian()))
 }
@@ -1041,7 +1041,7 @@ pub fn check_sanshoku_dojun(agari: &AgariTilesets) -> Option<Form> {
 ///
 /// - 索子・萬子・筒子で同じ数字からなる刻子を作る。
 pub fn check_sanshoku_doko(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 三色同刻を判定...");
+    debug!("--> 三色同刻を判定...");
 
     // 「その順序から始まる刻子にはどの種類の牌があるか」を集める
     let mut map: HashMap<Option<Order>, HashSet<TileKind>> = HashMap::new();
@@ -1057,11 +1057,11 @@ pub fn check_sanshoku_doko(agari: &AgariTilesets) -> Option<Form> {
     });
 
     if !does_match {
-        info!("    全ての種類が揃っている刻子はありませんでした。");
+        debug!("    全ての種類が揃っている刻子はありませんでした。");
         return None;
     }
 
-    info!("    三色同刻です。");
+    debug!("    三色同刻です。");
     Some(Form::Sanshokudoko)
 }
 
@@ -1073,18 +1073,18 @@ pub fn check_sanshoku_doko(agari: &AgariTilesets) -> Option<Form> {
 /// 〈三暗刻〉
 /// - 暗刻が3つある
 pub fn check_sananke_sianke(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 四暗刻・三暗刻を判定...");
+    debug!("--> 四暗刻・三暗刻を判定...");
 
     let count = agari.ankes().count();
 
     if count == 4 {
-        info!("    四暗刻です。");
+        debug!("    四暗刻です。");
         Some(Form::Sianke(agari.machi() == MachiKind::Danqi))
     } else if count == 3 {
-        info!("    三暗刻です。");
+        debug!("    三暗刻です。");
         Some(Form::Sananke)
     } else {
-        info!("    暗刻は{}つしかありません。", count);
+        debug!("    暗刻は{}つしかありません。", count);
         None
     }
 }
@@ -1093,7 +1093,7 @@ pub fn check_sananke_sianke(agari: &AgariTilesets) -> Option<Form> {
 ///
 /// - どれか一種類の牌で 123 456 789 を達成する
 pub fn check_ikki_tukan(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 一気通貫を判定...");
+    debug!("--> 一気通貫を判定...");
 
     let mut map: HashMap<TileKind, HashSet<Option<Order>>> = HashMap::new();
     for tile in agari.shunzis().map(|t| t.first()) {
@@ -1107,11 +1107,11 @@ pub fn check_ikki_tukan(agari: &AgariTilesets) -> Option<Form> {
     });
 
     if !does_match {
-        info!("    123 456 789 を達成している牌はありませんでした。");
+        debug!("    123 456 789 を達成している牌はありませんでした。");
         return None;
     }
 
-    info!("    一気通貫です。");
+    debug!("    一気通貫です。");
     Some(Form::Ikkitsukan(agari.is_menqian()))
 }
 
@@ -1119,16 +1119,16 @@ pub fn check_ikki_tukan(agari: &AgariTilesets) -> Option<Form> {
 ///
 /// - 刻子が4つある。
 pub fn check_duiduihe(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 対々和を判定...");
+    debug!("--> 対々和を判定...");
 
     let count = agari.kezis().count();
 
     if count != 4 {
-        info!("    刻子が{}個しかありません。", count);
+        debug!("    刻子が{}個しかありません。", count);
         return None;
     }
 
-    info!("    対々和です。");
+    debug!("    対々和です。");
     Some(Form::Duiduihe)
 }
 
@@ -1139,7 +1139,7 @@ pub fn check_duiduihe(agari: &AgariTilesets) -> Option<Form> {
 /// 〈純全帯公九〉
 /// - 全ての面子と雀頭に 1, 9 が絡んでいる。
 pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 混全帯幺九・純全帯公九を判定...");
+    debug!("--> 混全帯幺九・純全帯公九を判定...");
 
     let mut has_zipai = false;
     let mut has_zhongzhang = false;
@@ -1147,7 +1147,7 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
     for tiles in agari.mianzis().chain(once(agari.quetou())) {
         // その面子の牌の全てが中張牌であれば対象の役のどれも成立しえないので放置。
         if tiles.iter().all(|&tile| tile.is_zhongzhang()) {
-            info!(
+            debug!(
                 "    全てが中張牌で構成された面子{}があったため、いずれも成立しません。",
                 tiles
             );
@@ -1158,7 +1158,7 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
         has_zhongzhang = has_zhongzhang || tiles.iter().any(|tile| tile.is_zhongzhang());
     }
 
-    info!(
+    debug!(
         "    字牌があり{}。中張牌はあり{}。",
         if has_zipai { "ます" } else { "ません" },
         if has_zhongzhang {
@@ -1170,16 +1170,16 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
 
     match (has_zipai, has_zhongzhang) {
         (false, true) => {
-            info!("    純全帯公九です。");
+            debug!("    純全帯公九です。");
             Some(Form::Chunquandaiyaojiu(agari.is_menqian()))
         }
         (true, true) => {
-            info!("    混全帯幺九です。");
+            debug!("    混全帯幺九です。");
             Some(Form::Hunquandaiyaojiu(agari.is_menqian()))
         }
         // 混老頭は別扱いのため、ここでは None
         _ => {
-            info!("    純全帯公九でも混全帯幺九でもありません。");
+            debug!("    純全帯公九でも混全帯幺九でもありません。");
             None
         }
     }
@@ -1192,18 +1192,18 @@ pub fn check_hunquandaiyaojiu_chunquandaiyaojiu(agari: &AgariTilesets) -> Option
 /// 〈三槓子〉
 /// - 槓を3回行う
 pub fn check_sangangzi_sigangzi(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 四槓子・三槓子を判定...");
+    debug!("--> 四槓子・三槓子を判定...");
     match agari.angangs().count() + agari.minggangs().count() {
         4 => {
-            info!("    四槓子です。");
+            debug!("    四槓子です。");
             Some(Form::Sigangzi)
         }
         3 => {
-            info!("    三槓子です。");
+            debug!("    三槓子です。");
             Some(Form::Sangangzi)
         }
         n => {
-            info!("    槓は{}回しか行われていません。", n);
+            debug!("    槓は{}回しか行われていません。", n);
             None
         }
     }
@@ -1214,11 +1214,11 @@ pub fn check_sangangzi_sigangzi(agari: &AgariTilesets) -> Option<Form> {
 /// - 雀頭が三元牌になっている。
 /// - 遺りの二つを刻子または槓子で揃える。
 pub fn check_shousanyuan(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 小三元を判定...");
+    debug!("--> 小三元を判定...");
 
     // まず雀頭が三元牌でないならアウト。
     if !agari.quetou().first().is_sanyuan() {
-        info!("    雀頭が三元牌ではありません。");
+        debug!("    雀頭が三元牌ではありません。");
         return None;
     }
 
@@ -1228,13 +1228,13 @@ pub fn check_shousanyuan(agari: &AgariTilesets) -> Option<Form> {
         .count();
 
     if num_sanyuan >= 2 {
-        info!(
+        debug!(
             "    三元牌が雀頭を除いて {} 枚あるので小三元です。",
             num_sanyuan
         );
         Some(Form::Shousangen)
     } else {
-        info!(
+        debug!(
             "    三元牌は雀頭を除いて{}枚しかありません。",
             num_sanyuan
         );
@@ -1246,7 +1246,7 @@ pub fn check_shousanyuan(agari: &AgariTilesets) -> Option<Form> {
 ///
 /// - 三元牌全てについてそれぞれ刻子を作る。
 pub fn check_daisanyuan(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 大三元を判定...");
+    debug!("--> 大三元を判定...");
     let num_sanyuan = agari
         .kezis()
         .filter(|tiles| tiles.first().is_sanyuan())
@@ -1254,13 +1254,13 @@ pub fn check_daisanyuan(agari: &AgariTilesets) -> Option<Form> {
 
     // 刻子が3つあれば自動的に全種類で刻子を作っていることになるのでOK。そもそも数がないため。
     if num_sanyuan == 3 {
-        info!(
+        debug!(
             "    三元牌が{}枚あるので大三元です。",
             num_sanyuan
         );
         Some(Form::Daisangen)
     } else {
-        info!(
+        debug!(
             "    三元牌が雀頭を除いて{}枚しかありません。",
             num_sanyuan
         );
@@ -1276,7 +1276,7 @@ pub fn check_daisanyuan(agari: &AgariTilesets) -> Option<Form> {
 /// 〈小四喜〉
 /// - 雀頭と3面子が風牌
 pub fn check_shousushi_daisushi(agari: &AgariTilesets) -> Option<Form> {
-    info!("--> 大四喜・小四喜を判定...");
+    debug!("--> 大四喜・小四喜を判定...");
 
     let extract_zipai_kind = |tiles: &Tiles| match tiles.first() {
         Tile::Zipai(kind) => Some(kind),
@@ -1288,14 +1288,14 @@ pub fn check_shousushi_daisushi(agari: &AgariTilesets) -> Option<Form> {
             .iter()
             .all(|d| set.contains(d));
         if ok {
-            info!(
+            debug!(
                 "   全方位を含んでいるので{}成立です。",
                 form.name()
             );
 
             Some(form)
         } else {
-            info!(
+            debug!(
                 "    方位が足りず{}は成立しませんでした。",
                 form.name()
             );
