@@ -138,6 +138,7 @@ fn forms_for_all_base(tilesets: &Tilesets) -> impl Iterator<Item = Form> {
         .chain(special_check_duanyaojiu(tilesets))
         .chain(special_check_ziyise(tilesets))
         .chain(special_check_hungyise_qingyise(tilesets))
+        .chain(special_check_qinglaotou(tilesets))
         .chain(special_check_hunlaotou(tilesets))
         .chain(special_check_dora(tilesets))
 }
@@ -439,5 +440,14 @@ mod tests {
             res.to_string(),
             "東場 東家 \n1p1p2p3p4p4p5p6p6p7p7p8p9p ツモ5P\n(2p3p4p 4p5p6p 5P6p7p 7p8p9p 1p1p 待ち: 両面)\n1翻 立直\n1翻 門前清自摸和\n1翻 平和\n3翻 ドラ\n6翻 清一色\n12翻 36000点 三倍満"
         )
+    }
+
+    #[test]
+    fn judge_qinglaotou() {
+        crate::logger::init_once();
+        let tilesets = parse("1s1s1s9s9s9p9p ロン9p 暗槓1p1p1p1p ポン1m1m1m ドラ8s9p");
+        let tilesets = with_direction(tilesets, Direction::West, Direction::East);
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(res.to_string(), "東場 西家 \n1s1s1s9s9s9p9p ポン1m1m1m 暗槓1p1p1p1p ロン9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s 待ち: シャンポン)\n13翻 清老頭\n32000点 役満",);
     }
 }
