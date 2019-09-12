@@ -466,6 +466,14 @@ mod tests {
     }
 
     #[test]
+    fn judge_hunlaotou() {
+        crate::logger::init_once();
+        let tilesets = parse("1m1m9m9m1s1s1s東東東 ロン9m ポン白白白");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(res.to_string(), "東場 東家 \n1s1s1s1m1m9m9m東東東 ポン白白白 ロン9m\n(白白白 9m9m9m 1s1s1s 東東東 1m1m 待ち: シャンポン)\n2翻 混老頭\n2翻 対々和\n3翻 役牌\n7翻 18000点 跳満");
+    }
+
+    #[test]
     fn judge_dora_only() {
         crate::logger::init_once();
         let tilesets = parse("2m3m4m2s2s4s5s6p7p8p ツモ6s チー3m1m2m ドラ2m");

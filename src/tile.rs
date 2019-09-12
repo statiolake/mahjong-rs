@@ -182,7 +182,8 @@ impl Tile {
 
     /// 么九牌かどうか調べる。 `!self.is_zhongzhang()` と同じ。
     pub fn is_yaojiu(self) -> bool {
-        self.order().map(|o| o.is_yaojiu()).unwrap_or(false)
+        // order がない場合は字牌なので幺九牌
+        self.order().map(|o| o.is_yaojiu()).unwrap_or(true)
     }
 
     /// 風牌かどうか調べる。風牌は「東南西北」のどれか。
