@@ -505,6 +505,14 @@ impl Form {
         }
     }
 
+    pub fn is_dora(self) -> bool {
+        if let Form::Dora(_) = self {
+            true
+        } else {
+            false
+        }
+    }
+
     pub fn display(self) -> FormDisplay {
         let name = self.name();
         let point = self.point();

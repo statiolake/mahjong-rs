@@ -39,6 +39,11 @@ impl Judge {
         if forms.iter().any(|form| form.point().is_true_yiman()) {
             forms.retain(|form| form.point().is_true_yiman());
         }
+
+        // もし役がドラのみであれば、それでは上がれないので役を空にする
+        if forms.iter().all(|form| form.is_dora()) {
+            forms.clear();
+        }
     }
 
     fn from_tilesets(tilesets: Tilesets, mut forms: Vec<Form>) -> Option<Judge> {
@@ -458,5 +463,12 @@ mod tests {
         let tilesets = parse("2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s");
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(res.to_string(), "東場 東家 \n2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s\n(6s6s6s 8s8s8s 2s3s4s 2s3s4s 2s2s 待ち: カンチャン)\n13翻 緑一色\n48000点 役満");
+    }
+
+    #[test]
+    fn judge_dora_only() {
+        crate::logger::init_once();
+        let tilesets = parse("2m3m4m2s2s4s5s6p7p8p ツモ6s チー3m1m2m ドラ2m");
+        assert!(judge(&tilesets).is_none());
     }
 }
