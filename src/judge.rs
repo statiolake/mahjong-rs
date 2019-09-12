@@ -137,6 +137,7 @@ fn forms_for_all_base(tilesets: &Tilesets) -> impl Iterator<Item = Form> {
         .chain(special_check_menqianqingzimohu(tilesets))
         .chain(special_check_duanyaojiu(tilesets))
         .chain(special_check_ziyise(tilesets))
+        .chain(special_check_luyise(tilesets))
         .chain(special_check_hungyise_qingyise(tilesets))
         .chain(special_check_qinglaotou(tilesets))
         .chain(special_check_hunlaotou(tilesets))
@@ -449,5 +450,13 @@ mod tests {
         let tilesets = with_direction(tilesets, Direction::West, Direction::East);
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(res.to_string(), "東場 西家 \n1s1s1s9s9s9p9p ポン1m1m1m 暗槓1p1p1p1p ロン9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s 待ち: シャンポン)\n13翻 清老頭\n32000点 役満",);
+    }
+
+    #[test]
+    fn judge_luyise() {
+        crate::logger::init_once();
+        let tilesets = parse("2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(res.to_string(), "東場 東家 \n2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s\n(6s6s6s 8s8s8s 2s3s4s 2s3s4s 2s2s 待ち: カンチャン)\n13翻 緑一色\n48000点 役満");
     }
 }
