@@ -474,6 +474,24 @@ mod tests {
     }
 
     #[test]
+    fn judge_bianzhang() {
+        use crate::context::Lizhi;
+
+        crate::logger::init_once();
+        let tilesets = parse("2s2s1p1p1p3m4m5m5s6s7s8s9s ツモ7s ドラ4m");
+        let tilesets = Tilesets {
+            context: Context {
+                lizhi: Lizhi::Lizhi,
+                ..Context::default()
+            },
+            ..tilesets
+        };
+
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(res.to_string(), "東場 東家 \n2s2s5s6s7s8s9s3m4m5m1p1p1p ツモ7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s 待ち: ペンチャン)\n1翻 立直\n1翻 門前清自摸和\n1翻 ドラ\n3翻40符 7700点");
+    }
+
+    #[test]
     fn judge_dora_only() {
         crate::logger::init_once();
         let tilesets = parse("2m3m4m2s2s4s5s6p7p8p ツモ6s チー3m1m2m ドラ2m");

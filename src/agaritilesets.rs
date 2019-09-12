@@ -4,10 +4,11 @@ use crate::context::Context;
 use crate::tile::{Order, Tile};
 use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;
+use std::collections::HashSet;
 use std::fmt;
 use std::ops::Range;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum MachiKind {
     /// 両面待ち。
     ///
@@ -120,7 +121,8 @@ impl<'a> MachiEnumerator<'a> {
 
     /// 両面待ちにあたるかどうか。
     fn is_liangmian(&self) -> bool {
-        self.is_liangmian_bianzhang() == Some(MachiKind::Liangmian)
+        self.is_liangmian_bianzhang()
+            .contains(&MachiKind::Liangmian)
     }
 
     /// シャンポン待ちにあたるかどうか。
@@ -132,7 +134,8 @@ impl<'a> MachiEnumerator<'a> {
 
     /// ペンチャン待ちにあたるかどうか。
     fn is_bianzhang(&self) -> bool {
-        self.is_liangmian_bianzhang() == Some(MachiKind::Bianzhang)
+        self.is_liangmian_bianzhang()
+            .contains(&MachiKind::Bianzhang)
     }
 
     /// カンチャン待ちにあたるかどうか。
@@ -150,9 +153,14 @@ impl<'a> MachiEnumerator<'a> {
         self.is_danqi_yandan() == Some(MachiKind::Yandan)
     }
 
-    fn is_liangmian_bianzhang(&self) -> Option<MachiKind> {
+    fn is_liangmian_bianzhang(&self) -> HashSet<MachiKind> {
         // まずオーダーをとる。そもそも字牌なら両面もペンチャンもありえない。
-        let order_last = self.last.order()?;
+        let order_last = match self.last.order() {
+            Some(order) => order,
+            None => return HashSet::new(),
+        };
+
+        let mut res = HashSet::new();
 
         for shunzi in self.anshuns.iter() {
             // そもそも両端でないなら次へ
@@ -177,19 +185,21 @@ impl<'a> MachiEnumerator<'a> {
             // この順子の左端が7かつ7を引いてきた場合はペンチャン待ち。
             let order_3 = Order::new(3).unwrap();
             if order_shunzi_last == order_3 && order_last == order_3 {
-                return Some(MachiKind::Bianzhang);
+                res.insert(MachiKind::Bianzhang);
+                continue;
             }
 
             let order_7 = Order::new(7).unwrap();
             if order_shunzi_first == order_7 && order_last == order_7 {
-                return Some(MachiKind::Bianzhang);
+                res.insert(MachiKind::Bianzhang);
+                continue;
             }
 
             // ここまでこれば、この牌で両面待ちとできる。
-            return Some(MachiKind::Liangmian);
+            res.insert(MachiKind::Liangmian);
         }
 
-        None
+        res
     }
 
     fn is_danqi_yandan(&self) -> Option<MachiKind> {
