@@ -492,6 +492,14 @@ mod tests {
     }
 
     #[test]
+    fn judge_true_yiman() {
+        crate::logger::init_once();
+        let tilesets = parse("2m2m2m3m3m3m4m4m4m5m5m5m1m ツモ1m ドラ2m3m4m");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(res.to_string(), "東場 東家 \n1m2m2m2m3m3m3m4m4m4m5m5m5m ツモ1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m 待ち: 単騎)\n13翻 四暗刻単騎\n48000点 役満");
+    }
+
+    #[test]
     fn judge_dora_only() {
         crate::logger::init_once();
         let tilesets = parse("2m3m4m2s2s4s5s6p7p8p ツモ6s チー3m1m2m ドラ2m");

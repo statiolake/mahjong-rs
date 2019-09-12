@@ -198,8 +198,8 @@ impl PartialOrd for Point {
 
 impl Ord for Point {
     fn cmp(&self, other: &Point) -> Ordering {
-        self.fan
-            .cmp(&other.fan)
+        (self.yiman.cmp(&other.yiman))
+            .then_with(|| self.fan.cmp(&other.fan))
             .then_with(|| self.fu.cmp(&other.fu))
     }
 }
