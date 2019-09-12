@@ -454,7 +454,10 @@ mod tests {
         let tilesets = parse("1s1s1s9s9s9p9p ロン9p 暗槓1p1p1p1p ポン1m1m1m ドラ8s9p");
         let tilesets = with_direction(tilesets, Direction::West, Direction::East);
         let res = dbg!(judge(&tilesets)).unwrap();
-        assert_eq!(res.to_string(), "東場 西家 \n1s1s1s9s9s9p9p ポン1m1m1m 暗槓1p1p1p1p ロン9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s 待ち: シャンポン)\n13翻 清老頭\n32000点 役満",);
+        assert_eq!(
+            res.to_string(),
+            "東場 西家 \n1s1s1s9s9s9p9p ポン1m1m1m 暗槓1p1p1p1p ロン9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s 待ち: シャンポン)\n13翻 清老頭\n32000点 役満"
+        );
     }
 
     #[test]
@@ -462,7 +465,10 @@ mod tests {
         crate::logger::init_once();
         let tilesets = parse("2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s");
         let res = dbg!(judge(&tilesets)).unwrap();
-        assert_eq!(res.to_string(), "東場 東家 \n2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s\n(6s6s6s 8s8s8s 2s3s4s 2s3s4s 2s2s 待ち: カンチャン)\n13翻 緑一色\n48000点 役満");
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n2s2s2s2s3s4s4s6s6s6s8s8s8s ロン3s\n(6s6s6s 8s8s8s 2s3s4s 2s3s4s 2s2s 待ち: カンチャン)\n13翻 緑一色\n48000点 役満"
+        );
     }
 
     #[test]
@@ -470,7 +476,10 @@ mod tests {
         crate::logger::init_once();
         let tilesets = parse("1m1m9m9m1s1s1s東東東 ロン9m ポン白白白");
         let res = dbg!(judge(&tilesets)).unwrap();
-        assert_eq!(res.to_string(), "東場 東家 \n1s1s1s1m1m9m9m東東東 ポン白白白 ロン9m\n(白白白 9m9m9m 1s1s1s 東東東 1m1m 待ち: シャンポン)\n2翻 混老頭\n2翻 対々和\n3翻 役牌\n7翻 18000点 跳満");
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1s1s1s1m1m9m9m東東東 ポン白白白 ロン9m\n(白白白 9m9m9m 1s1s1s 東東東 1m1m 待ち: シャンポン)\n2翻 混老頭\n2翻 対々和\n3翻 役牌\n7翻 18000点 跳満"
+        );
     }
 
     #[test]
@@ -488,7 +497,10 @@ mod tests {
         };
 
         let res = dbg!(judge(&tilesets)).unwrap();
-        assert_eq!(res.to_string(), "東場 東家 \n2s2s5s6s7s8s9s3m4m5m1p1p1p ツモ7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s 待ち: ペンチャン)\n1翻 立直\n1翻 門前清自摸和\n1翻 ドラ\n3翻40符 7700点");
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n2s2s5s6s7s8s9s3m4m5m1p1p1p ツモ7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s 待ち: ペンチャン)\n1翻 立直\n1翻 門前清自摸和\n1翻 ドラ\n3翻40符 7700点"
+        );
     }
 
     #[test]
@@ -496,7 +508,10 @@ mod tests {
         crate::logger::init_once();
         let tilesets = parse("2m2m2m3m3m3m4m4m4m5m5m5m1m ツモ1m ドラ2m3m4m");
         let res = dbg!(judge(&tilesets)).unwrap();
-        assert_eq!(res.to_string(), "東場 東家 \n1m2m2m2m3m3m3m4m4m4m5m5m5m ツモ1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m 待ち: 単騎)\n13翻 四暗刻単騎\n48000点 役満");
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1m2m2m2m3m3m3m4m4m4m5m5m5m ツモ1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m 待ち: 単騎)\n13翻 四暗刻単騎\n48000点 役満"
+        );
     }
 
     #[test]
