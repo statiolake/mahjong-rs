@@ -102,10 +102,7 @@ impl Point {
                     match (self.fan, self.fu) {
                         // 4翻30符と3翻60符は切り上げ満貫
                         (fan @ 4, fu @ 30) | (fan @ 3, fu @ 60) => {
-                            debug!(
-                                "    {}翻{}符のため、切り上げ満貫です。",
-                                fan, fu
-                            );
+                            debug!("    {}翻{}符のため、切り上げ満貫です。", fan, fu);
                             manguan()
                         }
 
@@ -142,10 +139,7 @@ impl Point {
             let value = self.value(is_parent);
             let manguan = Point::new_manguan().value(is_parent);
 
-            assert!(
-                value <= manguan,
-                "4翻以下で満貫を越えることはありません。"
-            );
+            assert!(value <= manguan, "4翻以下で満貫を越えることはありません。");
 
             if value == manguan {
                 Point::new_manguan().rank(is_parent)
@@ -601,12 +595,7 @@ pub fn special_check_qiduizi(tilesets: &Tilesets) -> Option<Form> {
         .chain(once(tilesets.last))
         .collect();
 
-    assert_eq!(
-        tiles.len(),
-        14,
-        "なぜか牌が足りません: {}",
-        tiles.len()
-    );
+    assert_eq!(tiles.len(), 14, "なぜか牌が足りません: {}", tiles.len());
 
     // 七対子
     let mut map: HashMap<Tile, u8> = HashMap::new();
@@ -685,10 +674,7 @@ pub fn special_check_hungyise_qingyise(tilesets: &Tilesets) -> Option<Form> {
 
     // 対象となる種類
     let target_kind = kinds_not_zipai().next()?;
-    debug!(
-        "    字牌でない牌の種類の一つは {} です。",
-        target_kind
-    );
+    debug!("    字牌でない牌の種類の一つは {} です。", target_kind);
 
     // 全てが同じかどうか
     let all_same = kinds_not_zipai().all(|kind| kind == target_kind);
@@ -761,10 +747,7 @@ pub fn special_check_certadebugrm(
         // 一致した場合は国士無双などが成立。
         if target == hand {
             let form = form_constructor(add == tilesets.last);
-            debug!(
-                "    形が一致したので {} 成立です。",
-                form.name()
-            );
+            debug!("    形が一致したので {} 成立です。", form.name());
             return Some(form);
         }
 
@@ -1227,10 +1210,7 @@ pub fn check_shousanyuan(agari: &AgariTilesets) -> Option<Form> {
         );
         Some(Form::Shousangen)
     } else {
-        debug!(
-            "    三元牌は雀頭を除いて{}枚しかありません。",
-            num_sanyuan
-        );
+        debug!("    三元牌は雀頭を除いて{}枚しかありません。", num_sanyuan);
         None
     }
 }
@@ -1247,16 +1227,10 @@ pub fn check_daisanyuan(agari: &AgariTilesets) -> Option<Form> {
 
     // 刻子が3つあれば自動的に全種類で刻子を作っていることになるのでOK。そもそも数がないため。
     if num_sanyuan == 3 {
-        debug!(
-            "    三元牌が{}枚あるので大三元です。",
-            num_sanyuan
-        );
+        debug!("    三元牌が{}枚あるので大三元です。", num_sanyuan);
         Some(Form::Daisangen)
     } else {
-        debug!(
-            "    三元牌が雀頭を除いて{}枚しかありません。",
-            num_sanyuan
-        );
+        debug!("    三元牌が雀頭を除いて{}枚しかありません。", num_sanyuan);
         None
     }
 }
@@ -1281,17 +1255,11 @@ pub fn check_shousushi_daisushi(agari: &AgariTilesets) -> Option<Form> {
             .iter()
             .all(|d| set.contains(d));
         if ok {
-            debug!(
-                "   全方位を含んでいるので{}成立です。",
-                form.name()
-            );
+            debug!("   全方位を含んでいるので{}成立です。", form.name());
 
             Some(form)
         } else {
-            debug!(
-                "    方位が足りず{}は成立しませんでした。",
-                form.name()
-            );
+            debug!("    方位が足りず{}は成立しませんでした。", form.name());
             None
         }
     };
