@@ -515,6 +515,28 @@ mod tests {
     }
 
     #[test]
+    fn judge_pinghe_zipai() {
+        crate::logger::init_once();
+        let tilesets = parse("1p2p2p3p3p4p6p6p7p7p8p南南 ロン8p");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1p2p2p3p3p4p6p6p7p7p8p南南 ロン8p\n(6p7p8p 1p2p3p 2p3p4p 6p7p8p 南南 待ち: 両面)\n1翻 平和\n1翻 一盃口\n3翻 混一色\n5翻 12000点 満貫"
+        );
+    }
+
+    #[test]
+    fn judge_pinghe_zipai_ng() {
+        crate::logger::init_once();
+        let tilesets = parse("1p2p2p3p3p4p6p6p7p7p8p東東 ロン8p");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \n1p2p2p3p3p4p6p6p7p7p8p東東 ロン8p\n(6p7p8p 1p2p3p 2p3p4p 6p7p8p 東東 待ち: 両面)\n1翻 一盃口\n3翻 混一色\n4翻40符 12000点 満貫"
+        );
+    }
+
+    #[test]
     fn judge_dora_only() {
         crate::logger::init_once();
         let tilesets = parse("2m3m4m2s2s4s5s6p7p8p ツモ6s チー3m1m2m ドラ2m");

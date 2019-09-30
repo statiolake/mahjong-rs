@@ -914,8 +914,8 @@ pub fn check_pinghe(agari: &AgariTilesets) -> Option<Form> {
         return None;
     }
 
-    if agari.quetou().first().kind() == TileKind::Zipai {
-        debug!("    雀頭が字牌です。");
+    if agari.quetou().first().num_fan(agari.context()) >= 1 {
+        debug!("    雀頭が役牌です。");
         return None;
     }
 
