@@ -478,7 +478,7 @@ impl Form {
             Form::Hunquandaiyaojiu(is_menqian) => Point::new(if is_menqian { 2 } else { 1 }),
             Form::Sangangzi => Point::new(2),
             Form::Liangbeigou => Point::new(3),
-            Form::Chunquandaiyaojiu(is_menqian) => Point::new(if is_menqian { 2 } else { 1 }),
+            Form::Chunquandaiyaojiu(is_menqian) => Point::new(if is_menqian { 3 } else { 2 }),
             Form::Hungyise(is_menqian) => Point::new(if is_menqian { 3 } else { 2 }),
             Form::Shousangen => Point::new(4),
             Form::Hunlaotou => Point::new(2),
