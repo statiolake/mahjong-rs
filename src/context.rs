@@ -1,7 +1,9 @@
 //! リーチやコンテキストなどを定義する。
 
 use crate::form::Form;
+use failure::Fail;
 use std::fmt;
+use std::str::FromStr;
 
 /// 場風や自風を表す。例 : 東家、東場
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -32,6 +34,23 @@ impl fmt::Display for Direction {
             Direction::South => write!(b, "南"),
             Direction::West => write!(b, "西"),
             Direction::North => write!(b, "北"),
+        }
+    }
+}
+
+#[derive(Debug, Fail)]
+#[fail(display = "不明な方角です: {}", 0)]
+pub struct UnknownDirection(String);
+
+impl FromStr for Direction {
+    type Err = UnknownDirection;
+    fn from_str(from: &str) -> Result<Direction, UnknownDirection> {
+        match from {
+            "東" => Ok(Direction::East),
+            "南" => Ok(Direction::South),
+            "西" => Ok(Direction::West),
+            "北" => Ok(Direction::North),
+            _ => Err(UnknownDirection(from.to_string())),
         }
     }
 }
