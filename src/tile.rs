@@ -321,9 +321,14 @@ impl Order {
         })
     }
 
+    /// 赤ドラになれる番号かどうか。5かどうか。
+    pub fn can_be_red(self) -> bool {
+        self.order == 5
+    }
+
     /// 赤ドラにした同じ番号のものを作る。
     pub fn with_red(self, is_red: bool) -> Result<Order> {
-        if is_red && self.order != 5 {
+        if is_red && !self.can_be_red() {
             return Err(Error::InvalidRed);
         }
 
