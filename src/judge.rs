@@ -70,11 +70,19 @@ impl Judge {
         Judge::new(forms, total, JudgeTilesets::AgariTilesets(agari))
     }
 
-    fn tilesets(&self) -> &Tilesets {
+    pub fn tilesets(&self) -> &Tilesets {
         match &self.tilesets {
             JudgeTilesets::Tilesets(tilesets) => tilesets,
             JudgeTilesets::AgariTilesets(agari) => agari.tilesets(),
         }
+    }
+
+    pub fn total(&self) -> &Point {
+        &self.total
+    }
+
+    pub fn forms(&self) -> &Vec<Form> {
+        &self.forms
     }
 }
 
