@@ -2,11 +2,12 @@
 
 use crate::form::Form;
 use failure::Fail;
+use num_derive::FromPrimitive;
 use std::fmt;
 use std::str::FromStr;
 
 /// 場風や自風を表す。例 : 東家、東場
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive)]
 pub enum Direction {
     /// 東場 / 東家。
     East,
