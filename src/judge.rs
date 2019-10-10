@@ -427,7 +427,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(6s7s8s 1s2s3s 4s5s6s 7s8s9s 西西 待ち: カンチャン)\n2翻 一気通貫\n3翻 混一色\n3翻 ドラ\n8翻 24000点 倍満"
+            "東場 東家 \nドラ1s6s2p中 1s2s3s4s5s6s6s7s8s8s9s西西 ロン7s\n(6s7s8s 1s2s3s 4s5s6s 7s8s9s 西西 待ち: カンチャン)\n2翻 一気通貫\n3翻 混一色\n3翻 ドラ\n8翻 24000点 倍満"
         );
     }
 
@@ -459,7 +459,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1p1p2p3p4p4p5p6p6p7p7p8p9p ツモ5P\n(2p3p4p 4p5p6p 5P6p7p 7p8p9p 1p1p 待ち: 両面)\n1翻 立直\n1翻 門前清自摸和\n1翻 平和\n3翻 ドラ\n6翻 清一色\n12翻 36000点 三倍満"
+            "東場 東家 \nドラ9m9p9p東 1p1p2p3p4p4p5p6p6p7p7p8p9p ツモ5P\n(2p3p4p 4p5p6p 5P6p7p 7p8p9p 1p1p 待ち: 両面)\n1翻 立直\n1翻 門前清自摸和\n1翻 平和\n3翻 ドラ\n6翻 清一色\n12翻 36000点 三倍満"
         )
     }
 
@@ -471,7 +471,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 西家 \n1s1s1s9s9s9p9p ポン1m1m1m 暗槓1p1p1p1p ロン9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s 待ち: シャンポン)\n13翻 清老頭\n32000点 役満"
+            "東場 西家 \nドラ8s9p 1s1s1s9s9s9p9p ポン1m1m1m 暗槓1p1p1p1p ロン9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s 待ち: シャンポン)\n13翻 清老頭\n32000点 役満"
         );
     }
 
@@ -514,7 +514,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n2s2s5s6s7s8s9s3m4m5m1p1p1p ツモ7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s 待ち: ペンチャン)\n1翻 立直\n1翻 門前清自摸和\n1翻 ドラ\n3翻40符 7700点"
+            "東場 東家 \nドラ4m 2s2s5s6s7s8s9s3m4m5m1p1p1p ツモ7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s 待ち: ペンチャン)\n1翻 立直\n1翻 門前清自摸和\n1翻 ドラ\n3翻40符 7700点"
         );
     }
 
@@ -525,7 +525,7 @@ mod tests {
         let res = dbg!(judge(&tilesets)).unwrap();
         assert_eq!(
             res.to_string(),
-            "東場 東家 \n1m2m2m2m3m3m3m4m4m4m5m5m5m ツモ1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m 待ち: 単騎)\n13翻 四暗刻単騎\n48000点 役満"
+            "東場 東家 \nドラ2m3m4m 1m2m2m2m3m3m3m4m4m4m5m5m5m ツモ1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m 待ち: 単騎)\n13翻 四暗刻単騎\n48000点 役満"
         );
     }
 

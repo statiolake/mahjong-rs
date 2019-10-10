@@ -275,6 +275,10 @@ impl Tilesets {
 
 impl fmt::Display for Tilesets {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        if !self.doras.is_empty() {
+            write!(b, "ドラ{} ", self.doras)?;
+        }
+
         write!(b, "{}", self.hand)?;
 
         for peng in &self.pengs {
