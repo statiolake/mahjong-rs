@@ -77,6 +77,13 @@ impl Judge {
         }
     }
 
+    pub fn agari_tilesets(&self) -> Option<&AgariTilesets> {
+        match &self.tilesets {
+            JudgeTilesets::Tilesets(_) => None,
+            JudgeTilesets::AgariTilesets(agari) => Some(agari),
+        }
+    }
+
     pub fn total(&self) -> &Point {
         &self.total
     }
