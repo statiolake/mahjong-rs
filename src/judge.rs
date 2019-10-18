@@ -552,6 +552,17 @@ mod tests {
     }
 
     #[test]
+    fn judge_dora_yiman() {
+        crate::logger::init_once();
+        let tilesets = parse("1p1p1p2p2p2p3p3p3p4p5p6p5p ツモ5p ドラ1p2p3p4p5p6p");
+        let res = dbg!(judge(&tilesets)).unwrap();
+        assert_eq!(
+            res.to_string(),
+            "東場 東家 \nドラ1p2p3p4p5p6p 1p1p1p2p2p2p3p3p3p4p5p5p6p ツモ5p\n(1p1p1p 2p2p2p 3p3p3p 4p5p6p 5p5p 待ち: 単騎)\n1翻 門前清自摸和\n2翻 三暗刻\n6翻 清一色\n14翻 ドラ\n23翻 48000点 役満"
+        );
+    }
+
+    #[test]
     fn judge_dora_only() {
         crate::logger::init_once();
         let tilesets = parse("2m3m4m2s2s4s5s6p7p8p ツモ6s チー3m1m2m ドラ2m");
