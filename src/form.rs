@@ -236,7 +236,7 @@ impl fmt::Display for PointDisplayFull {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         let &PointDisplayFull { point, is_parent } = self;
 
-        if !point.is_yiman() {
+        if !point.is_true_yiman() {
             write!(b, "{} ", point)?;
         }
 
