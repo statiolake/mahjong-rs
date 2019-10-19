@@ -18,8 +18,8 @@ pub enum Error {
     #[fail(display = "索子・萬子・筒子の番号が範囲外です。")]
     InvalidOrder,
 
-    /// 5 以外の牌で赤ドラが指定された。
-    #[fail(display = "5 以外は赤ドラになれません。")]
+    /// 字牌で赤ドラが指定された。
+    #[fail(display = "字牌は赤ドラになれません。")]
     InvalidRed,
 }
 
@@ -154,9 +154,9 @@ impl Tile {
     pub fn with_red(self, is_red: bool) -> Result<Tile> {
         match self {
             Tile::Zipai(_) => Err(Error::InvalidRed),
-            Tile::Suozi(o) => Ok(Tile::Suozi(o.with_red(is_red)?)),
-            Tile::Wanzi(o) => Ok(Tile::Wanzi(o.with_red(is_red)?)),
-            Tile::Tongzi(o) => Ok(Tile::Tongzi(o.with_red(is_red)?)),
+            Tile::Suozi(o) => Ok(Tile::Suozi(o.with_red(is_red))),
+            Tile::Wanzi(o) => Ok(Tile::Wanzi(o.with_red(is_red))),
+            Tile::Tongzi(o) => Ok(Tile::Tongzi(o.with_red(is_red))),
         }
     }
 
@@ -298,7 +298,7 @@ impl FromStr for Tile {
             ch => return Err(ParseError::InvalidChar(ch)),
         };
 
-        let order = Order::new(order as u8 - b'0')?.with_red(is_red)?;
+        let order = Order::new(order as u8 - b'0')?.with_red(is_red);
 
         Ok(tile_constructor(order))
     }
@@ -321,18 +321,9 @@ impl Order {
         })
     }
 
-    /// 赤ドラになれる番号かどうか。5かどうか。
-    pub fn can_be_red(self) -> bool {
-        self.order == 5
-    }
-
     /// 赤ドラにした同じ番号のものを作る。
-    pub fn with_red(self, is_red: bool) -> Result<Order> {
-        if is_red && !self.can_be_red() {
-            return Err(Error::InvalidRed);
-        }
-
-        Ok(Order { is_red, ..self })
+    pub fn with_red(self, is_red: bool) -> Order {
+        Order { is_red, ..self }
     }
 
     /// 次の番号。9であれば1に戻る。
@@ -488,7 +479,6 @@ mod tests {
         Order::new(order)
             .expect("不正な順番です。")
             .with_red(is_red)
-            .expect("不正な赤ドラです。")
     }
 
     #[test]

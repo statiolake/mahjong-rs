@@ -88,7 +88,6 @@ impl Tilesets {
         let cand = Tilesets::dispatch(context, tilesets)?;
 
         cand.check_lizhi_fulou()?;
-        cand.check_num_reds()?;
         cand.check_num_same_tiles()?;
         cand.check_num_tiles()?;
 
@@ -215,26 +214,6 @@ impl Tilesets {
     fn tiles_all<'a>(&'a self) -> impl Iterator<Item = Tile> + 'a {
         self.tiles_without_doras()
             .chain(self.doras.iter().map(|tile| tile.wrapping_prev()))
-    }
-
-    /// 赤ドラの枚数を確認。各色に赤ドラは 1 枚ずつしかないはず。
-    fn check_num_reds(&self) -> Result<()> {
-        let (mut red_s, mut red_m, mut red_p) = (0, 0, 0);
-        self.tiles_without_doras().for_each(|tile| match tile {
-            Tile::Suozi(o) if o.is_red() => red_s += 1,
-            Tile::Wanzi(o) if o.is_red() => red_m += 1,
-            Tile::Tongzi(o) if o.is_red() => red_p += 1,
-            _ => (),
-        });
-
-        let (kind, num) = match (red_s >= 2, red_m >= 2, red_p >= 2) {
-            (true, _, _) => (TileKind::Suozi, red_s),
-            (_, true, _) => (TileKind::Wanzi, red_m),
-            (_, _, true) => (TileKind::Tongzi, red_p),
-            _ => return Ok(()),
-        };
-
-        Err(TilesetsError::InvalidNumRed(kind, num))
     }
 
     /// 同じ牌の数を確認。同じ牌は 4 枚しかないはず。
