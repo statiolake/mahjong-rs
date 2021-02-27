@@ -394,7 +394,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1p1p1p2p2p2p3p3p3p4p4p4p5p Tsumo 5p\n(1p1p1p 2p2p2p 3p3p3p 4p4p4p 5p5p waiting: Single wait)\n13 Han Four Concealed Pungs (Single)\n48000 Points Yakuman"
+            "East East \n1p1p1p2p2p2p3p3p3p4p4p4p5p Tsumo5p\n(1p1p1p 2p2p2p 3p3p3p 4p4p4p 5p5p waiting: Single wait)\n13 Han Four Concealed Pungs (Single)\n48000 Points Yakuman"
         );
     }
 
@@ -410,7 +410,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1s9s1m9m1p9p東南西北白發中 Tsumo 中\n13 Han Thirteen Orphans (13)\n48000 Points Yakuman"
+            "East East \n1s9s1m9m1p9p東南西北白發中 Tsumo中\n13 Han Thirteen Orphans (13)\n48000 Points Yakuman"
         );
     }
 
@@ -426,7 +426,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n3s3s5s5s1p6p6p東東白白中中 Tsumo 1p\n1 Han Fully Concealed Hand\n2 Han 25 Minipoints Seven Pairs\n3 Han 25 Minipoints 4800 Points"
+            "East East \n3s3s5s5s1p6p6p東東白白中中 Tsumo1p\n1 Han Fully Concealed Hand\n2 Han 25 Minipoints Seven Pairs\n3 Han 25 Minipoints 4800 Points"
         );
     }
 
@@ -442,7 +442,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1p1p2p2p3p3p4p4p5p5p6p6p7p Tsumo 7p\n(1p2p3p 1p2p3p 5p6p7p 5p6p7p 4p4p waiting: Open wait)\n1 Han Fully Concealed Hand\n1 Han Pinfu\n3 Han Twice Pure Double Chows\n6 Han Full Flush\n11 Han 36000 Points Sanbaiman"
+            "East East \n1p1p2p2p3p3p4p4p5p5p6p6p7p Tsumo7p\n(1p2p3p 1p2p3p 5p6p7p 5p6p7p 4p4p waiting: Open wait)\n1 Han Fully Concealed Hand\n1 Han Pinfu\n3 Han Twice Pure Double Chows\n6 Han Full Flush\n11 Han 36000 Points Sanbaiman"
         );
     }
 
@@ -458,7 +458,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1p1p1p2p2p2p3p3p3p5p Pon 4p4p4p Tsumo 5P\n(4p4p4p 1p1p1p 2p2p2p 3p3p3p 5p5P waiting: Single wait)\n1 Han Dora\n2 Han Three Concealed Pungs\n2 Han All Pungs\n5 Han Full Flush\n10 Han 24000 Points Baiman"
+            "East East \n1p1p1p2p2p2p3p3p3p5p Pon4p4p4p Tsumo5P\n(4p4p4p 1p1p1p 2p2p2p 3p3p3p 5p5P waiting: Single wait)\n1 Han Dora\n2 Han Three Concealed Pungs\n2 Han All Pungs\n5 Han Full Flush\n10 Han 24000 Points Baiman"
         );
     }
 
@@ -476,7 +476,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East West \n5s6s7s4m5m6m4p4p4p5p6p西西 Ron 西\n(西西西 5s6s7s 4m5m6m 4p5p6p 4p4p waiting: Double set wait)\n1 Han Yakuhai\n1 Han 40 Minipoints 1300 Points"
+            "East West \n5s6s7s4m5m6m4p4p4p5p6p西西 Ron西\n(西西西 5s6s7s 4m5m6m 4p5p6p 4p4p waiting: Double set wait)\n1 Han Yakuhai\n1 Han 40 Minipoints 1300 Points"
         );
     }
 
@@ -492,7 +492,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \nDora 1s6s2p中 1s2s3s4s5s6s6s7s8s8s9s西西 Ron 7s\n(6s7s8s 1s2s3s 4s5s6s 7s8s9s 西西 waiting: Closed wait)\n2 Han Pure Straight\n3 Han Half Flush\n3 Han Dora\n8 Han 24000 Points Baiman"
+            "East East \nDora1s6s2p中 1s2s3s4s5s6s6s7s8s8s9s西西 Ron7s\n(6s7s8s 1s2s3s 4s5s6s 7s8s9s 西西 waiting: Closed wait)\n2 Han Pure Straight\n3 Han Half Flush\n3 Han Dora\n8 Han 24000 Points Baiman"
         );
     }
 
@@ -508,7 +508,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n4s5s6s8s8s1m2m3m7m7m西西西 Tsumo 7m\n(7m7m7m 西西西 4s5s6s 1m2m3m 8s8s waiting: Double set wait)\n1 Han Fully Concealed Hand\n1 Han 40 Minipoints 2000 Points"
+            "East East \n4s5s6s8s8s1m2m3m7m7m西西西 Tsumo7m\n(7m7m7m 西西西 4s5s6s 1m2m3m 8s8s waiting: Double set wait)\n1 Han Fully Concealed Hand\n1 Han 40 Minipoints 2000 Points"
         );
     }
 
@@ -532,7 +532,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \nDora 9m9p9p東 1p1p2p3p4p4p5p6p6p7p7p8p9p Tsumo 5P\n(2p3p4p 4p5p6p 5P6p7p 7p8p9p 1p1p waiting: Open wait)\n1 Han Riichi\n1 Han Fully Concealed Hand\n1 Han Pinfu\n3 Han Dora\n6 Han Full Flush\n12 Han 36000 Points Sanbaiman"
+            "East East \nDora9m9p9p東 1p1p2p3p4p4p5p6p6p7p7p8p9p Tsumo5P\n(2p3p4p 4p5p6p 5P6p7p 7p8p9p 1p1p waiting: Open wait)\n1 Han Riichi\n1 Han Fully Concealed Hand\n1 Han Pinfu\n3 Han Dora\n6 Han Full Flush\n12 Han 36000 Points Sanbaiman"
         );
     }
 
@@ -548,7 +548,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East West \nDora 8s9p 1s1s1s9s9s9p9p Pon 1m1m1m Concealed Kong 1p1p1p1p Ron 9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s waiting: Double set wait)\n13 Han All Terminals\n32000 Points Yakuman"
+            "East West \nDora8s9p 1s1s1s9s9s9p9p Pon1m1m1m ConcealedKong1p1p1p1p Ron9p\n(1m1m1m 9p9p9p 1s1s1s 1p1p1p1p 9s9s waiting: Double set wait)\n13 Han All Terminals\n32000 Points Yakuman"
         );
     }
 
@@ -563,7 +563,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n2s2s2s2s3s4s4s6s6s6s8s8s8s Ron 3s\n(6s6s6s 8s8s8s 2s3s4s 2s3s4s 2s2s waiting: Closed wait)\n13 Han All Green\n48000 Points Yakuman"
+            "East East \n2s2s2s2s3s4s4s6s6s6s8s8s8s Ron3s\n(6s6s6s 8s8s8s 2s3s4s 2s3s4s 2s2s waiting: Closed wait)\n13 Han All Green\n48000 Points Yakuman"
         );
     }
 
@@ -578,7 +578,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1s1s1s1m1m9m9m東東東 Pon 白白白 Ron 9m\n(白白白 9m9m9m 1s1s1s 東東東 1m1m waiting: Double set wait)\n2 Han All Terminals and Honors\n2 Han All Pungs\n3 Han Yakuhai\n7 Han 18000 Points Haneman"
+            "East East \n1s1s1s1m1m9m9m東東東 Pon白白白 Ron9m\n(白白白 9m9m9m 1s1s1s 東東東 1m1m waiting: Double set wait)\n2 Han All Terminals and Honors\n2 Han All Pungs\n3 Han Yakuhai\n7 Han 18000 Points Haneman"
         );
     }
 
@@ -603,7 +603,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \nDora 4m 2s2s5s6s7s8s9s3m4m5m1p1p1p Tsumo 7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s waiting: Edge wait)\n1 Han Riichi\n1 Han Fully Concealed Hand\n1 Han Dora\n3 Han 40 Minipoints 7700 Points"
+            "East East \nDora4m 2s2s5s6s7s8s9s3m4m5m1p1p1p Tsumo7s\n(1p1p1p 5s6s7s 7s8s9s 3m4m5m 2s2s waiting: Edge wait)\n1 Han Riichi\n1 Han Fully Concealed Hand\n1 Han Dora\n3 Han 40 Minipoints 7700 Points"
         );
     }
 
@@ -618,7 +618,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \nDora 2m3m4m 1m2m2m2m3m3m3m4m4m4m5m5m5m Tsumo 1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m waiting: Single wait)\n13 Han Four Concealed Pungs (Single)\n48000 Points Yakuman"
+            "East East \nDora2m3m4m 1m2m2m2m3m3m3m4m4m4m5m5m5m Tsumo1m\n(2m2m2m 3m3m3m 4m4m4m 5m5m5m 1m1m waiting: Single wait)\n13 Han Four Concealed Pungs (Single)\n48000 Points Yakuman"
         );
     }
 
@@ -633,7 +633,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1p2p2p3p3p4p6p6p7p7p8p南南 Ron 8p\n(6p7p8p 1p2p3p 2p3p4p 6p7p8p 南南 waiting: Open wait)\n1 Han Pinfu\n1 Han Pure Double Chow\n3 Han Half Flush\n5 Han 12000 Points Mangan"
+            "East East \n1p2p2p3p3p4p6p6p7p7p8p南南 Ron8p\n(6p7p8p 1p2p3p 2p3p4p 6p7p8p 南南 waiting: Open wait)\n1 Han Pinfu\n1 Han Pure Double Chow\n3 Han Half Flush\n5 Han 12000 Points Mangan"
         );
     }
 
@@ -648,7 +648,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \n1p2p2p3p3p4p6p6p7p7p8p東東 Ron 8p\n(6p7p8p 1p2p3p 2p3p4p 6p7p8p 東東 waiting: Open wait)\n1 Han Pure Double Chow\n3 Han Half Flush\n4 Han 40 Minipoints 12000 Points Mangan"
+            "East East \n1p2p2p3p3p4p6p6p7p7p8p東東 Ron8p\n(6p7p8p 1p2p3p 2p3p4p 6p7p8p 東東 waiting: Open wait)\n1 Han Pure Double Chow\n3 Han Half Flush\n4 Han 40 Minipoints 12000 Points Mangan"
         );
     }
 
@@ -663,7 +663,7 @@ mod tests {
         );
         assert_eq!(
             res.display_en().to_string(),
-            "East East \nDora 1p2p3p4p5p6p 1p1p1p2p2p2p3p3p3p4p5p5p6p Tsumo 5p\n(1p1p1p 2p2p2p 3p3p3p 4p5p6p 5p5p waiting: Single wait)\n1 Han Fully Concealed Hand\n2 Han Three Concealed Pungs\n6 Han Full Flush\n14 Han Dora\n23 Han 48000 Points Yakuman"
+            "East East \nDora1p2p3p4p5p6p 1p1p1p2p2p2p3p3p3p4p5p5p6p Tsumo5p\n(1p1p1p 2p2p2p 3p3p3p 4p5p6p 5p5p waiting: Single wait)\n1 Han Fully Concealed Hand\n2 Han Three Concealed Pungs\n6 Han Full Flush\n14 Han Dora\n23 Han 48000 Points Yakuman"
         );
     }
 

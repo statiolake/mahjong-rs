@@ -297,31 +297,31 @@ impl fmt::Display for TilesetsDisplayEn<'_> {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         let TilesetsDisplayEn(tilesets) = self;
         if !tilesets.doras.is_empty() {
-            write!(b, "Dora {} ", tilesets.doras)?;
+            write!(b, "Dora{} ", tilesets.doras)?;
         }
 
         write!(b, "{}", tilesets.hand)?;
 
         for peng in &tilesets.pengs {
-            write!(b, " Pon {}", peng)?;
+            write!(b, " Pon{}", peng)?;
         }
 
         for chi in &tilesets.chis {
-            write!(b, " Chii {}", chi)?;
+            write!(b, " Chii{}", chi)?;
         }
 
         for minggang in &tilesets.minggangs {
-            write!(b, " Kong {}", minggang)?;
+            write!(b, " Kong{}", minggang)?;
         }
 
         for angang in &tilesets.angangs {
-            write!(b, " Concealed Kong {}", angang)?;
+            write!(b, " ConcealedKong{}", angang)?;
         }
 
         if tilesets.is_zimo {
-            write!(b, " Tsumo {}", tilesets.last)?;
+            write!(b, " Tsumo{}", tilesets.last)?;
         } else {
-            write!(b, " Ron {}", tilesets.last)?;
+            write!(b, " Ron{}", tilesets.last)?;
         }
 
         Ok(())
