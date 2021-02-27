@@ -686,11 +686,7 @@ impl Form {
     }
 
     pub fn is_dora(self) -> bool {
-        if let Form::Dora(_) = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, Form::Dora(_))
     }
 
     pub fn display(self) -> FormDisplay {

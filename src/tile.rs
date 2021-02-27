@@ -370,10 +370,7 @@ impl Order {
     /// そもそも索子でなければありえないが、こういった牌の種類はこちらからは知りようもないし無視す
     /// る。それらを考慮するのは牌側の仕事である。順序が 2, 3, 4, 6, 8 になっていることを確かめる。
     pub fn is_green_order(self) -> bool {
-        match self.order {
-            2 | 3 | 4 | 6 | 8 => true,
-            _ => false,
-        }
+        matches!(self.order, 2 | 3 | 4 | 6 | 8)
     }
 }
 
