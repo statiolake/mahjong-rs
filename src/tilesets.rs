@@ -250,6 +250,10 @@ impl Tilesets {
 
         Ok(())
     }
+
+    pub fn display_en(&self) -> TilesetsDisplayEn {
+        TilesetsDisplayEn(self)
+    }
 }
 
 impl fmt::Display for Tilesets {
@@ -280,6 +284,44 @@ impl fmt::Display for Tilesets {
             write!(b, " ツモ{}", self.last)?;
         } else {
             write!(b, " ロン{}", self.last)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TilesetsDisplayEn<'a>(&'a Tilesets);
+
+impl fmt::Display for TilesetsDisplayEn<'_> {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let TilesetsDisplayEn(tilesets) = self;
+        if !tilesets.doras.is_empty() {
+            write!(b, "Dora {} ", tilesets.doras)?;
+        }
+
+        write!(b, "{}", tilesets.hand)?;
+
+        for peng in &tilesets.pengs {
+            write!(b, " Pon {}", peng)?;
+        }
+
+        for chi in &tilesets.chis {
+            write!(b, " Chii {}", chi)?;
+        }
+
+        for minggang in &tilesets.minggangs {
+            write!(b, " Kong {}", minggang)?;
+        }
+
+        for angang in &tilesets.angangs {
+            write!(b, " Concealed Kong {}", angang)?;
+        }
+
+        if tilesets.is_zimo {
+            write!(b, " Tsumo {}", tilesets.last)?;
+        } else {
+            write!(b, " Ron {}", tilesets.last)?;
         }
 
         Ok(())

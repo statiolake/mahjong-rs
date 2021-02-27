@@ -56,6 +56,28 @@ impl fmt::Display for MachiKind {
     }
 }
 
+impl MachiKind {
+    pub fn display_en(self) -> MachiKindDisplayEn {
+        MachiKindDisplayEn(self)
+    }
+}
+
+pub struct MachiKindDisplayEn(MachiKind);
+
+impl fmt::Display for MachiKindDisplayEn {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let &MachiKindDisplayEn(machi) = self;
+        match machi {
+            MachiKind::Liangmian => write!(b, "Open wait"),
+            MachiKind::Shuangpeng => write!(b, "Double set wait"),
+            MachiKind::Bianzhang => write!(b, "Edge wait"),
+            MachiKind::Qianzhang => write!(b, "Closed wait"),
+            MachiKind::Danqi => write!(b, "Single wait"),
+            MachiKind::Yandan => write!(b, "Nobetan"),
+        }
+    }
+}
+
 pub fn enumerate_machis(
     quetou: &Tiles,
     anshuns: &[Tiles],
@@ -443,6 +465,11 @@ impl AgariTilesets {
     pub fn tilesets(&self) -> &Tilesets {
         &self.tilesets
     }
+
+    /// 英語で表示する
+    pub fn display_en(&self) -> AgariTilesetsDisplayEn {
+        AgariTilesetsDisplayEn(self)
+    }
 }
 
 impl fmt::Display for AgariTilesets {
@@ -453,6 +480,22 @@ impl fmt::Display for AgariTilesets {
 
         write!(b, "{} ", self.quetou())?;
         write!(b, "待ち: {}", self.machi)?;
+
+        Ok(())
+    }
+}
+
+pub struct AgariTilesetsDisplayEn<'a>(&'a AgariTilesets);
+
+impl fmt::Display for AgariTilesetsDisplayEn<'_> {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let AgariTilesetsDisplayEn(agari) = self;
+        for mianzi in agari.mianzis() {
+            write!(b, "{} ", mianzi)?;
+        }
+
+        write!(b, "{} ", agari.quetou())?;
+        write!(b, "waiting: {}", agari.machi.display_en())?;
 
         Ok(())
     }

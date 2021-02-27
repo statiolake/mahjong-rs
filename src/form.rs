@@ -579,6 +579,68 @@ impl Form {
         }
     }
 
+    pub fn name_en(self) -> &'static str {
+        match self {
+            Form::Lizhi => "Riichi",
+            Form::Ippatsu => "Ippatsu",
+            Form::Menqianqingzimohu => "Fully Concealed Hand",
+            Form::Fanpai(_) => "Yakuhai",
+            Form::Duanyaojiu => "All Simples",
+            Form::Pinghe => "Pinfu",
+            Form::Yibeikou => "Pure Double Chow",
+            Form::Haidimoyue => "Last Tile Draw",
+            Form::Hedilaoyu => "Last Tile Claim",
+            Form::Lingshangkaihua => "After a Kong",
+            Form::Chenggang => "Robbing a Kong",
+            Form::Doublelizhi => "Double Riichi",
+            Form::Sanshokudojun(_) => "Mixed Triple Chow",
+            Form::Sanshokudoko => "Triple Pung",
+            Form::Sananke => "Three Concealed Pungs",
+            Form::Ikkitsukan(_) => "Pure Straight",
+            Form::Qiduizi => "Seven Pairs",
+            Form::Duiduihe => "All Pungs",
+            Form::Hunquandaiyaojiu(_) => "Outside Hand",
+            Form::Sangangzi => "Three Kongs",
+            Form::Liangbeigou => "Twice Pure Double Chows",
+            Form::Chunquandaiyaojiu(_) => "Terminals in All Groups",
+            Form::Hungyise(_) => "Half Flush",
+            Form::Shousangen => "Little Three Dragons",
+            Form::Hunlaotou => "All Terminals and Honors",
+            Form::Qingyise(_) => "Full Flush",
+            Form::Sianke(is_danqi) => {
+                if is_danqi {
+                    "Four Concealed Pungs (Single)"
+                } else {
+                    "Four Concealed Pungs"
+                }
+            }
+            Form::Daisangen => "Big Three Dragons",
+            Form::Kokushimuso(is_genuine) => {
+                if is_genuine {
+                    "Thirteen Orphans (13)"
+                } else {
+                    "Thirteen Orphans"
+                }
+            }
+            Form::Luyise => "All Green",
+            Form::Ziyise => "All Honors",
+            Form::Qinglaotou => "All Terminals",
+            Form::Sigangzi => "Four Kongs",
+            Form::Shousushi => "Little Four Winds",
+            Form::Daisushi => "Big Four Winds",
+            Form::Jiulianbaodeng(is_genuine) => {
+                if is_genuine {
+                    "Genuine Nine Gates"
+                } else {
+                    "Nine Gates"
+                }
+            }
+            Form::Dihe => "Blessing of Earth",
+            Form::Tianhe => "Blessing of Heaven",
+            Form::Dora(_) => "Dora",
+        }
+    }
+
     pub fn point(self) -> Point {
         match self {
             Form::Lizhi => Point::new(1),
@@ -636,6 +698,12 @@ impl Form {
         let point = self.point();
         FormDisplay { name, point }
     }
+
+    pub fn display_en(self) -> FormDisplayEn {
+        let name = self.name_en();
+        let point = self.point();
+        FormDisplayEn { name, point }
+    }
 }
 
 /// 役。
@@ -651,6 +719,22 @@ pub struct FormDisplay {
 impl fmt::Display for FormDisplay {
     fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
         write!(b, "{} {}", self.point, self.name)
+    }
+}
+
+/// 役 (英語) 。
+#[derive(Debug, Clone, Copy)]
+pub struct FormDisplayEn {
+    /// 名前
+    name: &'static str,
+
+    /// 翻数
+    point: Point,
+}
+
+impl fmt::Display for FormDisplayEn {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        write!(b, "{} {}", self.point.display_en(), self.name)
     }
 }
 

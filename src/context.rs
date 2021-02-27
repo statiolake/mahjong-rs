@@ -22,6 +22,12 @@ pub enum Direction {
     North,
 }
 
+impl Direction {
+    pub fn display_en(self) -> DirectionDisplayEn {
+        DirectionDisplayEn(self)
+    }
+}
+
 impl Default for Direction {
     fn default() -> Direction {
         Direction::East
@@ -35,6 +41,20 @@ impl fmt::Display for Direction {
             Direction::South => write!(b, "南"),
             Direction::West => write!(b, "西"),
             Direction::North => write!(b, "北"),
+        }
+    }
+}
+
+pub struct DirectionDisplayEn(Direction);
+
+impl fmt::Display for DirectionDisplayEn {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let DirectionDisplayEn(dir) = self;
+        match dir {
+            Direction::East => write!(b, "East"),
+            Direction::South => write!(b, "South"),
+            Direction::West => write!(b, "West"),
+            Direction::North => write!(b, "North"),
         }
     }
 }
