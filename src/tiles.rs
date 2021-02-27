@@ -179,6 +179,12 @@ impl FromIterator<Tile> for Tiles {
 pub enum ParseError {
     #[fail(display = "牌のパースに失敗しました: {}", 0)]
     ParseTileError(#[fail(cause)] ParseTileError),
+
+    #[fail(display = "数字がついていない s, m, p, z が出現しています。")]
+    EmptyBroadcast,
+
+    #[fail(display = "s, m, p, z がついていない数字が出現しています。")]
+    UnterminatedBroadcast,
 }
 
 impl From<ParseTileError> for ParseError {
@@ -189,19 +195,34 @@ impl From<ParseTileError> for ParseError {
 
 impl FromStr for Tiles {
     type Err = ParseError;
-    fn from_str(mut s: &str) -> std::result::Result<Tiles, ParseError> {
+    fn from_str(s: &str) -> std::result::Result<Tiles, ParseError> {
+        // まとめ入力をきちんとパースしたい。
         let mut res = Vec::new();
-        while let Some(ch) = s.chars().next() {
-            let bytes = if ch.is_numeric() {
-                // 数字なら 1s などなので2バイト
-                2
-            } else {
-                // そうでなければ白發中などなので3バイト
-                3
-            };
+        let mut pending_numbers = Vec::new();
 
-            res.push(s[0..bytes].parse()?);
-            s = &s[bytes..];
+        // 文字列が残っている限り繰り返す
+        for ch in s.chars() {
+            match ch {
+                '1'..='9' => pending_numbers.push(ch),
+                's' | 'm' | 'p' | 'S' | 'M' | 'P' | 'z' => {
+                    // pending_numbers が空の場合は許さないことにする。
+                    if pending_numbers.is_empty() {
+                        return Err(ParseError::EmptyBroadcast);
+                    }
+                    // 繰り返しターミネーターなら pending_numbers にある数字をすべて変換する。
+                    for number in pending_numbers.drain(..) {
+                        res.push(format!("{}{}", number, ch).parse()?);
+                    }
+                }
+                _ => {
+                    // 繰り返しが解消されていない場合はエラーとする。
+                    if !pending_numbers.is_empty() {
+                        return Err(ParseError::UnterminatedBroadcast);
+                    }
+                    // そうでない場合は直接パースする。
+                    res.push(ch.to_string().parse()?);
+                }
+            }
         }
 
         Ok(Tiles::new(res))
@@ -224,6 +245,26 @@ mod tests {
         );
 
         assert_eq!(
+            &*"123s".parse::<Tiles>().unwrap(),
+            &[
+                "1s".parse().unwrap(),
+                "2s".parse().unwrap(),
+                "3s".parse().unwrap(),
+            ]
+        );
+
+        assert_eq!(
+            &*"123s45p".parse::<Tiles>().unwrap(),
+            &[
+                "1s".parse().unwrap(),
+                "2s".parse().unwrap(),
+                "3s".parse().unwrap(),
+                "4p".parse().unwrap(),
+                "5p".parse().unwrap(),
+            ]
+        );
+
+        assert_eq!(
             &*"白發中".parse::<Tiles>().unwrap(),
             &[
                 "白".parse().unwrap(),
@@ -232,6 +273,22 @@ mod tests {
             ]
         );
 
+        assert_eq!(
+            &*"567z".parse::<Tiles>().unwrap(),
+            &[
+                "白".parse().unwrap(),
+                "發".parse().unwrap(),
+                "中".parse().unwrap(),
+            ]
+        );
+
+        assert!("s".parse::<Tiles>().is_err());
+        assert!("s12p".parse::<Tiles>().is_err());
+        assert!("12sp".parse::<Tiles>().is_err());
+        assert!("12sz".parse::<Tiles>().is_err());
+        assert!("12東".parse::<Tiles>().is_err());
+        assert!("12東p".parse::<Tiles>().is_err());
+        assert!("あいうえおs".parse::<Tiles>().is_err());
         assert!("1sあいうえお".parse::<Tiles>().is_err());
         assert!("あいうえお".parse::<Tiles>().is_err());
     }
