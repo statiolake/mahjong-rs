@@ -178,7 +178,22 @@ mod tests {
         );
 
         assert_eq!(
+            "Ron1p".parse::<Tileset>().unwrap(),
+            Tileset::new(Tag::Ronghe, "1p".parse().unwrap()).unwrap()
+        );
+
+        assert_eq!(
+            "Tsumo1p".parse::<Tileset>().unwrap(),
+            Tileset::new(Tag::Zimo, "1p".parse().unwrap()).unwrap()
+        );
+
+        assert_eq!(
             "暗槓1p1p1p1p".parse::<Tileset>().unwrap(),
+            Tileset::new(Tag::Angang, "1p1p1p1p".parse().unwrap()).unwrap()
+        );
+
+        assert_eq!(
+            "ConcealedKong1p1p1p1p".parse::<Tileset>().unwrap(),
             Tileset::new(Tag::Angang, "1p1p1p1p".parse().unwrap()).unwrap()
         );
 
