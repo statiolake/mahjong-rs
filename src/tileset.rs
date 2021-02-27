@@ -136,13 +136,13 @@ impl FromStr for Tileset {
             .collect();
 
         let (tag, rest) = match &*annot {
-            "ツモ" => (Tag::Zimo, &s[6..]),
-            "ロン" => (Tag::Ronghe, &s[6..]),
-            "ポン" => (Tag::Peng, &s[6..]),
-            "チー" => (Tag::Chi, &s[6..]),
-            "明槓" => (Tag::Minggang, &s[6..]),
-            "暗槓" => (Tag::Angang, &s[6..]),
-            "ドラ" => (Tag::Dora, &s[6..]),
+            "ツモ" | "Tsumo" => (Tag::Zimo, &s[6..]),
+            "ロン" | "Ron" => (Tag::Ronghe, &s[6..]),
+            "ポン" | "Pon" => (Tag::Peng, &s[6..]),
+            "チー" | "Chii" => (Tag::Chi, &s[6..]),
+            "明槓" | "Kong" => (Tag::Minggang, &s[6..]),
+            "暗槓" | "Concealed Kong" => (Tag::Angang, &s[6..]),
+            "ドラ" | "Dora" => (Tag::Dora, &s[6..]),
             "" => (Tag::Hand, &*s),
             _ => return Err(ParseError::UnknownAnnotation(annot)),
         };

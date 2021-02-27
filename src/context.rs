@@ -67,10 +67,10 @@ impl FromStr for Direction {
     type Err = UnknownDirection;
     fn from_str(from: &str) -> Result<Direction, UnknownDirection> {
         match from {
-            "東" => Ok(Direction::East),
-            "南" => Ok(Direction::South),
-            "西" => Ok(Direction::West),
-            "北" => Ok(Direction::North),
+            "東" | "East" => Ok(Direction::East),
+            "南" | "South" => Ok(Direction::South),
+            "西" | "West" => Ok(Direction::West),
+            "北" | "North" => Ok(Direction::North),
             _ => Err(UnknownDirection(from.to_string())),
         }
     }
