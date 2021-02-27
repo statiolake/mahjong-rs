@@ -6,7 +6,6 @@ use crate::tile::{Order, Tile, TileKind, Zipai};
 use crate::tiles::Tiles;
 use crate::tilesets::Tilesets;
 use log::debug;
-use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -134,7 +133,7 @@ impl Point {
         value
     }
 
-    pub fn rank(self, is_parent: bool) -> Option<Cow<'static, str>> {
+    pub fn rank(self, is_parent: bool) -> Option<Rank> {
         let calc_few = || {
             let value = self.value(is_parent);
             let manguan = Point::new_manguan().value(is_parent);
@@ -152,24 +151,39 @@ impl Point {
         match self.yiman {
             0 => match self.fan {
                 0..=4 => calc_few(),
-                5 => Some("満貫".into()),
-                6..=7 => Some("跳満".into()),
-                8..=10 => Some("倍満".into()),
-                11..=12 => Some("三倍満".into()),
+                5 => Some(Rank::Mangan),
+                6..=7 => Some(Rank::Haneman),
+                8..=10 => Some(Rank::Baiman),
+                11..=12 => Some(Rank::Sanbaiman),
                 x if x >= 13 => Point::new_yiman().rank(is_parent),
                 _ => unreachable!(),
             },
-            1 => Some("役満".into()),
-            2 => Some("ダブル役満".into()),
-            3 => Some("トリプル役満".into()),
-            4 => Some("四倍役満".into()),
-            5 => Some("五倍役満".into()),
-            n => Some(format!("{}倍役満", n).into()),
+            1 => Some(Rank::Yiman),
+            2 => Some(Rank::DoubleYiman),
+            3 => Some(Rank::TripleYiman),
+            4 => Some(Rank::ForthYiman),
+            5 => Some(Rank::FifthYiman),
+            n => Some(Rank::MoreYiman(n)),
         }
+    }
+
+    pub fn rank_en(self, is_parent: bool) -> Option<RankEn> {
+        self.rank(is_parent).map(RankEn)
+    }
+
+    pub fn display_en(self) -> PointDisplayEn {
+        PointDisplayEn { point: self }
     }
 
     pub fn display_full(self, is_parent: bool) -> PointDisplayFull {
         PointDisplayFull {
+            point: self,
+            is_parent,
+        }
+    }
+
+    pub fn display_full_en(self, is_parent: bool) -> PointDisplayFullEn {
+        PointDisplayFullEn {
             point: self,
             is_parent,
         }
@@ -247,6 +261,116 @@ impl fmt::Display for PointDisplayFull {
         }
 
         Ok(())
+    }
+}
+
+pub struct PointDisplayEn {
+    point: Point,
+}
+
+impl fmt::Display for PointDisplayEn {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let &PointDisplayEn {
+            point: Point { fan, fu, .. },
+        } = self;
+
+        if fu == 0 || fan > 4 {
+            write!(b, "{} Han", fan)
+        } else {
+            write!(b, "{} Han {} Minipoints", fan, fu)
+        }
+    }
+}
+
+pub struct PointDisplayFullEn {
+    point: Point,
+    is_parent: bool,
+}
+
+impl fmt::Display for PointDisplayFullEn {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let &PointDisplayFullEn { point, is_parent } = self;
+
+        if !point.is_true_yiman() {
+            write!(b, "{} ", point.display_en())?;
+        }
+
+        write!(b, "{} Points", point.value(is_parent))?;
+
+        if let Some(rank) = point.rank_en(is_parent) {
+            write!(b, " {}", rank)?;
+        }
+
+        Ok(())
+    }
+}
+
+pub enum Rank {
+    /// 満貫
+    Mangan,
+
+    /// 跳満
+    Haneman,
+
+    /// 倍満
+    Baiman,
+
+    /// 三倍満
+    Sanbaiman,
+
+    /// 役満
+    Yiman,
+
+    /// ダブル役満
+    DoubleYiman,
+
+    /// トリプル役満
+    TripleYiman,
+
+    /// 四倍役満
+    ForthYiman,
+
+    /// 五倍役満
+    FifthYiman,
+
+    /// それ以上
+    MoreYiman(u32),
+}
+
+impl fmt::Display for Rank {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Rank::Mangan => write!(b, "満貫"),
+            Rank::Haneman => write!(b, "跳満"),
+            Rank::Baiman => write!(b, "倍満"),
+            Rank::Sanbaiman => write!(b, "三倍満"),
+            Rank::Yiman => write!(b, "役満"),
+            Rank::DoubleYiman => write!(b, "ダブル役満"),
+            Rank::TripleYiman => write!(b, "トリプル役満"),
+            Rank::ForthYiman => write!(b, "四倍役満"),
+            Rank::FifthYiman => write!(b, "五倍役満"),
+            Rank::MoreYiman(count) => write!(b, "{}倍役満", count),
+        }
+    }
+}
+
+pub struct RankEn(Rank);
+
+impl fmt::Display for RankEn {
+    fn fmt(&self, b: &mut fmt::Formatter) -> fmt::Result {
+        let RankEn(rank) = self;
+        match rank {
+            Rank::Mangan => write!(b, "Mangan"),
+            Rank::Haneman => write!(b, "Haneman"),
+            Rank::Baiman => write!(b, "Baiman"),
+            Rank::Sanbaiman => write!(b, "Sanbaiman"),
+            Rank::Yiman => write!(b, "Yakuman"),
+            Rank::DoubleYiman => write!(b, "Double Yakuman"),
+            Rank::TripleYiman => write!(b, "Triple Yakuman"),
+            Rank::ForthYiman => write!(b, "Forth Yakuman"),
+            Rank::FifthYiman => write!(b, "Fifth Yakuman"),
+            Rank::MoreYiman(count) => write!(b, "{}th Yakuman", count),
+        }
     }
 }
 
