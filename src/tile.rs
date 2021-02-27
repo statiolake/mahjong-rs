@@ -268,13 +268,13 @@ impl FromStr for Tile {
         // 字牌
         //------------------------------
         match from {
-            "東" => return Ok(Tile::Zipai(Zipai::East)),
-            "南" => return Ok(Tile::Zipai(Zipai::South)),
-            "西" => return Ok(Tile::Zipai(Zipai::West)),
-            "北" => return Ok(Tile::Zipai(Zipai::North)),
-            "白" => return Ok(Tile::Zipai(Zipai::Bai)),
-            "發" => return Ok(Tile::Zipai(Zipai::Fa)),
-            "中" => return Ok(Tile::Zipai(Zipai::Zhong)),
+            "東" | "1z" => return Ok(Tile::Zipai(Zipai::East)),
+            "南" | "2z" => return Ok(Tile::Zipai(Zipai::South)),
+            "西" | "3z" => return Ok(Tile::Zipai(Zipai::West)),
+            "北" | "4z" => return Ok(Tile::Zipai(Zipai::North)),
+            "白" | "5z" => return Ok(Tile::Zipai(Zipai::Bai)),
+            "發" | "6z" => return Ok(Tile::Zipai(Zipai::Fa)),
+            "中" | "7z" => return Ok(Tile::Zipai(Zipai::Zhong)),
             _ => (),
         };
 
@@ -536,6 +536,13 @@ mod tests {
         assert_eq!("白".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Bai));
         assert_eq!("發".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Fa));
         assert_eq!("中".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Zhong));
+        assert_eq!("1z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::East));
+        assert_eq!("2z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::South));
+        assert_eq!("3z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::West));
+        assert_eq!("4z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::North));
+        assert_eq!("5z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Bai));
+        assert_eq!("6z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Fa));
+        assert_eq!("7z".parse::<Tile>().unwrap(), Tile::Zipai(Zipai::Zhong));
         assert!("あ".parse::<Tile>().is_err());
         assert!("あい".parse::<Tile>().is_err());
     }
