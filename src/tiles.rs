@@ -1,27 +1,27 @@
 use crate::tile::{ParseError as ParseTileError, Tile};
-use failure::Fail;
 use std::fmt;
 use std::iter::FromIterator;
 use std::ops::Deref;
 use std::str::FromStr;
+use thiserror::Error;
 
 /// 牌のかたまりに関するエラー。
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// アガリ牌が複数回指定されている。
-    #[fail(display = "アガリ牌が複数枚指定されています: {}", 0)]
+    #[error("アガリ牌が複数枚指定されています: {}", 0)]
     InvalidLastTile(Tiles),
 
     /// ポンの長さが変、または全ての牌が同じではない。
-    #[fail(display = "変なポンです: {}", 0)]
+    #[error("変なポンです: {}", 0)]
     InvalidPeng(Tiles),
 
     /// チーの長さが変、または牌の番号が連続していない。例 : 2s4s5s
-    #[fail(display = "変なチーです: {}", 0)]
+    #[error("変なチーです: {}", 0)]
     InvalidChi(Tiles),
 
     /// カンの長さが変、または全ての牌が同じではない。
-    #[fail(display = "変なカンです: {}", 0)]
+    #[error("変なカンです: {}", 0)]
     InvalidGang(Tiles),
 }
 
@@ -175,15 +175,15 @@ impl FromIterator<Tile> for Tiles {
     }
 }
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ParseError {
-    #[fail(display = "牌のパースに失敗しました: {}", 0)]
-    ParseTileError(#[fail(cause)] ParseTileError),
+    #[error("牌のパースに失敗しました: {}", 0)]
+    ParseTileError(#[source] ParseTileError),
 
-    #[fail(display = "数字がついていない s, m, p, z が出現しています。")]
+    #[error("数字がついていない s, m, p, z が出現しています。")]
     EmptyBroadcast,
 
-    #[fail(display = "s, m, p, z がついていない数字が出現しています。")]
+    #[error("s, m, p, z がついていない数字が出現しています。")]
     UnterminatedBroadcast,
 }
 

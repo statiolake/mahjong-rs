@@ -2,24 +2,24 @@
 
 use crate::context::Context;
 use crate::context::Direction;
-use failure::Fail;
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
 use std::hash;
 use std::str::FromStr;
+use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// 牌を作るときまたはパース中に生じたエラー。
-#[derive(Debug, Fail, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Error, Copy, Clone, PartialEq, Eq)]
 pub enum Error {
     /// 番号がおかしい。 (例: 10m など)
-    #[fail(display = "索子・萬子・筒子の番号が範囲外です。")]
+    #[error("索子・萬子・筒子の番号が範囲外です。")]
     InvalidOrder,
 
     /// 字牌で赤ドラが指定された。
-    #[fail(display = "字牌は赤ドラになれません。")]
+    #[error("字牌は赤ドラになれません。")]
     InvalidRed,
 }
 
@@ -240,18 +240,18 @@ impl Tile {
     }
 }
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ParseError {
     /// 文字列の長さが変。
-    #[fail(display = "文字列の長さが変です。")]
+    #[error("文字列の長さが変です。")]
     InvalidStringLen,
 
     /// 予期しない文字が出現した。
-    #[fail(display = "予期しない文字です: {}", 0)]
+    #[error("予期しない文字です: {}", 0)]
     InvalidChar(char),
 
     /// その他、牌をつくるときにエラーが起きた
-    #[fail(display = "牌を作成できませんでした: {}", 0)]
+    #[error("牌を作成できませんでした: {}", 0)]
     TileError(Error),
 }
 

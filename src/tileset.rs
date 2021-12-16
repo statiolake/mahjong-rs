@@ -7,16 +7,16 @@
 //! - AgariTileset (アガリ牌集合) : Tileset をもとに役判定をし、手牌を分解したもの。
 
 use crate::tiles::{Error as TilesError, ParseError as ParseTilesError, Tiles};
-use failure::Fail;
 use std::fmt;
 use std::str::FromStr;
+use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum Error {
-    #[fail(display = "牌集合のエラーです: {}", 0)]
-    TilesError(#[fail(cause)] TilesError),
+    #[error("牌集合のエラーです: {}", 0)]
+    TilesError(#[source] TilesError),
 }
 
 impl From<TilesError> for Error {
@@ -102,16 +102,16 @@ impl fmt::Display for Tileset {
     }
 }
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ParseError {
-    #[fail(display = "不明なアノテーションです: {}", 0)]
+    #[error("不明なアノテーションです: {}", 0)]
     UnknownAnnotation(String),
 
-    #[fail(display = "妙な牌集合です: {}", 0)]
+    #[error("妙な牌集合です: {}", 0)]
     TilesetError(Error),
 
-    #[fail(display = "牌集合のパースに失敗しました: {}", 0)]
-    ParseTilesError(#[fail(cause)] ParseTilesError),
+    #[error("牌集合のパースに失敗しました: {}", 0)]
+    ParseTilesError(#[source] ParseTilesError),
 }
 
 impl From<Error> for ParseError {

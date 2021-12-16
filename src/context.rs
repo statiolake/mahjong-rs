@@ -1,10 +1,10 @@
 //! リーチやコンテキストなどを定義する。
 
 use crate::form::Form;
-use failure::Fail;
 use num_derive::FromPrimitive;
 use std::fmt;
 use std::str::FromStr;
+use thiserror::Error;
 
 /// 場風や自風を表す。例 : 東家、東場
 #[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive)]
@@ -59,8 +59,8 @@ impl fmt::Display for DirectionDisplayEn {
     }
 }
 
-#[derive(Debug, Fail)]
-#[fail(display = "不明な方角です: {}", 0)]
+#[derive(Debug, Error)]
+#[error("不明な方角です: {}", 0)]
 pub struct UnknownDirection(String);
 
 impl FromStr for Direction {

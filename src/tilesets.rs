@@ -5,47 +5,47 @@ use crate::tile::{Tile, TileKind};
 use crate::tiles::Tiles;
 use crate::tileset::ParseError as ParseTilesetError;
 use crate::tileset::{Tag, Tileset};
-use failure::Fail;
 use std::fmt;
+use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, TilesetsError>;
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum TilesetsError {
     /// 手牌が指定されていない。
-    #[fail(display = "手牌が指定されていません。")]
+    #[error("手牌が指定されていません。")]
     HandNotFound,
 
     /// 手牌が 2 回以上指定された。
-    #[fail(display = "手牌が二回以上指定されています。")]
+    #[error("手牌が二回以上指定されています。")]
     HandSpecifiedMoreThanOnce,
 
     /// アガリ牌が指定されなかった。
-    #[fail(display = "アガリ牌が指定されていません。")]
+    #[error("アガリ牌が指定されていません。")]
     LastTileNotFound,
 
     /// アガリ牌が 2 回以上指定された。
-    #[fail(display = "アガリ牌が二回以上指定されています。")]
+    #[error("アガリ牌が二回以上指定されています。")]
     LastTileSpecifiedMoreThanOnce,
 
     /// ドラが 2 回以上指定された。
-    #[fail(display = "ドラが二回以上指定されています。")]
+    #[error("ドラが二回以上指定されています。")]
     DorasSpecifiedMoreThanOnce,
 
     /// 立直と副露が同時に行われている。
-    #[fail(display = "立直と副露が同時に行われています。")]
+    #[error("立直と副露が同時に行われています。")]
     BothLizhiFulou,
 
     /// 赤ドラが多すぎる。
-    #[fail(display = "{} に対する赤ドラが {} 枚もあります。", 0, 1)]
+    #[error("{} に対する赤ドラが {} 枚もあります。", 0, 1)]
     InvalidNumRed(TileKind, u32),
 
     /// 手牌に同じ牌が多すぎる。
-    #[fail(display = "{} の数が多すぎます。", 0)]
+    #[error("{} の数が多すぎます。", 0)]
     InvalidNumSameTiles(Tile),
 
     /// 手牌の枚数が多すぎるか少なすぎる (多牌か少牌) 。
-    #[fail(display = "手牌の数が変です: {} 枚あります。", 0)]
+    #[error("手牌の数が変です: {} 枚あります。", 0)]
     InvalidNumTiles(u32),
 }
 
@@ -328,13 +328,13 @@ impl fmt::Display for TilesetsDisplayEn<'_> {
     }
 }
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Error)]
 pub enum ParseError {
-    #[fail(display = "牌集合のパースに失敗しました: {}", 0)]
-    ParseTilesetError(#[fail(cause)] ParseTilesetError),
+    #[error("牌集合のパースに失敗しました: {}", 0)]
+    ParseTilesetError(#[source] ParseTilesetError),
 
-    #[fail(display = "牌集合の生成に失敗しました: {}", 0)]
-    TilesetsError(#[fail(cause)] TilesetsError),
+    #[error("牌集合の生成に失敗しました: {}", 0)]
+    TilesetsError(#[source] TilesetsError),
 }
 
 impl From<ParseTilesetError> for ParseError {
